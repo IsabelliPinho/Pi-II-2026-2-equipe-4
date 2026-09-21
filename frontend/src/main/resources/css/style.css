@@ -1,0 +1,65 @@
+* {
+    -fx-font-family: Arial;
+}
+
+.tela {
+    -fx-background-color: #632D2D;
+}
+
+.area-logo {
+    -fx-pref-width: 48%;
+    -fx-min-width: 360px;
+    -fx-background-color: white;
+}
+
+.area-formulario {
+    -fx-background-color: #632D2D;
+    -fx-padding: 30px;
+}
+
+.formulario {
+    -fx-background-color: #E59CAF;
+    -fx-background-radius: 9px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 5, 0.15, 0, 3);
+}
+
+.campo-container {
+    -fx-background-color: white;
+    -fx-background-radius: 6px;
+    -fx-min-height: 45px;
+    -fx-padding: 0 12px;
+}
+
+.campo {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-text-fill: #333333;
+    -fx-prompt-text-fill: #4C3A3A;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+}
+
+.icone {
+    -fx-text-fill: #632D2D;
+    -fx-font-size: 18px;
+}
+
+.botao-cadastrar {
+    -fx-background-color: #632D2D;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-min-width: 162px;
+    -fx-min-height: 39px;
+    -fx-cursor: hand;
+}
+
+.botao-cadastrar:hover {
+    -fx-background-color: #7B3939;
+}
+
+.botao-cadastrar:pressed {
+    -fx-background-color: #512424;
+}
