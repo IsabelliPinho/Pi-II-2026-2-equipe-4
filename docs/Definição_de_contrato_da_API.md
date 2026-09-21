@@ -35,7 +35,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **1\. Cadastrar Cliente**
 
 * **Requisito:** RF001  
-* **Caminho:** /clientes  
+* **Caminho:** /criar_clientes  
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
