@@ -1,0 +1,54 @@
+# Gabi Cake - esqueleto em containers
+# Uso: cp .env.example .env  &&  docker compose up --build
+
+name: gabicake
+
+services:
+
+  # Banco de dados
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB no .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+    command: ["postgres", "-c", "timezone=${APP_TZ:-America/Fortaleza}"]
+    ports:
+      - "${DB_HOST_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data              # dados do banco (persistem)
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro   # cria as tabelas na 1ª inicialização
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Backend: Spring Boot + Hibernate
+  backend:
+    build: ./backend
+    environment:
+      TZ: ${APP_TZ:-America/Fortaleza}
+      SERVER_PORT: ${BACKEND_PORT:-8080}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${BACKEND_PORT:-8080}:${BACKEND_PORT:-8080}"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Frontend: JavaFX (a janela é exibida no navegador via noVNC)
+  frontend:
+    build: ./frontend
+    environment:
+      TZ: ${APP_TZ:-America/Fortaleza}
+      API_BASE_URL: http://backend:${BACKEND_PORT:-8080}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-6080}:6080"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
