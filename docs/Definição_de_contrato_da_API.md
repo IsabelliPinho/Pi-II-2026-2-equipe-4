@@ -35,7 +35,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **1\. Cadastrar Cliente**
 
 * **Requisito:** RF001  
-* **Caminho:** /criar_clientes  
+* **Caminho:** /clientes/cadastro  
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
@@ -70,7 +70,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **2\. Buscar Clientes**
 
 * **Requisito:** RF002  
-* **Caminho:** /clientes  
+* **Caminho:** /clientes/busca  
 * **Método:** GET  
 * **Parâmetros de Query:** busca (opcional \- busca por nome ou telefone)  
 * **Status HTTP de Sucesso:** 200 OK
@@ -91,7 +91,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **3\. Registrar Pedido**
 
 * **Requisito:** RF003, RF005  
-* **Caminho:** /pedidos  
+* **Caminho:** /pedidos/cadastro  
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
@@ -130,7 +130,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **4\. Consultar Pedidos**
 
 * **Requisito:** RF003, RF007  
-* **Caminho:** /pedidos  
+* **Caminho:** /pedidos/consulta  
 * **Método:** GET  
 * **Parâmetros de Query:** status (opcional), inicio (opcional), fim (opcional)  
 * **Status HTTP de Sucesso:** 200 OK
@@ -243,7 +243,7 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 ### **9\. Adicionar Lançamento Financeiro**
 
 * **Requisito:** RF010  
-* **Caminho:** /financeiro  
+* **Caminho:** /financeiro/lancamentos  
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
