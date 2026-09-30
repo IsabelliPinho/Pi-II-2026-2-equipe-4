@@ -1,0 +1,230 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================
+   FUNDO
+========================= */
+
+.cadastro-container {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    padding-right: 7%;
+
+    background-image: url("../assets/images/background-login.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.cadastro-card {
+    width: 440px;
+    min-height: 450px;
+
+    background-color: #E39AAF;
+
+    border-radius: 11px;
+
+    padding: 82px 67px 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo-cadastro {
+    width: 100%;
+    height: 50px;
+
+    background-color: #FFFFFF;
+
+    border-radius: 7px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 14px;
+
+    margin-bottom: 15px;
+}
+
+
+/* ÍCONES */
+
+.icone-cadastro {
+    width: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+
+/* INPUT */
+
+.campo-cadastro input {
+    flex: 1;
+
+    height: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    padding-left: 8px;
+
+    font-size: 12px;
+
+    color: #5B292B;
+}
+
+
+.campo-cadastro input::placeholder {
+    color: #5B292B;
+
+    opacity: 1;
+}
+
+
+/* =========================
+   OLHO
+========================= */
+
+.olho-cadastro {
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+}
+
+
+/* =========================
+   BOTÃO CADASTRAR
+========================= */
+
+.botao-cadastrar {
+    width: 177px;
+    height: 43px;
+
+    margin-top: 39px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #5B292B;
+
+    color: #FFFFFF;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.botao-cadastrar:hover {
+    background-color: #472022;
+}
+
+
+/* =========================
+   VOLTAR PARA LOGIN
+========================= */
+
+.voltar-login {
+    margin-top: 15px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #5B292B;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+.voltar-login:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 1000px) {
+
+    .cadastro-container {
+        padding-right: 4%;
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .cadastro-container {
+        justify-content: center;
+
+        padding: 30px;
+
+        background-position: left center;
+    }
+
+    .cadastro-card {
+        width: 100%;
+        max-width: 440px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .cadastro-container {
+        padding: 20px;
+    }
+
+    .cadastro-card {
+        padding: 60px 30px 35px;
+    }
+}

@@ -1,0 +1,356 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.carrinho-container {
+    width: 100%;
+    min-height: 100vh;
+
+    background-color: #ffffff;
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.carrinho-header {
+    width: 100%;
+    height: 50px;
+
+    background-color: #5B292B;
+
+    position: relative;
+}
+
+
+/* =========================
+   BOTÃO X
+========================= */
+
+.botao-fechar {
+    position: absolute;
+
+    right: 14px;
+    top: 7px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 29px;
+
+    font-weight: 200;
+
+    line-height: 30px;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.carrinho-conteudo {
+    width: 100%;
+
+    min-height: calc(100vh - 50px);
+
+    position: relative;
+
+    padding-top: 86px;
+}
+
+
+/* =========================
+   CLIENTE
+========================= */
+
+.cliente {
+    margin-left: 153px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.cliente strong {
+    color: #5B292B;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   ÍCONE DO CLIENTE
+========================= */
+
+.icone-cliente {
+    width: 34px;
+    height: 34px;
+
+    border: 1.8px solid #A76C73;
+
+    border-radius: 50%;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* cabeça */
+
+.cabeca-cliente {
+    width: 11px;
+    height: 11px;
+
+    border: 1.5px solid #A76C73;
+
+    border-radius: 50%;
+
+    position: absolute;
+
+    top: 6px;
+}
+
+
+/* corpo */
+
+.corpo-cliente {
+    width: 19px;
+    height: 10px;
+
+    border: 1.5px solid #A76C73;
+
+    border-radius: 12px 12px 0 0;
+
+    border-bottom: none;
+
+    position: absolute;
+
+    bottom: 4px;
+}
+
+
+/* =========================
+   LISTA DE BOLOS
+========================= */
+
+.lista-bolos {
+    margin-left: 180px;
+
+    margin-top: 14px;
+}
+
+
+.lista-bolos p {
+    color: #5B292B;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    margin-bottom: 14px;
+}
+
+
+/* =========================
+   BOTÃO REALIZAR PEDIDO
+========================= */
+
+.botao-realizar {
+    position: absolute;
+
+    left: 180px;
+    right: 180px;
+
+    bottom: 104px;
+
+    height: 45px;
+
+    border: 1px solid #61A875;
+
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    color: #347444;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+.botao-realizar:hover {
+    background-color: #f4faf5;
+}
+
+
+/* =========================
+   BOTÕES INFERIORES
+========================= */
+
+.botoes-carrinho {
+    position: absolute;
+
+    left: 181px;
+    right: 181px;
+
+    bottom: 40px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 21px;
+}
+
+
+.botoes-carrinho button {
+    height: 45px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+}
+
+
+/* =========================
+   ADICIONAR PRODUTO
+========================= */
+
+.botao-adicionar {
+    width: 192px;
+
+    background-color: #4DD477;
+
+    color: #28753F;
+}
+
+
+.botao-adicionar:hover {
+    background-color: #3FC468;
+}
+
+
+.simbolo-mais {
+    font-size: 22px;
+
+    font-weight: 300;
+
+    line-height: 10px;
+}
+
+
+/* =========================
+   ESVAZIAR CARRINHO
+========================= */
+
+.botao-esvaziar {
+    width: 192px;
+
+    background-color: #D9535B;
+
+    color: #7C272C;
+}
+
+
+.botao-esvaziar:hover {
+    background-color: #ca464e;
+}
+
+
+.simbolo-x {
+    font-size: 23px;
+
+    font-weight: 300;
+
+    line-height: 10px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 700px) {
+
+    .carrinho-conteudo {
+        padding-top: 60px;
+    }
+
+    .cliente {
+        margin-left: 30px;
+    }
+
+    .lista-bolos {
+        margin-left: 58px;
+    }
+
+    .botao-realizar {
+        left: 30px;
+        right: 30px;
+    }
+
+    .botoes-carrinho {
+        left: 30px;
+        right: 30px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .botoes-carrinho {
+        flex-direction: column;
+    }
+
+    .botoes-carrinho button {
+        width: 100%;
+    }
+
+    .botao-realizar {
+        bottom: 150px;
+    }
+}

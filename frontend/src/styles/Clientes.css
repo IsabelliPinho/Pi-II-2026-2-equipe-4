@@ -1,0 +1,590 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.clientes-container {
+    width: 100%;
+    min-height: 100vh;
+
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.clientes-header {
+    width: 100%;
+    height: 53px;
+
+    background-color: #5B292B;
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.clientes-logo {
+    width: 46px;
+    height: 53px;
+
+    background-color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circulo-clientes {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background-color: #5B292B;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #ffffff;
+}
+
+.logo-circulo-clientes span {
+    color: #ffffff;
+
+    font-family: Georgia, serif;
+
+    font-size: 17px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+.clientes-menu {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 29px;
+
+    margin-left: auto;
+    margin-right: 24px;
+}
+
+.clientes-menu button {
+    height: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    padding: 0;
+}
+
+.clientes-menu button:hover {
+    opacity: 0.75;
+}
+
+
+/* MENU ATIVO */
+
+.clientes-menu .menu-ativo {
+    border-bottom: 2px solid #ffffff;
+}
+
+
+/* =========================
+   NOTIFICAÇÃO
+========================= */
+
+.clientes-notificacao {
+    border: none;
+
+    background: transparent;
+
+    color: #FFD34E;
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    margin-right: 14px;
+}
+
+
+/* =========================
+   BOTÃO FECHAR
+========================= */
+
+.botao-fechar-clientes {
+    width: 32px;
+    height: 42px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 30px;
+
+    font-weight: 200;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   ÁREA PRINCIPAL
+========================= */
+
+.clientes-main {
+    width: 100%;
+
+    min-height: calc(100vh - 53px);
+
+    padding-top: 56px;
+}
+
+
+/* =========================
+   TÍTULO
+========================= */
+
+.clientes-main h1 {
+    text-align: center;
+
+    color: #5B292B;
+
+    font-size: 18px;
+
+    margin-bottom: 44px;
+}
+
+
+/* =========================
+   AÇÕES
+========================= */
+
+.clientes-acoes {
+    width: 727px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+/* =========================
+   CAMPO DE PESQUISA
+========================= */
+
+.campo-pesquisa {
+    width: 492px;
+    height: 39px;
+
+    background-color: #F0C8D0;
+
+    border-radius: 6px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 13px;
+}
+
+
+/* ÍCONE DE LUPA */
+
+.icone-pesquisa {
+    width: 18px;
+    height: 18px;
+
+    color: #111111;
+
+    margin-right: 9px;
+
+    flex-shrink: 0;
+}
+
+
+.campo-pesquisa input {
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #222222;
+
+    font-size: 12px;
+}
+
+
+.campo-pesquisa input::placeholder {
+    color: #222222;
+
+    opacity: 1;
+}
+
+
+/* =========================
+   BOTÃO CADASTRAR
+========================= */
+
+.botao-cadastrar {
+    width: 125px;
+    height: 39px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #5B292B;
+
+    color: #ffffff;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+
+.botao-cadastrar:hover {
+    opacity: 0.9;
+}
+
+
+/* ÍCONE DE PESSOA */
+
+.icone-pessoa {
+    width: 18px;
+    height: 18px;
+
+    color: #ffffff;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================
+   TABELA
+========================= */
+
+.tabela-clientes {
+    width: 608px;
+
+    margin: 47px auto 0;
+
+    background-color: #ffffff;
+
+    border-radius: 6px;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   ESTRUTURA DAS LINHAS
+========================= */
+
+.tabela-header,
+.cliente-linha {
+    display: grid;
+
+    grid-template-columns:
+        58px
+        190px
+        155px
+        75px
+        130px;
+
+    align-items: center;
+}
+
+
+/* =========================
+   CABEÇALHO DA TABELA
+========================= */
+
+.tabela-header {
+    min-height: 44px;
+
+    background-color: #F0C8D0;
+
+    color: #111111;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+/* =========================
+   LINHAS DOS CLIENTES
+========================= */
+
+.cliente-linha {
+    min-height: 44px;
+
+    background-color: #ffffff;
+
+    color: #111111;
+
+    font-size: 11px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   COLUNAS
+========================= */
+
+.coluna-numero {
+    text-align: center;
+}
+
+.coluna-cliente {
+    text-align: center;
+}
+
+.coluna-contato {
+    text-align: center;
+}
+
+.coluna-pedidos {
+    text-align: center;
+}
+
+.coluna-acoes {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 21px;
+}
+
+
+/* =========================
+   DIVISÃO DA COLUNA #
+========================= */
+
+.tabela-header .coluna-numero {
+    min-height: 44px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-right: 1px solid #dfa9b3;
+}
+
+
+/* =========================
+   BOTÃO OLHO
+========================= */
+
+.botao-visualizar {
+    width: 25px;
+    height: 25px;
+
+    border: 1px solid #555555;
+
+    border-radius: 5px;
+
+    background-color: #ffffff;
+
+    color: #111111;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px;
+}
+
+
+.botao-visualizar:hover {
+    background-color: #f5f5f5;
+}
+
+
+.botao-visualizar svg {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================
+   BOTÃO LIXEIRA
+========================= */
+
+.botao-excluir {
+    width: 20px;
+    height: 25px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ff1f1f;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 2px;
+}
+
+
+.botao-excluir:hover {
+    color: #cc0000;
+}
+
+
+.botao-excluir svg {
+    width: 18px;
+    height: 18px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 850px) {
+
+    .clientes-menu {
+        gap: 13px;
+    }
+
+    .clientes-menu button {
+        font-size: 10px;
+    }
+
+    .clientes-acoes {
+        width: 85%;
+    }
+
+    .campo-pesquisa {
+        width: 70%;
+    }
+
+    .tabela-clientes {
+        width: 90%;
+
+        overflow-x: auto;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .clientes-header {
+        height: auto;
+
+        min-height: 53px;
+
+        flex-wrap: wrap;
+    }
+
+    .clientes-menu {
+        order: 3;
+
+        width: 100%;
+
+        overflow-x: auto;
+
+        padding: 8px;
+
+        margin: 0;
+
+        gap: 20px;
+    }
+
+    .clientes-acoes {
+        width: 90%;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .campo-pesquisa {
+        width: 100%;
+    }
+
+    .botao-cadastrar {
+        width: 140px;
+    }
+
+    .tabela-clientes {
+        width: 95%;
+
+        overflow-x: auto;
+    }
+}

@@ -1,0 +1,329 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f8f6f5;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.pedido-container {
+    min-height: 100vh;
+    width: 100%;
+
+    background-color: #f8f6f5;
+}
+
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+.pedido-header {
+    height: 51px;
+
+    background-color: #5B292B;
+
+    display: flex;
+    align-items: center;
+
+    padding-left: 30px;
+}
+
+
+.pedido-header h1 {
+    color: #E8DCDD;
+
+    font-size: 27px;
+
+    font-style: italic;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   ÁREA PRINCIPAL
+========================= */
+
+.pedido-main {
+    min-height: calc(100vh - 51px);
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding-top: 65px;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.pedido-card {
+    width: 778px;
+    min-height: 522px;
+
+    background-color: #FFFFFF;
+
+    border: 1px solid #8E5A5D;
+
+    border-radius: 6px;
+
+    padding: 55px 39px 40px;
+
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    column-gap: 70px;
+}
+
+
+/* =========================
+   TÍTULOS
+========================= */
+
+.pedido-card h2 {
+    color: #5B292B;
+
+    font-size: 23px;
+
+    font-weight: bold;
+
+    margin-bottom: 35px;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo-pedido {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+
+.campo-pedido label,
+.campo-textarea label {
+    color: #5B292B;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    min-width: 67px;
+}
+
+
+.campo-pedido label span,
+.campo-textarea label span {
+    color: #5B292B;
+}
+
+
+/* =========================
+   SELECT
+========================= */
+
+.campo-pedido select {
+    width: 90px;
+    height: 21px;
+
+    border: 1px solid #9B6C70;
+
+    border-radius: 7px;
+
+    background-color: white;
+
+    color: #9A9A9A;
+
+    font-size: 9px;
+
+    padding-left: 10px;
+
+    outline: none;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   OBSERVAÇÃO DO TAMANHO
+========================= */
+
+.observacao {
+    width: max-content;
+
+    background-color: #5B292B;
+
+    color: white;
+
+    font-size: 7px;
+
+    padding: 3px 6px;
+
+    border-radius: 3px;
+
+    margin-left: 117px;
+
+    margin-top: -20px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   TEXTAREAS
+========================= */
+
+.campo-textarea {
+    display: flex;
+    align-items: flex-start;
+
+    margin-bottom: 25px;
+}
+
+
+.campo-textarea textarea {
+    width: 124px;
+    height: 65px;
+
+    resize: none;
+
+    border: 1px solid #9B6C70;
+
+    background-color: white;
+
+    padding: 6px;
+
+    font-size: 8px;
+
+    color: #5B292B;
+
+    outline: none;
+}
+
+
+.campo-textarea textarea::placeholder {
+    color: #999;
+
+    opacity: 1;
+}
+
+
+/* =========================
+   BOTÃO CARRINHO
+========================= */
+
+.botao-carrinho {
+    position: absolute;
+
+    bottom: 39px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 193px;
+    height: 44px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background-color: #4DD477;
+
+    color: #28753F;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    transition: 0.2s;
+}
+
+
+.botao-carrinho:hover {
+    background-color: #3fc468;
+}
+
+
+.icone-carrinho {
+    font-size: 16px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 850px) {
+
+    .pedido-main {
+        padding: 30px 20px;
+    }
+
+    .pedido-card {
+        width: 100%;
+        max-width: 778px;
+
+        column-gap: 30px;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .pedido-card {
+        grid-template-columns: 1fr;
+
+        row-gap: 30px;
+
+        padding-bottom: 110px;
+    }
+
+    .botao-carrinho {
+        bottom: 30px;
+    }
+}
+
+
+@media (max-width: 450px) {
+
+    .pedido-header {
+        padding-left: 20px;
+    }
+
+    .pedido-header h1 {
+        font-size: 22px;
+    }
+
+    .pedido-card {
+        padding: 35px 20px 100px;
+    }
+
+    .pedido-card h2 {
+        font-size: 20px;
+    }
+}

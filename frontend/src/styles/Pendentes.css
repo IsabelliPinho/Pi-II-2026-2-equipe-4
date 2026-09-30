@@ -1,0 +1,495 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #faf8f7;
+}
+
+.pendentes-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #faf8f7;
+}
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+.pendentes-header {
+    width: 100%;
+    height: 45px;
+    background-color: #5B292B;
+    position: relative;
+}
+
+.pendentes-fechar {
+    position: absolute;
+    top: 12px;
+    right: 9px;
+
+    width: 22px;
+    height: 22px;
+
+    border: none;
+    background: transparent;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+}
+
+.pendentes-fechar svg {
+    width: 19px;
+    height: 19px;
+}
+
+.pendentes-fechar:hover {
+    opacity: 0.75;
+}
+
+
+/* =========================
+   CONTEÚDO PRINCIPAL
+========================= */
+
+.pendentes-main {
+    width: 744px;
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 275px 308px;
+    column-gap: 114px;
+
+    padding-top: 51px;
+}
+
+
+/* =========================
+   LADO ESQUERDO
+========================= */
+
+.pendentes-esquerda h1 {
+    color: #5B292B;
+    font-size: 16px;
+    font-weight: bold;
+
+    margin-bottom: 15px;
+}
+
+.resumo-pendentes {
+    width: 275px;
+    height: 94px;
+
+    border: 1px solid #777777;
+    border-radius: 5px;
+
+    background-color: #ffffff;
+
+    padding: 13px 5px;
+}
+
+.resumo-pendentes h2 {
+    color: #555555;
+    font-size: 12px;
+    font-weight: bold;
+
+    margin-bottom: 13px;
+}
+
+.resumo-cards {
+    display: flex;
+    gap: 8px;
+}
+
+.resumo-card {
+    width: 83px;
+    height: 36px;
+
+    background-color: #E9A9B9;
+    border-radius: 5px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    padding-top: 6px;
+
+    color: #5B292B;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.resumo-entrega {
+    width: 83px;
+
+    display: block;
+    text-align: center;
+}
+
+.data-resumo {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+
+    margin-top: 3px;
+
+    font-size: 13px;
+    color: #111111;
+}
+
+
+/* =========================
+   TABELA
+========================= */
+
+.tabela-pendentes {
+    width: 275px;
+
+    margin-top: 26px;
+
+    background-color: #ffffff;
+    border-radius: 5px;
+
+    overflow: hidden;
+}
+
+.tabela-pendentes-header,
+.linha-pendente {
+    display: grid;
+
+    grid-template-columns:
+        50px
+        101px
+        51px
+        73px;
+
+    align-items: center;
+
+    text-align: center;
+}
+
+.tabela-pendentes-header {
+    height: 25px;
+
+    background-color: #F0C8D0;
+
+    color: #111111;
+
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.linha-pendente {
+    height: 25px;
+
+    background-color: #ffffff;
+
+    color: #111111;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.prazo-pedido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prazo-urgente {
+    color: #E00000;
+    font-weight: bold;
+}
+
+.botao-calendario {
+    width: 20px;
+    height: 20px;
+
+    border: none;
+    background: transparent;
+
+    color: #1748E8;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+}
+
+.botao-calendario svg {
+    width: 16px;
+    height: 16px;
+}
+
+.botao-calendario:hover {
+    opacity: 0.7;
+}
+
+
+/* =========================
+   DETALHES
+========================= */
+
+.detalhes-pendente h1 {
+    color: #5B292B;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    margin-bottom: 13px;
+}
+
+.campo-detalhe {
+    width: 308px;
+
+    margin-bottom: 10px;
+}
+
+.campo-detalhe label {
+    display: block;
+
+    color: #111111;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    margin-bottom: 3px;
+}
+
+.campo-detalhe input {
+    width: 308px;
+    height: 31px;
+
+    border: 1px solid #B89A9D;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    outline: none;
+
+    padding: 0 9px;
+
+    font-size: 12px;
+}
+
+.campo-detalhe input:focus {
+    border-color: #5B292B;
+}
+
+
+/* =========================
+   CAMPOS DE DATA
+========================= */
+
+.campo-data-detalhe {
+    position: relative;
+}
+
+.input-data {
+    width: 308px;
+    height: 31px;
+
+    border: 1px solid #B89A9D;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    padding: 0 85px;
+
+    color: #111111;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+/* =========================
+   TEXTAREAS
+========================= */
+
+.campo-detalhe textarea {
+    width: 308px;
+    height: 49px;
+
+    resize: none;
+
+    border: 1px solid #B89A9D;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    outline: none;
+
+    padding: 7px;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+.campo-detalhe textarea:focus {
+    border-color: #5B292B;
+}
+
+.campo-detalhe .campo-observacoes {
+    height: 42px;
+}
+
+
+/* =========================
+   AÇÕES
+========================= */
+
+.acoes-detalhe {
+    width: 308px;
+
+    margin-top: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.marcar-atendida {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #111111;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+.marcar-atendida input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checkbox-personalizado {
+    width: 17px;
+    height: 17px;
+
+    border: 1px solid #555555;
+    border-radius: 50%;
+
+    background-color: #ffffff;
+
+    display: inline-block;
+}
+
+.marcar-atendida input:checked + .checkbox-personalizado {
+    background-color: #5B292B;
+
+    box-shadow:
+        inset 0 0 0 4px #ffffff;
+}
+
+.botao-editar {
+    width: 125px;
+    height: 38px;
+
+    border: 1px solid #4EBDC5;
+    border-radius: 6px;
+
+    background-color: #9BEFF3;
+
+    color: #5B292B;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.botao-editar:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 800px) {
+
+    .pendentes-main {
+        width: 90%;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
+    }
+
+    .resumo-pendentes,
+    .tabela-pendentes {
+        width: 100%;
+    }
+
+    .tabela-pendentes-header,
+    .linha-pendente {
+        grid-template-columns:
+            45px
+            1fr
+            55px
+            65px;
+    }
+
+    .campo-detalhe,
+    .campo-detalhe input,
+    .campo-detalhe textarea,
+    .input-data {
+        width: 100%;
+    }
+
+    .acoes-detalhe {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .pendentes-main {
+        width: 90%;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .resumo-pendentes,
+    .tabela-pendentes {
+        width: 100%;
+    }
+
+    .detalhes-pendente {
+        width: 100%;
+    }
+
+    .campo-detalhe,
+    .campo-detalhe input,
+    .campo-detalhe textarea,
+    .input-data {
+        width: 100%;
+    }
+
+    .acoes-detalhe {
+        width: 100%;
+    }
+}

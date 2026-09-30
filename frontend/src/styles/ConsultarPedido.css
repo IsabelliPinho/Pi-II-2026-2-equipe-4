@@ -1,0 +1,750 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.consultar-container {
+    width: 100%;
+    min-height: 100vh;
+
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.consultar-header {
+    width: 100%;
+    height: 53px;
+
+    background-color: #5B292B;
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.consultar-logo {
+    width: 46px;
+    height: 53px;
+
+    background-color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circulo-consultar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background-color: #5B292B;
+
+    border: 2px solid #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circulo-consultar span {
+    color: #ffffff;
+
+    font-family: Georgia, serif;
+
+    font-size: 17px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+.consultar-menu {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 29px;
+
+    margin-left: auto;
+    margin-right: 24px;
+}
+
+.consultar-menu button {
+    height: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    padding: 0;
+}
+
+.consultar-menu button:hover {
+    opacity: 0.75;
+}
+
+
+/* MENU ATIVO */
+
+.consultar-menu .menu-ativo {
+    border-bottom: 2px solid #ffffff;
+}
+
+
+/* =========================
+   SINO
+========================= */
+
+.consultar-notificacao {
+    width: 25px;
+    height: 25px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #FFD34E;
+
+    cursor: pointer;
+
+    margin-right: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.consultar-notificacao svg {
+    width: 23px;
+    height: 23px;
+}
+
+
+/* =========================
+   FECHAR
+========================= */
+
+.botao-fechar-consultar {
+    width: 32px;
+    height: 42px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 30px;
+
+    font-weight: 200;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   ÁREA PRINCIPAL
+========================= */
+
+.consultar-main {
+    width: 100%;
+
+    min-height: calc(100vh - 53px);
+
+    padding-top: 37px;
+}
+
+
+/* =========================
+   TÍTULO
+========================= */
+
+.consultar-main > h1 {
+    text-align: center;
+
+    color: #5B292B;
+
+    font-size: 16px;
+
+    margin-bottom: 21px;
+}
+
+
+/* =========================
+   CAMPOS DE DATA
+========================= */
+
+.filtros-data {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 70px;
+}
+
+.campo-data {
+    width: 126px;
+    height: 38px;
+
+    background-color: #E8A0B0;
+
+    border-radius: 6px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 10px 0 18px;
+
+    color: #5B292B;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+.campo-data svg {
+    width: 18px;
+    height: 18px;
+
+    color: #111111;
+}
+
+
+/* =========================
+   FILTROS RÁPIDOS
+========================= */
+
+.filtros-rapidos {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    margin-top: 24px;
+}
+
+.filtros-rapidos button {
+    width: 91px;
+    height: 22px;
+
+    border-radius: 12px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+/* HOJE */
+
+.filtro-hoje {
+    background-color: #FFB5B8;
+
+    border: 1px solid #555555;
+
+    color: #5B292B;
+}
+
+
+/* SEMANA */
+
+.filtro-semana {
+    background-color: #FFF0BD;
+
+    border: 1px solid #555555;
+
+    color: #5B292B;
+}
+
+
+/* MÊS */
+
+.filtro-mes {
+    background-color: #BFF3C9;
+
+    border: 1px solid #555555;
+
+    color: #5B292B;
+}
+
+
+/* 30 DIAS */
+
+.filtro-30dias {
+    background-color: #C7DCF2;
+
+    border: 1px solid #555555;
+
+    color: #5B292B;
+}
+
+
+/* =========================
+   BOTÕES BUSCAR / LIMPAR
+========================= */
+
+.botoes-filtro {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 45px;
+
+    margin-top: 22px;
+
+    margin-bottom: 18px;
+}
+
+.botoes-filtro button {
+    width: 88px;
+    height: 38px;
+
+    border-radius: 6px;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+/* BUSCAR */
+
+.botao-buscar {
+    border: 1px solid #5B292B;
+
+    background-color: #5B292B;
+}
+
+
+/* LIMPAR */
+
+.botao-limpar {
+    border: 1px solid #990000;
+
+    background-color: #C90000;
+}
+
+
+/* =========================
+   RESUMO DO PERÍODO
+========================= */
+
+.resumo-periodo {
+    width: 640px;
+
+    height: 93px;
+
+    margin: 0 auto;
+
+    background-color: #F0D4D9;
+
+    border-radius: 6px;
+
+    padding: 14px 12px;
+}
+
+.resumo-periodo h2 {
+    color: #555555;
+
+    font-size: 12px;
+
+    margin-bottom: 13px;
+}
+
+
+/* =========================
+   CARDS DO RESUMO
+========================= */
+
+.cards-periodo {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 18px;
+}
+
+.card-periodo {
+    flex: 1;
+
+    height: 39px;
+
+    border-radius: 6px;
+
+    background-color: #E8A0B0;
+
+    padding: 8px 6px;
+
+    color: #5B292B;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   TABELA
+========================= */
+
+.tabela-pedidos {
+    width: 640px;
+
+    margin: 14px auto 20px;
+
+    background-color: #ffffff;
+
+    border-radius: 6px;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+.tabela-pedidos-header,
+.pedido-linha {
+    display: grid;
+
+    grid-template-columns:
+        48px
+        150px
+        81px
+        74px
+        96px
+        82px
+        109px;
+
+    align-items: center;
+
+    text-align: center;
+}
+
+.tabela-pedidos-header {
+    min-height: 25px;
+
+    background-color: #F0C8D0;
+
+    color: #111111;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   LINHAS
+========================= */
+
+.pedido-linha {
+    min-height: 25px;
+
+    color: #111111;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status-entregue {
+    color: #1748E8;
+
+    font-weight: bold;
+}
+
+.status-pendente {
+    color: #E00000;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   AÇÕES
+========================= */
+
+.acoes-pedido {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 14px;
+}
+
+
+/* =========================
+   OLHO
+========================= */
+
+.botao-olho-pedido {
+    width: 20px;
+    height: 20px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #111111;
+
+    cursor: pointer;
+
+    padding: 1px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.botao-olho-pedido svg {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================
+   LIXEIRA
+========================= */
+
+.botao-lixeira-pedido {
+    width: 20px;
+    height: 20px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #FF0000;
+
+    cursor: pointer;
+
+    padding: 1px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.botao-lixeira-pedido svg {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================
+   RODAPÉ DA TABELA
+========================= */
+
+.tabela-rodape {
+    min-height: 34px;
+
+    border-top: 1px solid #555555;
+
+    margin: 0 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    color: #111111;
+
+    font-size: 8px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   PAGINAÇÃO
+========================= */
+
+.paginacao {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+.paginacao button {
+    width: 17px;
+    height: 17px;
+
+    border: none;
+
+    border-radius: 2px;
+
+    background-color: #E8A0B0;
+
+    color: #5B292B;
+
+    font-size: 9px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.paginacao .pagina-seta {
+    background-color: #ffffff;
+
+    border: 1px solid #555555;
+
+    border-radius: 50%;
+
+    font-size: 10px;
+}
+
+.paginacao .pagina-ativa {
+    background-color: #E8A0B0;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 850px) {
+
+    .consultar-menu {
+        gap: 13px;
+    }
+
+    .consultar-menu button {
+        font-size: 10px;
+    }
+
+    .resumo-periodo,
+    .tabela-pedidos {
+        width: 90%;
+    }
+
+    .tabela-pedidos {
+        overflow-x: auto;
+    }
+
+    .tabela-pedidos-header,
+    .pedido-linha {
+        min-width: 640px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .consultar-header {
+        height: auto;
+
+        min-height: 53px;
+
+        flex-wrap: wrap;
+    }
+
+    .consultar-menu {
+        order: 3;
+
+        width: 100%;
+
+        overflow-x: auto;
+
+        padding: 8px;
+
+        margin: 0;
+
+        gap: 20px;
+    }
+
+    .filtros-data {
+        gap: 20px;
+    }
+
+    .filtros-rapidos {
+        flex-wrap: wrap;
+
+        padding: 0 20px;
+    }
+
+    .botoes-filtro {
+        gap: 20px;
+    }
+
+    .resumo-periodo {
+        width: 90%;
+    }
+
+    .cards-periodo {
+        gap: 7px;
+    }
+
+    .tabela-pedidos {
+        width: 95%;
+
+        overflow-x: auto;
+    }
+}
