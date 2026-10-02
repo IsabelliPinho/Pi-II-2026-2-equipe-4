@@ -23,11 +23,10 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * Datas: YYYY-MM-DD  
 * Data e hora: YYYY-MM-DDTHH:mm:ss  
 * Valores monetários: Número decimal positivo, em reais.  
-* Nomenclatura: camelCase nos campos JSON.  
+* Nomenclatura: camelCase nos campos JSON.( as colunas do banco estão em snake_case)
 * Identificadores: Números inteiros (Long / Integer).  
 * Status de pedido permitidos: PENDENTE, ATENDIDO, CANCELADO  
 * Formas de atendimento permitidas: ENTREGA, RETIRADA  
-* Tipos financeiros permitidos: ENTRADA, SAIDA
 
 
 **ROTAS :**
@@ -43,29 +42,26 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 
 {  
   "nome": "Maria da Silva",  
-  "telefone": "(85) 99999-1111",  
-  "endereco": {  
-    "rua": "Rua das Flores",  
-    "numero": "120",  
-    "bairro": "Centro",  
-    "cep": "60000-000"  
-  }  
+   "telefones": ["(85) 99999-1111", "(85) 98888-2222"],
+   "bairro": "Centro",
+   "rua": "Rua das Flores",
+   "numCasa": "120",
+  "cep": "60000-000"
 }
 
 **Resposta:**
 
 {  
-  "idCliente": 1,  
+  "id": 1,  
   "nome": "Maria da Silva",  
-  "telefone": "(85) 99999-1111",  
-  "endereco": {  
-    "rua": "Rua das Flores",  
-    "numero": "120",  
-    "bairro": "Centro",  
-    "cep": "60000-000"  
-  },  
-  "criadoEm": "2026-09-20T14:30:00"  
+  "telefones": ["(85) 99999-1111", "(85) 98888-2222"],
+  "bairro": "Centro",
+  "rua": "Rua das Flores",
+  "numCasa": "120",
+  "cep": "60000-000"
 }
+
+
 
 ### **2\. Buscar Clientes**
 
@@ -75,16 +71,15 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Parâmetros de Query:** busca (opcional \- busca por nome ou telefone)  
 * **Status HTTP de Sucesso:** 200 OK
 
-**Exemplo de Chamada:** /clientes?busca=maria
+**Exemplo de Chamada:** /clientes/busca?busca=maria
 
 **Resposta:**
 
 \[  
   {  
-    "idCliente": 1,  
+    "id": 1,  
     "nome": "Maria da Silva",  
-    "telefone": "(85) 99999-1111",  
-    "quantidadePedidos": 3  
+    "telefones": ["(85) 99999-1111"] 
   }  
 \]
 
@@ -95,36 +90,59 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
-*Nota: Se formaAtendimento for "RETIRADA", o campo enderecoEntrega não é obrigatório.*
+*Nota: Se formaEntrega for "RETIRADA", os campos entregaBairro,entregaRua e entregaNumCasa não são obrigatórios.*
+
+*Nota: dataPrevista não pode ser anterior a data atual .*
+
+*Nota: em cada item, quantidade deve ser maior que 0 ( assumindo 1 se não for informado ) ; peso, quando informado , deve ser no mínimo 2 kilos*
 
 **Body de Entrada:**
 
 {  
   "idCliente": 1,  
-  "descricao": "Bolo de aniversário",  
-  "valorTotal": 150.00,  
-  "dataPedido": "2026-09-20",  
-  "dataPrevistaEntrega": "2026-09-25",  
-  "formaAtendimento": "ENTREGA",  
-  "enderecoEntrega": {  
-    "rua": "Rua das Flores",  
-    "numero": "120",  
-    "bairro": "Centro",  
-    "cep": "60000-000"  
-  }  
+  "nomeGerente":"Gabriela",
+  "dataPrevista":"2026-09-25T15:00:00",
+  "formaEntrega":"ENTREGA",
+  "entregaBairro":"Centro",
+  "entregaRua":"Rua das Flores",
+  "entregaNumCasa":"120",
+  "entregaCep":"60000-000",
+  "itens": [
+    {
+     "idProduto": 10,
+    "quantidade": 1,
+    "tipoMassa": "Chocolate",
+    "tema": "Aniversário",
+    "peso": 2.5,
+    "tipoRecheio": "Brigadeiro"
+    }
+  ]
 }
 
 **Resposta:**
 
-{  
-  "idPedido": 100,  
-  "idCliente": 1,  
-  "descricao": "Bolo de aniversário",  
-  "valorTotal": 150.00,  
-  "dataPedido": "2026-09-20",  
-  "dataPrevistaEntrega": "2026-09-25",  
-  "formaAtendimento": "ENTREGA",  
-  "status": "PENDENTE"  
+{
+  "id": 100,
+  "idCliente": 1,
+  "nomeGerente": "Gabriela",
+  "dataPedido": "2026-09-20",
+  "dataPrevista": "2026-09-25T15:00:00",
+  "statusPedido": "PENDENTE",
+  "formaEntrega": "ENTREGA",
+  "entregaBairro": "Centro",
+  "entregaRua": "Rua das Flores",
+  "entregaNumCasa": "120",
+  "entregaCep": "60000-000",
+  "itens": [
+    {
+      "idProduto": 10,
+      "quantidade": 1,
+      "tipoMassa": "Chocolate",
+      "tema": "Aniversário",
+      "peso": 2.5,
+      "tipoRecheio": "Brigadeiro"
+    }
+  ]
 }
 
 ### **4\. Consultar Pedidos**
@@ -135,41 +153,42 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Parâmetros de Query:** status (opcional), inicio (opcional), fim (opcional)  
 * **Status HTTP de Sucesso:** 200 OK
 
-**Exemplo de Chamada:** /pedidos?status=PENDENTE
+**Exemplo de Chamada:** /pedidos/consulta?status=PENDENTE
 
 **Resposta:**
 
 \[  
   {  
-    "idPedido": 100,  
+    "id": 100,  
     "nomeCliente": "Maria da Silva",  
-    "dataPrevistaEntrega": "2026-09-25",  
-    "formaAtendimento": "ENTREGA",  
-    "status": "PENDENTE"  
+    "dataPrevista": "2026-09-25T15:00:00",  
+    "formaEntrega": "ENTREGA",  
+    "statusPedido": "PENDENTE"  
   }  
 \]
 
 ### **5\. Atualizar Pedido**
 
 * **Requisito:** RF004, RF005, RF007, RF009  
-* **Caminho:** /pedidos/{idPedido}  
+* **Caminho:** /pedidos/{id}  
 * **Método:** PATCH  
-* **Parâmetro de Rota:** idPedido  
+* **Parâmetro de Rota:** id 
 * **Status HTTP de Sucesso:** 200 OK
 
-*Valores possíveis para status: PENDENTE, ATENDIDO, CANCELADO*
+*Valores possíveis para statusPedido: PENDENTE, ATENDIDO, CANCELADO*
+*Regra só é permitido alterar Cancelado se o status atual for PENDENTE.*
 
 **Body de Entrada:**
 
 {  
-  "status": "ATENDIDO"  
+  "statusPedido": "ATENDIDO"  
 }
 
 **Resposta:**
 
 {  
-  "idPedido": 100,  
-  "status": "ATENDIDO",  
+  "id": 100,  
+  "statusPedido": "ATENDIDO",  
   "atualizadoEm": "2026-09-20T15:10:00"  
 }
 
@@ -187,14 +206,14 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 
 {  
   "data": "2026-09-25",  
-  "pedidos": \[  
+  "pedidos": [  
     {  
-      "idPedido": 100,  
+      "id": 100,  
       "nomeCliente": "Maria da Silva",  
-      "formaAtendimento": "ENTREGA",  
-      "status": "PENDENTE"  
+      "formaEntrega": "ENTREGA",  
+      "statusPedido": "PENDENTE"  
     }  
-  \]  
+  ]  
 }
 
 ### **7\. Pedidos Próximos do Prazo**
@@ -209,84 +228,93 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 
 **Resposta:**
 
-\[  
+[  
   {  
-    "idPedido": 100,  
+    "id": 100,  
     "nomeCliente": "Maria da Silva",  
-    "dataPrevistaEntrega": "2026-09-25",  
+    "dataPrevista": "2026-09-25T15:00:00",  
     "diasRestantes": 1  
   }  
-\]
+]
 
-### **8\. Consultar Lançamentos Financeiros**
+### **8\. Acesso á planilha financeira**
 
 * **Requisito:** RF010  
-* **Caminho:** /financeiro  
-* **Método:** GET  
-* **Parâmetros de Query:** tipo (opcional: ENTRADA | SAIDA), inicio (opcional), fim (opcional)  
+* **Caminho:** /financeiro/acesso 
+* **Método:** GET    
 * **Status HTTP de Sucesso:** 200 OK
-
-**Exemplo de Chamada:** /financeiro?tipo=ENTRADA
-
-**Resposta:**
-
-\[  
-  {  
-    "idLancamento": 50,  
-    "valor": 150.00,  
-    "tipo": "ENTRADA",  
-    "data": "2026-09-20",  
-    "descricao": "Pagamento do pedido 100"  
-  }  
-\]
-
-### **9\. Adicionar Lançamento Financeiro**
-
-* **Requisito:** RF010  
-* **Caminho:** /financeiro/lancamentos  
-* **Método:** POST  
-* **Status HTTP de Sucesso:** 201 Created
-
-**Body de Entrada:**
-
-{  
-  "valor": 150.00,  
-  "tipo": "ENTRADA",  
-  "data": "2026-09-20",  
-  "descricao": "Pagamento do pedido 100"  
-}
+  
+* Nota: os dados financeiros ficam numa planilha externa (Google Sheets), não
+no banco — por isso esta rota só devolve o link de acesso, sem gerenciar
+lançamentos.*
 
 **Resposta:**
+{"url":"https://docs.google.com/spreadsheets/d/EXEMPLO-ID/edit"}
 
-{  
-  "idLancamento": 50,  
-  "valor": 150.00,  
-  "tipo": "ENTRADA",  
-  "data": "2026-09-20",  
-  "descricao": "Pagamento do pedido 100"  
+possível erro : planilha indisponível :
+Status HTTP: 404   Not Found
+{
+"error":"PLANILHA_INDISPONIVEL",
+"message":"Não foi possível acessar a planilha financeira."
 }
 
-### **10\. Alterar Lançamento Financeiro**
 
-* **Requisito:** RF010  
-* **Caminho:** /financeiro/{idLancamento}  
-* **Método:** PATCH  
-* **Parâmetro de Rota:** idLancamento  
-* **Status HTTP de Sucesso:** 200 OK
+### **9\. Listar Produtos**
 
-**Body de Entrada:**
-
-{  
-  "valor": 175.00,  
-  "descricao": "Valor atualizado"  
-}
-
+* **Requisito:** RF003
+* **Caminho:** /listar/produtos  
+* **Método:** GET 
+* **Status HTTP de Sucesso:** 200 ok
+  
 **Resposta:**
-
+[
 {  
-  "idLancamento": 50,  
-  "valor": 175.00,  
-  "descricao": "Valor atualizado",  
-  "atualizadoEm": "2026-09-20T16:00:00"  
+  "id": 10,  
+  "nome": "Bolo de Chocolate",
+  "preco": 80.00
 }
+,
+{
+ "id":11,
+ "nome": "Bolo de Baunilha",
+ "preco":70.00
+}
+]
+### **10\.Consultar Pedido por ID**
+
+* **Requisito:** RF003,RF007  
+* **Caminho:**/pedidos/{id}  
+* **Método:**Get  
+* **Parâmetro de Rota:** id 
+* **Status HTTP de Sucesso:** 200 OK e 404 se o pedido não existir
+  
+* Nota: diferente da rota 4 ( que lista vários pedidos resumidos ) , esta retorna um único pedido com todos os detalhes, incluindo os itens .*
+  
+  **Resposta:**
+  {
+  "id": 100,
+  "idCliente": 1,
+  "nomeGerente": "Gabriela",
+  "dataPedido": "2026-09-20",
+  "dataPrevista": "2026-09-25T15:00:00",
+  "statusPedido": "PENDENTE",
+  "formaEntrega": "ENTREGA",
+  "entregaBairro": "Centro",
+  "entregaRua": "Rua das Flores",
+  "entregaNumCasa": "120",
+  "entregaCep": "60000-000",
+  "itens": [
+    {
+      "idProduto": 10,
+      "quantidade": 1,
+      "tipoMassa": "Chocolate",
+      "tema": "Aniversário",
+      "peso": 2.5,
+      "tipoRecheio": "Brigadeiro"
+    }
+  ]
+}
+  
+
+
 
