@@ -1,0 +1,11 @@
+# Arquivo com senhas
+.env
+
+# Build
+target/
+
+#IDEs e sistema
+.idea/
+.vscode/
+.DS_Store
+*.iml
