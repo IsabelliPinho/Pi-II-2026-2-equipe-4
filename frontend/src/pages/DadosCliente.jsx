@@ -1,6 +1,54 @@
+import { useState } from "react";
 import "../styles/DadosCliente.css";
 
 function DadosCliente({ voltarCarrinho, confirmarContato }) {
+    const [nome, setNome] = useState("");
+    const [telefone, setTelefone] = useState("");
+    const [endereco, setEndereco] = useState("");
+    const [enviando, setEnviando] = useState(false);
+
+    async function cadastrarCliente() {
+        if (!nome || !telefone || !endereco) {
+            alert("Preencha todos os campos.");
+            return;
+        }
+
+        setEnviando(true);
+
+        try {
+            const resposta = await fetch("http://localhost:8080/clientes/cadastro", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nome: nome,
+                    telefones: [telefone],
+                    bairro: "",
+                    rua: endereco,
+                    numCasa: "",
+                    cep: ""
+                })
+            });
+
+            if (!resposta.ok) {
+                throw new Error("Erro ao cadastrar cliente");
+            }
+
+            const cliente = await resposta.json();
+
+            console.log("Cliente cadastrado:", cliente);
+
+            confirmarContato(cliente);
+
+        } catch (erro) {
+            console.error("Erro ao cadastrar cliente:", erro);
+            alert("Não foi possível cadastrar o cliente.");
+        } finally {
+            setEnviando(false);
+        }
+    }
+
     return (
         <div className="dados-container">
 
@@ -52,6 +100,8 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
 
                         <input
                             type="text"
+                            value={nome}
+                            onChange={(e) => setNome(e.target.value)}
                         />
 
                     </div>
@@ -64,6 +114,8 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
 
                         <input
                             type="tel"
+                            value={telefone}
+                            onChange={(e) => setTelefone(e.target.value)}
                         />
 
                     </div>
@@ -76,6 +128,8 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
 
                         <input
                             type="text"
+                            value={endereco}
+                            onChange={(e) => setEndereco(e.target.value)}
                         />
 
                     </div>
@@ -84,9 +138,10 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
                     {/* CONFIRMAR */}
                     <button
                         className="botao-confirmar-contato"
-                        onClick={confirmarContato}
+                        onClick={cadastrarCliente}
+                        disabled={enviando}
                     >
-                        Confirmar Contato
+                        {enviando ? "Cadastrando..." : "Confirmar Contato"}
                     </button>
 
                 </div>
