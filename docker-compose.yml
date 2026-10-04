@@ -19,7 +19,7 @@ services:
       - db_data:/var/lib/postgresql/data              # dados do banco (persistem)
       - ./db/init:/docker-entrypoint-initdb.d:ro      # 01-schema.sql cria as tabelas e 02-seed.sql popula (só na 1ª inicialização)
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -27,6 +27,7 @@ services:
   # Backend: Spring Boot + Hibernate
   backend:
     build: ./backend
+    restart: on-failure
     environment:
       TZ: ${APP_TZ:-America/Fortaleza}
       SERVER_PORT: ${BACKEND_PORT:-8080}
