@@ -1,0 +1,455 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.dashboard-container {
+    width: 100%;
+    min-height: 100vh;
+
+    background-color: #faf8f7;
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.dashboard-header {
+    width: 100%;
+    height: 48px;
+
+    background-color: #5B292B;
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.dashboard-logo {
+    width: 49px;
+    height: 48px;
+
+    background-color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circulo {
+    width: 43px;
+    height: 43px;
+
+    border-radius: 50%;
+
+    background-color: #5B292B;
+
+    border: 2px solid #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circulo span {
+    color: #ffffff;
+
+    font-family: Georgia, serif;
+
+    font-size: 17px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+.dashboard-menu {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 30px;
+
+    margin-left: auto;
+    margin-right: 25px;
+}
+
+.dashboard-menu button {
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: opacity 0.2s;
+}
+
+.dashboard-menu button:hover {
+    opacity: 0.7;
+}
+
+
+/* =========================
+   NOTIFICAÇÃO
+========================= */
+
+.botao-notificacao {
+    border: none;
+
+    background: transparent;
+
+    color: #FFD34E;
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    margin-right: 15px;
+}
+
+
+/* =========================
+   BOTÃO FECHAR
+========================= */
+
+.botao-fechar-dashboard {
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 31px;
+
+    font-weight: 200;
+
+    cursor: pointer;
+
+    width: 35px;
+
+    line-height: 35px;
+}
+
+
+/* =========================
+   ÁREA PRINCIPAL
+========================= */
+
+.dashboard-main {
+    width: 100%;
+
+    min-height: calc(100vh - 48px);
+
+    padding-top: 32px;
+}
+
+
+/* =========================
+   TÍTULO
+========================= */
+
+.dashboard-main > h1 {
+    text-align: center;
+
+    color: #5B292B;
+
+    font-size: 18px;
+
+    margin-bottom: 11px;
+}
+
+
+/* =========================
+   RESUMO
+========================= */
+
+.resumo-alertas {
+    width: 508px;
+
+    min-height: 123px;
+
+    margin: 0 auto;
+
+    border: 1px solid #999999;
+
+    border-radius: 7px;
+
+    padding: 10px 11px;
+}
+
+.resumo-alertas h2 {
+    color: #555555;
+
+    font-size: 13px;
+
+    margin-bottom: 12px;
+}
+
+
+/* =========================
+   CARDS DO RESUMO
+========================= */
+
+.cards-resumo {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 31px;
+
+    padding: 0 17px;
+}
+
+.card-resumo {
+    width: 128px;
+    height: 62px;
+
+    border-radius: 6px;
+
+    border: 1px solid #555555;
+
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: center;
+
+    padding-top: 7px;
+}
+
+.card-resumo span {
+    font-size: 12px;
+
+    font-weight: bold;
+}
+
+.card-resumo.hoje span {
+    color: #e32929;
+}
+
+.card-resumo.amanha span {
+    color: #e3b927;
+}
+
+.card-resumo.proximos span {
+    color: #5B292B;
+}
+
+
+/* =========================
+   ALERTAS
+========================= */
+
+.grupo-alertas {
+    width: 580px;
+
+    margin: 20px auto 0;
+}
+
+.grupo-alertas h3 {
+    font-size: 12px;
+
+    margin-left: -45px;
+
+    margin-bottom: 10px;
+}
+
+.titulo-hoje {
+    color: #d71919;
+}
+
+.titulo-amanha {
+    color: #e8bc27;
+}
+
+.titulo-proximos {
+    color: #222222;
+}
+
+
+/* =========================
+   PEDIDO
+========================= */
+
+.alerta-pedido {
+    width: 100%;
+
+    min-height: 58px;
+
+    background-color: #f0cbd2;
+
+    border-radius: 6px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 8px 28px 8px 20px;
+}
+
+.alerta-pedido span {
+    color: #171717;
+
+    font-size: 11px;
+
+    font-weight: 500;
+}
+
+.alerta-pedido button {
+    width: 92px;
+    min-height: 35px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #5B292B;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.alerta-pedido button:hover {
+    opacity: 0.9;
+}
+
+
+/* =========================
+   MARCAR COMO LIDOS
+========================= */
+
+.botao-marcar-lidos {
+    display: block;
+
+    width: 180px;
+
+    min-height: 51px;
+
+    margin: 21px auto 20px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #98F3B7;
+
+    color: #111111;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+
+    .dashboard-menu {
+        gap: 15px;
+
+        margin-right: 10px;
+    }
+
+    .dashboard-menu button {
+        font-size: 11px;
+    }
+
+    .grupo-alertas {
+        width: 70%;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .dashboard-header {
+        height: auto;
+
+        min-height: 48px;
+
+        flex-wrap: wrap;
+
+        padding-bottom: 8px;
+    }
+
+    .dashboard-menu {
+        order: 3;
+
+        width: 100%;
+
+        overflow-x: auto;
+
+        justify-content: flex-start;
+
+        padding: 8px 10px;
+
+        margin: 0;
+    }
+
+    .resumo-alertas {
+        width: 90%;
+    }
+
+    .cards-resumo {
+        gap: 10px;
+
+        padding: 0;
+    }
+
+    .grupo-alertas {
+        width: 90%;
+    }
+
+    .grupo-alertas h3 {
+        margin-left: 0;
+    }
+
+    .alerta-pedido {
+        gap: 10px;
+    }
+
+    .alerta-pedido span {
+        font-size: 10px;
+    }
+}

@@ -1,0 +1,300 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.dados-container {
+    width: 100%;
+    min-height: 100vh;
+
+    background-color: #ffffff;
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.dados-header {
+    width: 100%;
+    height: 51px;
+
+    background-color: #5B292B;
+
+    position: relative;
+}
+
+
+/* =========================
+   BOTÃO X
+========================= */
+
+.botao-fechar-dados {
+    position: absolute;
+
+    right: 14px;
+    top: 7px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 29px;
+
+    font-weight: 200;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   BARRA VERDE
+========================= */
+
+.barra-quase-la {
+    width: 100%;
+    height: 26px;
+
+    background-color: #98F3B7;
+
+    border-bottom: 1px solid #58C87B;
+
+    color: #28753F;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    display: flex;
+    align-items: center;
+
+    padding-left: 7px;
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.dados-conteudo {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding-top: 40px;
+}
+
+
+/* =========================
+   TÍTULO
+========================= */
+
+.titulo-dados {
+    display: flex;
+
+    align-items: center;
+
+    gap: 22px;
+
+    margin-bottom: 35px;
+}
+
+
+.titulo-dados h1 {
+    color: #5B292B;
+
+    font-family: Georgia, serif;
+
+    font-size: 26px;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   ÍCONE DE USUÁRIO
+========================= */
+
+.icone-usuario-dados {
+    width: 36px;
+    height: 36px;
+
+    border: 1.8px solid #A76C73;
+
+    border-radius: 50%;
+
+    position: relative;
+}
+
+
+/* cabeça */
+
+.cabeca-dados {
+    width: 11px;
+    height: 11px;
+
+    border: 1.5px solid #A76C73;
+
+    border-radius: 50%;
+
+    position: absolute;
+
+    top: 6px;
+    left: 11px;
+}
+
+
+/* corpo */
+
+.corpo-dados {
+    width: 20px;
+    height: 11px;
+
+    border: 1.5px solid #A76C73;
+
+    border-bottom: none;
+
+    border-radius: 12px 12px 0 0;
+
+    position: absolute;
+
+    bottom: 4px;
+    left: 7px;
+}
+
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+.formulario-dados {
+    width: 306px;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo-dados {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 34px;
+}
+
+
+.campo-dados label {
+    width: 62px;
+
+    color: #5B292B;
+
+    font-size: 12px;
+
+    font-weight: bold;
+}
+
+
+.campo-dados input {
+    width: 157px;
+    height: 21px;
+
+    border: 1px solid #9B6C70;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    background-color: #ffffff;
+
+    padding: 0 8px;
+
+    color: #5B292B;
+
+    font-size: 12px;
+}
+
+
+.campo-dados input:focus {
+    border-color: #5B292B;
+}
+
+
+/* =========================
+   BOTÃO CONFIRMAR
+========================= */
+
+.botao-confirmar-contato {
+    width: 237px;
+    height: 45px;
+
+    display: block;
+
+    margin: 0 auto;
+
+    border: 1px solid #61A875;
+
+    border-radius: 7px;
+
+    background-color: #ffffff;
+
+    color: #347444;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.botao-confirmar-contato:hover {
+    background-color: #f4faf5;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 500px) {
+
+    .dados-conteudo {
+        padding: 35px 20px;
+    }
+
+    .titulo-dados {
+        gap: 14px;
+    }
+
+    .titulo-dados h1 {
+        font-size: 23px;
+    }
+
+    .formulario-dados {
+        width: 100%;
+        max-width: 306px;
+    }
+}

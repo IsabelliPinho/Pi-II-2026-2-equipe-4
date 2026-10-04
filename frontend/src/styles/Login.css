@@ -1,0 +1,292 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-container {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    padding-right: 8%;
+
+    background-image: url("../assets/images/background-login.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+}
+
+
+/* =========================
+   CARD DE LOGIN
+========================= */
+
+.login-card {
+    width: 455px;
+    min-height: 465px;
+
+    background-color: #E39AAF;
+
+    border-radius: 12px;
+
+    padding: 45px 50px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================
+   ÍCONE GRANDE DE USUÁRIO
+========================= */
+
+.usuario-icon {
+    width: 82px;
+    height: 82px;
+
+    margin-bottom: 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* cabeça */
+
+.cabeca {
+    width: 32px;
+    height: 32px;
+
+    border: 4px solid #5B292B;
+    border-radius: 50%;
+
+    margin-top: 3px;
+}
+
+
+/* corpo */
+
+.corpo {
+    width: 60px;
+    height: 32px;
+
+    border: 4px solid #5B292B;
+    border-bottom: none;
+
+    border-radius: 35px 35px 0 0;
+
+    margin-top: 5px;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo {
+    width: 100%;
+    height: 55px;
+
+    background-color: white;
+
+    border-radius: 6px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 14px;
+
+    margin-bottom: 20px;
+}
+
+
+/* ícones */
+
+.icone {
+    width: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+
+/* inputs */
+
+.campo input {
+    flex: 1;
+
+    height: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    padding-left: 8px;
+
+    font-size: 17px;
+
+    color: #5B292B;
+}
+
+
+.campo input::placeholder {
+    color: #5B292B;
+
+    opacity: 1;
+}
+
+
+/* =========================
+   BOTÃO MOSTRAR SENHA
+========================= */
+
+.mostrar-senha {
+    border: none;
+
+    background: transparent;
+
+    color: #5B292B;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    padding: 5px;
+}
+
+
+/* =========================
+   LINKS
+========================= */
+
+.links-login {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 2px;
+    margin-bottom: 30px;
+}
+
+
+.links-login a {
+    color: #5B292B;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    font-weight: 500;
+}
+
+
+.links-login a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   BOTÃO ENTRAR
+========================= */
+
+.botao-entrar {
+    width: 100%;
+    height: 55px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #5B292B;
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.botao-entrar:hover {
+    background-color: #472022;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 1000px) {
+
+    .login-container {
+        padding-right: 4%;
+    }
+
+    .login-card {
+        width: 420px;
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .login-container {
+        justify-content: center;
+
+        padding: 30px;
+
+        background-position: left center;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 430px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .login-container {
+        padding: 20px;
+
+        background-position: left center;
+    }
+
+    .login-card {
+        padding: 35px 25px;
+
+        min-height: auto;
+    }
+
+    .links-login {
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 10px;
+    }
+}
