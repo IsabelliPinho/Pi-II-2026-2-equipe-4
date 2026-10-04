@@ -17,7 +17,7 @@ services:
       - "${DB_HOST_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data              # dados do banco (persistem)
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro   # cria as tabelas na 1ª inicialização
+      - ./db/init:/docker-entrypoint-initdb.d:ro      # 01-schema.sql cria as tabelas e 02-seed.sql popula (só na 1ª inicialização)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -33,6 +33,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate         # Hibernate só confere as entidades contra as tabelas, não altera o banco
     ports:
       - "${BACKEND_PORT:-8080}:${BACKEND_PORT:-8080}"
     depends_on:
