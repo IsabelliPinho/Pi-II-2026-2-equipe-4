@@ -1,14 +1,13 @@
-# Arquivo com senhas
+# Maven
+backend/target/
+
+# Ambiente
 .env
-
-# Build
 target/
-
-#IDEs e sistema
+hs_err_pid*.log
+replay_pid*.log
+nbactions.xml
 .idea/
 .vscode/
 .DS_Store
 *.iml
-hs_err_pid*.log
-replay_pid*.log
-nbactions.xml
