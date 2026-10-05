@@ -1,4 +1,26 @@
+import { useEffect, useRef, useState } from "react";
 import "../styles/ConsultarPedido.css";
+import { atualizarPedido, consultarPedidos } from "../services/api";
+
+const POR_PAGINA = 5;
+
+const STATUS = {
+    PENDENTE: { rotulo: "Pendente", classe: "status-pendente" },
+    ATENDIDO: { rotulo: "Atendido", classe: "status-entregue" },
+    CANCELADO: { rotulo: "Cancelado", classe: "status-cancelado" }
+};
+
+// Date -> "YYYY-MM-DD" no fuso local
+function paraISO(d) {
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+// "2026-09-25T15:00:00" -> "25/09"
+function formatarDia(iso) {
+    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+}
 
 function ConsultarPedido({
     abrirDashboard,
@@ -9,48 +31,129 @@ function ConsultarPedido({
     abrirClientes,
     fecharConsultarPedido
 }) {
-    const pedidos = [
-        {
-            numero: "001",
-            cliente: "Maria Silva",
-            data: "01/09",
-            entrega: "25/09",
-            valor: "R$ 205,99",
-            status: "Entregue"
-        },
-        {
-            numero: "002",
-            cliente: "João Souza",
-            data: "01/09",
-            entrega: "19/09",
-            valor: "R$ 150,00",
-            status: "Pendente"
-        },
-        {
-            numero: "003",
-            cliente: "Ana Costa",
-            data: "15/09",
-            entrega: "12/10",
-            valor: "R$ 170,50",
-            status: "Pendente"
-        },
-        {
-            numero: "004",
-            cliente: "Carlos Lima",
-            data: "16/09",
-            entrega: "14/10",
-            valor: "R$ 300,25",
-            status: "Pendente"
-        },
-        {
-            numero: "005",
-            cliente: "Beatriz Alves",
-            data: "05/09",
-            entrega: "25/10",
-            valor: "R$ 100,00",
-            status: "Pendente"
+    const [inicio, setInicio] = useState("");
+    const [fim, setFim] = useState("");
+    const [pedidos, setPedidos] = useState([]);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState("");
+    const [pagina, setPagina] = useState(1);
+
+    // RF009: cancelamento
+    const [aCancelar, setACancelar] = useState(null); // pedido aguardando confirmação
+    const [cancelando, setCancelando] = useState(false);
+    const [aviso, setAviso] = useState(null); // { tipo: "sucesso" | "erro", texto }
+
+    const inicioRef = useRef(null);
+    const fimRef = useRef(null);
+
+    // RF003: consulta por mês/intervalo. Sem datas = todos os pedidos.
+    async function buscar(de = inicio, ate = fim) {
+        setErro("");
+        setAviso(null);
+
+        if (de && ate && de > ate) {
+            setPedidos([]);
+            setErro("Data inválida: a data inicial é maior que a final.");
+            setCarregando(false);
+            return;
         }
-    ];
+
+        setCarregando(true);
+        try {
+            const dados = await consultarPedidos({ inicio: de, fim: ate });
+            // garante o filtro por período mesmo que o backend ignore inicio/fim
+            const filtrados = dados.filter((p) => {
+                const dia = p.dataPrevista.slice(0, 10);
+                return (!de || dia >= de) && (!ate || dia <= ate);
+            });
+            setPedidos(filtrados);
+            setPagina(1);
+        } catch (e) {
+            setPedidos([]);
+            setErro(e.message);
+        } finally {
+            setCarregando(false);
+        }
+    }
+
+    useEffect(() => {
+        buscar("", "");
+    }, []);
+
+    // RF009: PATCH /pedidos/{id} com statusPedido = CANCELADO
+    async function confirmarCancelamento() {
+        const pedido = aCancelar;
+        setCancelando(true);
+        try {
+            await atualizarPedido(pedido.id, { statusPedido: "CANCELADO" });
+            setPedidos((atual) =>
+                atual.map((p) =>
+                    p.id === pedido.id ? { ...p, statusPedido: "CANCELADO" } : p
+                )
+            );
+            setAviso({
+                tipo: "sucesso",
+                texto: `Pedido ${String(pedido.id).padStart(3, "0")} cancelado com sucesso.`
+            });
+        } catch (e) {
+            // ex.: 409 se o pedido não estiver mais PENDENTE
+            setAviso({ tipo: "erro", texto: e.message });
+        } finally {
+            setCancelando(false);
+            setACancelar(null);
+        }
+    }
+
+    function aplicarPeriodo(de, ate) {
+        const a = paraISO(de);
+        const b = paraISO(ate);
+        setInicio(a);
+        setFim(b);
+        buscar(a, b);
+    }
+
+    function filtroHoje() {
+        const h = new Date();
+        aplicarPeriodo(h, h);
+    }
+
+    function filtroSemana() {
+        const h = new Date();
+        const dif = (h.getDay() + 6) % 7; // semana de segunda a domingo
+        const seg = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dif);
+        const dom = new Date(seg.getFullYear(), seg.getMonth(), seg.getDate() + 6);
+        aplicarPeriodo(seg, dom);
+    }
+
+    function filtroMes() {
+        const h = new Date();
+        aplicarPeriodo(
+            new Date(h.getFullYear(), h.getMonth(), 1),
+            new Date(h.getFullYear(), h.getMonth() + 1, 0)
+        );
+    }
+
+    function filtro30Dias() {
+        const h = new Date();
+        aplicarPeriodo(new Date(h.getFullYear(), h.getMonth(), h.getDate() - 29), h);
+    }
+
+    function limpar() {
+        setInicio("");
+        setFim("");
+        buscar("", "");
+    }
+
+    const totalPaginas = Math.max(1, Math.ceil(pedidos.length / POR_PAGINA));
+    const visiveis = pedidos.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const pendentes = pedidos.filter((p) => p.statusPedido === "PENDENTE").length;
+    const primeiro = pedidos.length === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1;
+    const ultimo = Math.min(pagina * POR_PAGINA, pedidos.length);
+
+    const numerosPagina = [];
+    for (let n = Math.max(1, pagina - 2); n <= Math.min(totalPaginas, pagina + 2); n++) {
+        numerosPagina.push(n);
+    }
 
     return (
         <div className="consultar-container">
@@ -149,7 +252,15 @@ function ConsultarPedido({
 
                         <span>De</span>
 
+                        <input
+                            type="date"
+                            ref={inicioRef}
+                            value={inicio}
+                            onChange={(e) => setInicio(e.target.value)}
+                        />
+
                         <svg
+                            onClick={() => inicioRef.current?.showPicker?.()}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -177,7 +288,15 @@ function ConsultarPedido({
 
                         <span>Para</span>
 
+                        <input
+                            type="date"
+                            ref={fimRef}
+                            value={fim}
+                            onChange={(e) => setFim(e.target.value)}
+                        />
+
                         <svg
+                            onClick={() => fimRef.current?.showPicker?.()}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -208,19 +327,19 @@ function ConsultarPedido({
 
                 <div className="filtros-rapidos">
 
-                    <button className="filtro-hoje">
+                    <button className="filtro-hoje" onClick={filtroHoje}>
                         Hoje
                     </button>
 
-                    <button className="filtro-semana">
+                    <button className="filtro-semana" onClick={filtroSemana}>
                         Esta Sem.
                     </button>
 
-                    <button className="filtro-mes">
+                    <button className="filtro-mes" onClick={filtroMes}>
                         Este Mês
                     </button>
 
-                    <button className="filtro-30dias">
+                    <button className="filtro-30dias" onClick={filtro30Dias}>
                         Últim. 30d
                     </button>
 
@@ -233,11 +352,11 @@ function ConsultarPedido({
 
                 <div className="botoes-filtro">
 
-                    <button className="botao-buscar">
+                    <button className="botao-buscar" onClick={() => buscar()}>
                         Buscar
                     </button>
 
-                    <button className="botao-limpar">
+                    <button className="botao-limpar" onClick={limpar}>
                         Limpar
                     </button>
 
@@ -258,14 +377,17 @@ function ConsultarPedido({
 
                         <div className="card-periodo">
                             <span>Total Pedi.</span>
+                            <strong>{pedidos.length}</strong>
                         </div>
 
                         <div className="card-periodo">
                             <span>Valor Total (R$)</span>
+                            <strong>—</strong>
                         </div>
 
                         <div className="card-periodo">
                             <span>Pedidos Pendentes</span>
+                            <strong>{pendentes}</strong>
                         </div>
 
                     </div>
@@ -276,6 +398,12 @@ function ConsultarPedido({
                 {/* =========================
                     TABELA
                 ========================= */}
+
+                {aviso && (
+                    <p className={`aviso-pedido aviso-${aviso.tipo}`} role="status">
+                        {aviso.texto}
+                    </p>
+                )}
 
                 <section className="tabela-pedidos">
 
@@ -299,42 +427,48 @@ function ConsultarPedido({
                     </div>
 
 
+                    {carregando && <p className="pedido-estado">Carregando...</p>}
+
+                    {!carregando && erro && <p className="pedido-estado">{erro}</p>}
+
+                    {!carregando && !erro && pedidos.length === 0 && (
+                        <p className="pedido-estado">
+                            Nenhum pedido encontrado no período selecionado.
+                        </p>
+                    )}
+
                     {/* PEDIDOS */}
-                    {pedidos.map((pedido) => (
+                    {!carregando && !erro && visiveis.map((pedido) => (
 
                         <div
                             className="pedido-linha"
-                            key={pedido.numero}
+                            key={pedido.id}
                         >
 
                             <div>
-                                {pedido.numero}
+                                {String(pedido.id).padStart(3, "0")}
                             </div>
 
                             <div>
-                                {pedido.cliente}
+                                {pedido.nomeCliente}
                             </div>
 
                             <div>
-                                {pedido.data}
+                                —
                             </div>
 
                             <div>
-                                {pedido.entrega}
+                                {formatarDia(pedido.dataPrevista)}
                             </div>
 
                             <div>
-                                {pedido.valor}
+                                —
                             </div>
 
                             <div
-                                className={
-                                    pedido.status === "Entregue"
-                                        ? "status-entregue"
-                                        : "status-pendente"
-                                }
+                                className={STATUS[pedido.statusPedido]?.classe}
                             >
-                                {pedido.status}
+                                {STATUS[pedido.statusPedido]?.rotulo ?? pedido.statusPedido}
                             </div>
 
                             <div className="acoes-pedido">
@@ -361,7 +495,13 @@ function ConsultarPedido({
                                 {/* LIXEIRA */}
                                 <button
                                     className="botao-lixeira-pedido"
-                                    title="Excluir pedido"
+                                    title={
+                                        pedido.statusPedido === "PENDENTE"
+                                            ? "Cancelar pedido"
+                                            : "Só pedidos pendentes podem ser cancelados"
+                                    }
+                                    disabled={pedido.statusPedido !== "PENDENTE"}
+                                    onClick={() => setACancelar(pedido)}
                                 >
                                     <svg
                                         viewBox="0 0 24 24"
@@ -393,32 +533,34 @@ function ConsultarPedido({
                     <div className="tabela-rodape">
 
                         <span>
-                            Mostrando 1–5 de 100 Pedidos
+                            Mostrando {primeiro}–{ultimo} de {pedidos.length} Pedidos
                         </span>
 
                         <div className="paginacao">
 
-                            <button className="pagina-seta">
+                            <button
+                                className="pagina-seta"
+                                disabled={pagina === 1}
+                                onClick={() => setPagina(pagina - 1)}
+                            >
                                 ←
                             </button>
 
-                            <button className="pagina-ativa">
-                                1
-                            </button>
+                            {numerosPagina.map((n) => (
+                                <button
+                                    key={n}
+                                    className={n === pagina ? "pagina-ativa" : ""}
+                                    onClick={() => setPagina(n)}
+                                >
+                                    {n}
+                                </button>
+                            ))}
 
-                            <button>
-                                2
-                            </button>
-
-                            <button>
-                                3
-                            </button>
-
-                            <button>
-                                50
-                            </button>
-
-                            <button className="pagina-seta">
+                            <button
+                                className="pagina-seta"
+                                disabled={pagina === totalPaginas}
+                                onClick={() => setPagina(pagina + 1)}
+                            >
                                 →
                             </button>
 
@@ -429,6 +571,39 @@ function ConsultarPedido({
                 </section>
 
             </main>
+
+
+            {/* CONFIRMAÇÃO DE CANCELAMENTO */}
+            {aCancelar && (
+                <div className="modal-fundo">
+                    <div className="modal-cancelar" role="dialog" aria-modal="true">
+                        <h2>Cancelar pedido?</h2>
+
+                        <p>
+                            Pedido {String(aCancelar.id).padStart(3, "0")} de{" "}
+                            {aCancelar.nomeCliente}. Essa ação não pode ser desfeita.
+                        </p>
+
+                        <div className="modal-botoes">
+                            <button
+                                className="modal-voltar"
+                                onClick={() => setACancelar(null)}
+                                disabled={cancelando}
+                            >
+                                Voltar
+                            </button>
+
+                            <button
+                                className="modal-confirmar"
+                                onClick={confirmarCancelamento}
+                                disabled={cancelando}
+                            >
+                                {cancelando ? "Cancelando..." : "Cancelar pedido"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

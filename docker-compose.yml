@@ -44,7 +44,11 @@ services:
     environment:
       TZ: ${APP_TZ:-America/Fortaleza}
     ports:
+<<<<<<< Updated upstream
       - "${FRONTEND_PORT:-3000}:80"
+=======
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:80"
+>>>>>>> Stashed changes
     depends_on:
       - backend
 

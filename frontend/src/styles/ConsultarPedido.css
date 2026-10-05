@@ -748,3 +748,131 @@ body {
         overflow-x: auto;
     }
 }
+
+/*Integração com a API*/
+.campo-data {
+    width: auto;
+    min-width: 190px;
+    gap: 8px;
+}
+ 
+.campo-data input[type="date"] {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #111111;
+    font: inherit;
+    font-size: 12px;
+}
+ 
+.campo-data input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+ 
+.campo-data svg {
+    cursor: pointer;
+}
+ 
+.card-periodo strong {
+    display: block;
+    font-size: 12px;
+}
+ 
+.status-cancelado {
+    color: #777777;
+    font-weight: bold;
+}
+ 
+.pedido-estado {
+    padding: 14px;
+    text-align: center;
+    color: #5B292B;
+}
+ 
+.paginacao button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/*Cancelamento*/
+.botao-lixeira-pedido:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+ 
+.aviso-pedido {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+}
+ 
+.aviso-sucesso {
+    background-color: #DFF2DF;
+    color: #1E6B1E;
+}
+ 
+.aviso-erro {
+    background-color: #FBDADA;
+    color: #A00000;
+}
+ 
+.modal-fundo {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+ 
+.modal-cancelar {
+    width: 320px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    color: #5B292B;
+}
+ 
+.modal-cancelar h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+}
+ 
+.modal-cancelar p {
+    margin: 0 0 16px;
+    font-size: 13px;
+}
+ 
+.modal-botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+ 
+.modal-botoes button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+ 
+.modal-voltar {
+    background-color: #E8A0B0;
+    color: #5B292B;
+}
+ 
+.modal-confirmar {
+    background-color: #C62828;
+    color: #ffffff;
+}
+ 
+.modal-botoes button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
