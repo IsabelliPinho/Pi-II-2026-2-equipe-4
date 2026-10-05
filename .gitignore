@@ -1,0 +1,13 @@
+# Maven
+backend/target/
+
+# Ambiente
+.env
+target/
+hs_err_pid*.log
+replay_pid*.log
+nbactions.xml
+.idea/
+.vscode/
+.DS_Store
+*.iml

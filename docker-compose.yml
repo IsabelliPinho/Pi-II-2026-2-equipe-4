@@ -1,5 +1,5 @@
 # Gabi Cake - esqueleto em containers
-# Uso: cp .env.example .env  &&  docker compose up --build
+# Uso: docker compose up --build
 
 name: gabicake
 
@@ -16,15 +16,14 @@ services:
     ports:
       - "${DB_HOST_PORT:-5432}:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data              # dados do banco (persistem)
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro   # cria as tabelas na 1ª inicialização
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-  # Backend: Spring Boot + Hibernate
+  # Backend: Spring Boot
   backend:
     build: ./backend
     environment:
@@ -39,14 +38,13 @@ services:
       db:
         condition: service_healthy
 
-  # Frontend: JavaFX (a janela é exibida no navegador via noVNC)
+  # Frontend
   frontend:
     build: ./frontend
     environment:
       TZ: ${APP_TZ:-America/Fortaleza}
-      API_BASE_URL: http://backend:${BACKEND_PORT:-8080}
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-6080}:6080"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
 

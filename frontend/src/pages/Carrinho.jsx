@@ -1,6 +1,12 @@
 import "../styles/Carrinho.css";
 
-function Carrinho({adicionarProduto, realizarPedido, fecharCarrinho, esvaziarCarrinho}) {
+function Carrinho({
+    carrinho,
+    adicionarProduto,
+    realizarPedido,
+    fecharCarrinho,
+    esvaziarCarrinho
+}) {
     return (
         <div className="carrinho-container">
 
@@ -39,9 +45,22 @@ function Carrinho({adicionarProduto, realizarPedido, fecharCarrinho, esvaziarCar
                 {/* BOLOS */}
                 <div className="lista-bolos">
 
-                    <p>1 bolo de brigadeiro 1kg</p>
+                    {carrinho && carrinho.length > 0 ? (
 
-                    <p>1 bolo de ninho 2kg</p>
+                        carrinho.map((produto, index) => (
+                            <p key={index}>
+                                1 {produto.nome}
+                            </p>
+                        ))
+
+                    ) : (
+
+                        <>
+                            <p>1 bolo de brigadeiro 1kg</p>
+                            <p>1 bolo de ninho 2kg</p>
+                        </>
+
+                    )}
 
                 </div>
 

@@ -14,15 +14,52 @@ import ConsultarPedido from "./pages/ConsultarPedido";
 import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
 
-
 function App() {
-
     const [tela, setTela] = useState("dashboard");
+    const [carrinho, setCarrinho] = useState([]);
+    const [cliente, setCliente] = useState(null);
 
+    async function finalizarPedido(clienteCadastrado) {
+        try {
+            const itens = carrinho.map((produto) => ({
+                idProduto: produto.idProduto,
+                quantidade: 1
+            }));
 
-    /* =========================
-       CADASTRO
-    ========================= */
+            const resposta = await fetch("http://localhost:8080/pedidos/cadastro", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    idCliente: clienteCadastrado.id,
+                    nomeGerente: "Gabriela",
+                    dataPrevista: "2026-10-05T15:00:00",
+                    formaEntrega: "RETIRADA",
+                    itens: itens
+                })
+            });
+
+            if (!resposta.ok) {
+                const erro = await resposta.text();
+                console.error("Erro ao criar pedido:", erro);
+                alert("Não foi possível criar o pedido.");
+                return;
+            }
+
+            const pedidoCriado = await resposta.json();
+
+            console.log("Pedido criado:", pedidoCriado);
+
+            setCliente(clienteCadastrado);
+            setCarrinho([]);
+            setTela("pedidoRealizado");
+
+        } catch (erro) {
+            console.error("Erro ao criar pedido:", erro);
+            alert("Erro de conexão com o servidor.");
+        }
+    }
 
     if (tela === "cadastro") {
         return (
@@ -32,39 +69,31 @@ function App() {
         );
     }
 
-
-    /* =========================
-       PEDIDO
-    ========================= */
-
     if (tela === "pedido") {
         return (
             <Pedido
-                adicionarCarrinho={() => setTela("carrinho")}
+                adicionarCarrinho={(produto) => {
+                    setCarrinho([...carrinho, produto]);
+                    setTela("carrinho");
+                }}
             />
         );
     }
-
-
-    /* =========================
-       CARRINHO
-    ========================= */
 
     if (tela === "carrinho") {
         return (
             <Carrinho
+                carrinho={carrinho}
                 adicionarProduto={() => setTela("pedido")}
                 realizarPedido={() => setTela("dados")}
                 fecharCarrinho={() => setTela("pedido")}
-                esvaziarCarrinho={() => setTela("carrinhoVazio")}
+                esvaziarCarrinho={() => {
+                    setCarrinho([]);
+                    setTela("carrinhoVazio");
+                }}
             />
         );
     }
-
-
-    /* =========================
-       CARRINHO VAZIO
-    ========================= */
 
     if (tela === "carrinhoVazio") {
         return (
@@ -74,24 +103,14 @@ function App() {
         );
     }
 
-
-    /* =========================
-       DADOS DO CLIENTE
-    ========================= */
-
     if (tela === "dados") {
         return (
             <DadosCliente
-                voltarPedido={() => setTela("pedido")}
-                realizarPedido={() => setTela("pedidoRealizado")}
+                voltarCarrinho={() => setTela("carrinho")}
+                confirmarContato={finalizarPedido}
             />
         );
     }
-
-
-    /* =========================
-       PEDIDO REALIZADO
-    ========================= */
 
     if (tela === "pedidoRealizado") {
         return (
@@ -101,204 +120,83 @@ function App() {
         );
     }
 
-
-    /* =========================
-       DASHBOARD
-    ========================= */
-
     if (tela === "dashboard") {
         return (
             <Dashboard
                 abrirDashboard={() => setTela("dashboard")}
-
                 abrirNovoPedido={() => setTela("pedido")}
-
-                abrirConsultarPedido={() =>
-                    setTela("consultarPedido")
-                }
-
-                abrirPendentes={() =>
-                    setTela("pendentes")
-                }
-
-                abrirFinanceiro={() =>
-                    setTela("detalhePedido")
-                }
-
-                abrirClientes={() =>
-                    setTela("clientes")
-                }
-
-                fecharDashboard={() =>
-                    setTela("login")
-                }
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirClientes={() => setTela("clientes")}
+                fecharDashboard={() => setTela("login")}
             />
         );
     }
-
-
-    /* =========================
-       CLIENTES
-    ========================= */
 
     if (tela === "clientes") {
         return (
             <Clientes
-                abrirDashboard={() =>
-                    setTela("dashboard")
-                }
-
-                abrirNovoPedido={() =>
-                    setTela("pedido")
-                }
-
-                abrirConsultarPedido={() =>
-                    setTela("consultarPedido")
-                }
-
-                abrirPendentes={() =>
-                    setTela("pendentes")
-                }
-
-                abrirFinanceiro={() =>
-                    setTela("detalhePedido")
-                }
-
-                abrirClientes={() =>
-                    setTela("clientes")
-                }
-
-                fecharClientes={() =>
-                    setTela("dashboard")
-                }
+                abrirDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirClientes={() => setTela("clientes")}
+                fecharClientes={() => setTela("dashboard")}
             />
         );
     }
-
-
-    /* =========================
-       CONSULTAR PEDIDO
-    ========================= */
 
     if (tela === "consultarPedido") {
         return (
             <ConsultarPedido
-                abrirDashboard={() =>
-                    setTela("dashboard")
-                }
-
-                abrirNovoPedido={() =>
-                    setTela("pedido")
-                }
-
-                abrirConsultarPedido={() =>
-                    setTela("consultarPedido")
-                }
-
-                abrirPendentes={() =>
-                    setTela("pendentes")
-                }
-
-                abrirFinanceiro={() =>
-                    setTela("detalhePedido")
-                }
-
-                abrirClientes={() =>
-                    setTela("clientes")
-                }
-
-                fecharConsultarPedido={() =>
-                    setTela("dashboard")
-                }
+                abrirDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirClientes={() => setTela("clientes")}
+                fecharConsultarPedido={() => setTela("dashboard")}
             />
         );
     }
-
-
-    /* =========================
-       PENDENTES
-    ========================= */
 
     if (tela === "pendentes") {
         return (
             <Pendentes
-                voltarDashboard={() =>
-                    setTela("dashboard")
-                }
+                voltarDashboard={() => setTela("dashboard")}
             />
         );
     }
 
-
-    /* =========================
-       DETALHE DO PEDIDO
-    ========================= */
-
     if (tela === "detalhePedido") {
         return (
             <DetalhePedido
-                voltarDashboard={() =>
-                    setTela("dashboard")
-                }
-
+                voltarDashboard={() => setTela("dashboard")}
                 editarPedido={() => {}}
             />
         );
     }
 
-
-    /* =========================
-       LOGIN
-    ========================= */
-
     if (tela === "login") {
         return (
             <Login
-                abrirCadastro={() =>
-                    setTela("cadastro")
-                }
-
-                entrar={() =>
-                    setTela("dashboard")
-                }
+                abrirCadastro={() => setTela("cadastro")}
+                entrar={() => setTela("dashboard")}
             />
         );
     }
 
-
-    /* =========================
-       PADRÃO
-    ========================= */
-
     return (
         <Dashboard
-            abrirDashboard={() =>
-                setTela("dashboard")
-            }
-
-            abrirNovoPedido={() =>
-                setTela("pedido")
-            }
-
-            abrirConsultarPedido={() =>
-                setTela("consultarPedido")
-            }
-
-            abrirPendentes={() =>
-                setTela("pendentes")
-            }
-
-            abrirFinanceiro={() =>
-                setTela("detalhePedido")
-            }
-
-            abrirClientes={() =>
-                setTela("clientes")
-            }
-
-            fecharDashboard={() =>
-                setTela("login")
-            }
+            abrirDashboard={() => setTela("dashboard")}
+            abrirNovoPedido={() => setTela("pedido")}
+            abrirConsultarPedido={() => setTela("consultarPedido")}
+            abrirPendentes={() => setTela("pendentes")}
+            abrirFinanceiro={() => setTela("detalhePedido")}
+            abrirClientes={() => setTela("clientes")}
+            fecharDashboard={() => setTela("login")}
         />
     );
 }
