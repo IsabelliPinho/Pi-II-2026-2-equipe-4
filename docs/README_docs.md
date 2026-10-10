@@ -17,7 +17,7 @@ Esta seção reúne os artefatos que ajudam a entender como o sistema será util
 
 - **Casos de Uso:** Apresenta as interações entre a gerente e as funcionalidades do sistema.
 - **Telas e Protótipos:** Reúne as representações das telas planejadas para o sistema.
-- **Rotas do Sistema:** Documenta as rotas relacionadas às funcionalidades disponíveis.
+- **[Rotas do Sistema](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/blob/main/docs/Defini%C3%A7%C3%A3o_de_contrato_da_API.md):** Documenta as rotas relacionadas às funcionalidades disponíveis.
 
 ## Planilha financeira
 
