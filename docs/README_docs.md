@@ -16,7 +16,7 @@ Nesta seção estão reunidos os documentos relacionados aos requisitos do siste
 Esta seção reúne os artefatos que ajudam a entender como o sistema será utilizado e como suas funcionalidades serão organizadas.
 
 - **Casos de Uso:** Apresenta as interações entre a gerente e as funcionalidades do sistema.
-- **Telas e Protótipos:** Reúne as representações das telas planejadas para o sistema.
+- **[Telas e Protótipos](https://www.figma.com/design/iORYQGu0hxchBwuklJR4Ui/Sistema_Confeitaria?node-id=171-16&t=uQPNDc90W8A0KoMz-1):** Reúne as representações das telas planejadas para o sistema.
 - **[Rotas do Sistema](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/blob/main/docs/Defini%C3%A7%C3%A3o_de_contrato_da_API.md):** Documenta as rotas relacionadas às funcionalidades disponíveis.
 
 ## Planilha financeira
