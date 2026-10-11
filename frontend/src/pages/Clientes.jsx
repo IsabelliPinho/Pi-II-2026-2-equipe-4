@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import "../styles/Clientes.css";
+import { buscarClientes } from "../services/api";
 
 function Clientes({
     abrirDashboard,
@@ -10,32 +12,32 @@ function Clientes({
     fecharClientes
 }) {
 
-    const clientes = [
-        {
-            numero: "010",
-            nome: "Ana Clara Lima",
-            contato: "(xx) xxxxx-xxxx",
-            pedidos: "5"
-        },
-        {
-            numero: "003",
-            nome: "Ana Costa",
-            contato: "(xx) xxxxx-xxxx",
-            pedidos: "2"
-        },
-        {
-            numero: "008",
-            nome: "Ana Paula Souza",
-            contato: "(xx) xxxxx-xxxx",
-            pedidos: "1"
-        },
-        {
-            numero: "005",
-            nome: "Ana Rosa Silva",
-            contato: "(xx) xxxxx-xxxx",
-            pedidos: "2"
-        }
-    ];
+    const [termo, setTermo] = useState("");
+    const [clientes, setClientes] = useState([]);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState("");
+
+    // RF002: só busca com 3+ caracteres; campo vazio lista todos.
+    useEffect(() => {
+        const t = termo.trim();
+        if (t.length > 0 && t.length < 3) return;
+
+        let cancelado = false;
+        setCarregando(true);
+        setErro("");
+
+        const espera = setTimeout(() => {
+            buscarClientes(t)
+                .then((dados) => !cancelado && setClientes(dados))
+                .catch((e) => !cancelado && setErro(e.message))
+                .finally(() => !cancelado && setCarregando(false));
+        }, 300);
+
+        return () => {
+            cancelado = true;
+            clearTimeout(espera);
+        };
+    }, [termo]);
 
     return (
         <div className="clientes-container">
