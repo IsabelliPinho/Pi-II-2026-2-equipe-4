@@ -1,6 +1,6 @@
 // Módulo único de chamadas ao backend
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 
 export class ApiError extends Error {
     constructor(status, codigo, message){
@@ -14,7 +14,7 @@ async function request(path, options = {}){
     let resposta;
 
     try{
-        resposta = await fetch('${BASE_URL}${path}',{
+        resposta = await fetch(`${BASE_URL}${path}`,{
             headers: {"Content-Type": "application/json"},
             ...options,
         });
