@@ -1,16 +1,16 @@
-# Guia de QA: Sprint 1 (esqueleto em containers)
+# Guia de QA: ambiente em containers e rotas ligadas ao banco
 
-Este guia explica como subir o ambiente do Gabi Cake e como verificar que o esqueleto da Sprint 1 está funcional. Não é preciso saber programar: basta seguir os passos e comparar com o resultado esperado.
+Este guia explica como subir o ambiente do Gabi Cake e como verificar que o esqueleto está funcional e que as rotas ligadas ao banco respondem com os dados dele. Não é preciso saber programar: basta seguir os passos e comparar com o resultado esperado.
 
-## 1. O que existe na Sprint 1
+## 1. O que existe
 
 | Parte | O que faz | Como é acessada |
 |---|---|---|
-| Banco de dados (PostgreSQL) | Guarda os dados. Os dados persistem em um volume do Docker | `localhost:5432` |
-| Backend (Spring Boot) | API. Nesta sprint só responde ao teste de saúde (`/actuator/health`) | `http://localhost:8080` |
+| Banco de dados (PostgreSQL) | 5 tabelas do MER (`cliente`, `gerente`, `produto`, `pedido`, `item_pedido`) com dados de teste, criadas na primeira inicialização. Os dados persistem em um volume do Docker | `localhost:5432` |
+| Backend (Spring Boot) | API. As rotas `GET /listar/produtos` e `GET /clientes/busca` consultam o banco. As demais rotas usam dados fixos | `http://localhost:8080` |
 | Frontend (web, nginx) | Interface web servida pelo nginx | `http://localhost:3000` |
 
-**Fora do escopo desta verificação** (não reportar como bug): tabelas do negócio, rotas como `/clientes`, `/pedidos` e `/produtos` (que já existem com dados fixos, mas fazem parte da Sprint 2), consulta real ao banco e telas funcionais completas. A rota usada para validar o esqueleto é a de saúde (`/actuator/health`).
+**Fora do escopo desta verificação** (não reportar como bug): as rotas de cadastro de cliente e de pedidos (`/clientes/cadastro` e `/pedidos/...`) ainda usam dados fixos em memória, e o que elas gravam some ao reiniciar o backend. O banco guarda um telefone por cliente, e a busca o devolve como uma lista de um item.
 
 ## 2. Pré-requisitos
 
@@ -37,7 +37,7 @@ docker compose up --build
 - O terminal fica "preso" mostrando os logs. Isso é normal. Para parar: `Ctrl + C`.
 - Para rodar em segundo plano, use `docker compose up --build -d`.
 
-O ambiente está pronto quando o log do backend mostra `Started GabicakeApplication`.
+O ambiente está pronto quando o log do backend mostra `Started ApiApplication`. Os arquivos de `db/init` só rodam quando o volume do banco está vazio (primeira subida, ou depois de `docker compose down -v`).
 
 ## 4. Variáveis de ambiente (arquivo `.env`)
 
@@ -51,7 +51,7 @@ O ambiente está pronto quando o log do backend mostra `Started GabicakeApplicat
 | `BACKEND_PORT` | Porta da API | `8080` |
 | `FRONTEND_PORT` | Porta do frontend no navegador | `3000` |
 
-Mantenha `BACKEND_PORT` em 8080 durante os testes: o frontend encaminha a API para essa porta.
+Mantenha `BACKEND_PORT` em 8080 durante os testes: o frontend chama a API em `http://localhost:8080`.
 
 ## 5. Roteiro de testes
 
@@ -59,20 +59,27 @@ Execute na ordem. Marque cada caso como **Passou** ou **Falhou**.
 
 | ID | Caso de teste | Passos | Resultado esperado |
 |---|---|---|---|
-| CT-01 | Ambiente sobe | `docker compose up --build` | Os 3 serviços iniciam sem erro. O log do backend mostra `Started GabicakeApplication` |
+| CT-01 | Ambiente sobe | `docker compose up --build` | Os 3 serviços iniciam sem erro. O log do backend mostra `Started ApiApplication` |
 | CT-02 | Containers ativos | Em outro terminal: `docker compose ps` | `db`, `backend` e `frontend` com status `Up`; o `db` aparece como `healthy` |
 | CT-03 | Saúde do backend | Abrir `http://localhost:8080/actuator/health` | `{"status":"UP"}` |
 | CT-04 | Frontend abre | Abrir `http://localhost:3000` | A página inicial da aplicação carrega, sem tela em branco nem erro do nginx |
-| CT-05 | Frontend e backend ao mesmo tempo | Com os 3 serviços no ar, abrir `http://localhost:3000` e `http://localhost:8080/actuator/health` em duas abas | As duas respondem (tela do frontend e `{"status":"UP"}`). A integração das telas com a API é da Sprint 2 |
-| CT-06 | Banco foi criado | `docker compose exec db psql -U gabicake -d gabicake -c "\dt"` | O comando conecta sem erro. Nesta sprint não há tabelas de negócio: a mensagem `Did not find any relations.` é esperada |
+| CT-05 | Frontend chama o backend | Abrir `http://localhost:3000` (tela "Faça seu Pedido") com o `F12` aberto na aba **Network** e recarregar | Aparece a requisição `produtos` com status `200`, e o campo **Produto** é preenchido com a lista. Nenhum erro de CORS no **Console** |
+| CT-06 | Banco foi criado | `docker compose exec db psql -U gabicake -d gabicake -c "\dt"` | Lista 5 tabelas: `cliente`, `gerente`, `item_pedido`, `pedido` e `produto` |
 | CT-07 | Persistência do volume | 1) `docker compose exec db psql -U gabicake -d gabicake -c "CREATE TABLE teste_volume (id int);"` 2) `docker compose down` 3) `docker compose up -d` 4) repetir o comando `\dt` do CT-06 | A tabela `teste_volume` continua listada. Depois, apague-a: `... -c "DROP TABLE teste_volume;"` |
 | CT-08 | Variável obrigatória | Renomear o `.env` para `.env.bak` e rodar `docker compose up` | O Docker recusa subir e mostra a mensagem `Defina POSTGRES_DB no .env` (ou equivalente). Depois, devolver o nome do arquivo |
 | CT-09 | `.env` não vai para o Git | `git check-ignore -v .env` | Mostra a regra `.gitignore:...:.env`. E `git status` não lista o `.env` |
 | CT-10 | Reinício limpo | `docker compose down -v` e depois `docker compose up --build` | Sobe de novo do zero, sem erro (o `-v` apaga os dados do banco) |
 | CT-11 | Rota inexistente | Abrir `http://localhost:8080/rota-que-nao-existe` | O backend responde com erro (404). Não deve travar nem derrubar o container |
+| CT-13 | Seed e integridade do banco | `docker compose exec -T db psql -U gabicake -d gabicake < db/verificar.sql` | As contagens mostram 10 ou mais linhas por tabela (cliente 12, gerente 10, produto 12, pedido 15, item_pedido 26). No bloco de testes de integridade, as linhas `ERROR` são **esperadas**: o banco recusa de propósito dados inválidos (chave estrangeira, `CHECK`, `UNIQUE`) |
+| CT-14 | Produtos vêm do banco | `curl http://localhost:8080/listar/produtos` | Lista JSON com 12 produtos, ids de 1 a 12 (`id`, `nome`, `preco`) |
+| CT-15 | Busca de clientes | `curl "http://localhost:8080/clientes/busca"` e depois `curl "http://localhost:8080/clientes/busca?busca=mar"` | A primeira devolve os 12 clientes, cada um com `telefones` como lista de um item. A segunda devolve só Mariana Souza, Marcos Vinícius Rocha e Sabrina Martins |
+| CT-16 | Busca curta demais | `curl "http://localhost:8080/clientes/busca?busca=ab"` | `{"error":"VALIDATION_ERROR","message":"A busca deve possuir pelo menos 3 caracteres."}` |
+| CT-17 | Os dados vêm mesmo do banco | 1) anotar o nome do produto 1: `docker compose exec db psql -U gabicake -d gabicake -c "SELECT nome FROM produto WHERE id = 1;"` 2) `docker compose exec db psql -U gabicake -d gabicake -c "UPDATE produto SET nome = 'TESTE BANCO' WHERE id = 1;"` 3) recarregar a tela "Faça seu Pedido" | O primeiro item da lista de produtos passa a se chamar `TESTE BANCO`. **Depois, devolver o nome anotado** com outro `UPDATE` |
+| CT-18 | Tela de clientes | Abrir a tela de clientes no frontend e fazer uma busca com 3 ou mais letras | A requisição `clientes/busca?busca=...` retorna `200`, e a lista mostra os clientes do banco |
+| CT-19 | Banco recusa dado inválido | `docker compose exec db psql -U gabicake -d gabicake -c "INSERT INTO produto (nome, preco) VALUES ('Teste', -1);"` | Erro `violates check constraint "ck_produto_preco"`, e nada é gravado |
 | CT-12 | Porta ocupada | Com algo usando a porta 5432 no computador (por exemplo, um PostgreSQL instalado localmente), subir o ambiente | O Docker avisa que a porta está em uso. A solução é trocar `DB_HOST_PORT` no `.env` (por exemplo para `5433`) |
 
-Os casos CT-01 a CT-07 e CT-09 são o núcleo da Sprint 1. Os demais cobrem falhas comuns.
+Os casos CT-01 a CT-07, CT-09 e CT-13 a CT-17 são o núcleo. Os demais cobrem falhas comuns.
 
 ## 6. Comandos úteis para o teste
 
@@ -93,7 +100,10 @@ Os casos CT-01 a CT-07 e CT-09 são o núcleo da Sprint 1. Os demais cobrem falh
 | `port is already allocated` | Porta em uso por outro programa | Trocar a porta no `.env` ou fechar o programa que a usa |
 | `curl` ou navegador não conecta em `localhost:8080` | Backend ainda iniciando, ou parado | Aguardar cerca de 10 segundos; conferir com `docker compose ps` e `docker compose logs backend` |
 | O backend reinicia ou sai logo após subir | Banco ainda não estava pronto, ou senha diferente da usada na primeira inicialização | Ver `docker compose logs backend`. Se mudou a senha depois de criar o banco, usar `docker compose down -v` |
-| Mudei o `schema.sql` e nada mudou | O `schema.sql` só roda quando o volume está vazio | `docker compose down -v` e subir de novo |
+| Mudei um arquivo de `db/init` e nada mudou | Esses arquivos só rodam quando o volume do banco está vazio | `docker compose down -v` e subir de novo |
+| O banco sobe sem tabelas | O volume já existia de uma versão antiga | `docker compose down -v` e subir de novo |
+| O backend reinicia sem parar, com `Schema-validation` no log | Uma entidade não bate com a tabela (coluna ou tipo diferente) | Ver `docker compose logs backend`, que indica a coluna, e avisar a equipe do backend |
+| A tela abre, mas a lista fica vazia e o **Console** mostra erro de CORS | O backend não libera a origem do frontend | Conferir que o frontend está em `http://localhost:3000` e reconstruir com `docker compose up -d --build` |
 | `localhost:3000` recusa a conexão com o ambiente no ar | `.env` antigo com `FRONTEND_PORT=6080` | Trocar para `FRONTEND_PORT=3000` no `.env` e rodar `docker compose up -d`; confirmar a porta com `docker compose ps` |
 | Página em branco em `localhost:3000` | Build do frontend com erro | `docker compose logs frontend` e `docker compose up --build` |
 

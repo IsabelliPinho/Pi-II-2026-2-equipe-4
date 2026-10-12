@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.gabicake.api.controller;
 
 /**
@@ -11,7 +6,7 @@ package com.gabicake.api.controller;
  */
 
 import com.gabicake.api.model.Produto;
-import com.gabicake.api.store.ProdutoMockStore;
+import com.gabicake.api.service.ProdutoService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,15 +17,15 @@ import java.util.List;
 @RequestMapping("/listar/produtos")
 public class ProdutoController {
 
-    private final ProdutoMockStore store;
+    private final ProdutoService service;
 
-    public ProdutoController(ProdutoMockStore store) {
-        this.store = store;
+    public ProdutoController(ProdutoService service) {
+        this.service = service;
     }
 
-    // GET /listar/produtos
+    // GET /listar/produtos (agora lendo do banco)
     @GetMapping
     public List<Produto> listar() {
-        return store.listarTodos();
+        return service.listar();
     }
 }

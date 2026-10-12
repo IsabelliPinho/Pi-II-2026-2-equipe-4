@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.gabicake.api.service;
 
 /**
@@ -10,10 +5,13 @@ package com.gabicake.api.service;
  * @author Sanara Carvalho
  */
 
-import com.gabicake.api.dto.ClienteBuscaResponseDTO; // adicionei 
+import com.gabicake.api.dto.ClienteBuscaResponseDTO;
+import com.gabicake.api.entity.ClienteEntity;
 import com.gabicake.api.exception.ApiException;
 import com.gabicake.api.model.Cliente;
+import com.gabicake.api.repository.ClienteRepository;
 import com.gabicake.api.store.ClienteMockStore;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,38 +20,34 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteMockStore store;
+    private final ClienteRepository repository;
 
-    public ClienteService(ClienteMockStore store) {
+    public ClienteService(ClienteMockStore store, ClienteRepository repository) {
         this.store = store;
+        this.repository = repository;
     }
 
-    // [ALTERADO] Tipo de retorno alterado para List<ClienteBuscaResponseDTO>
+    // GET /clientes/busca: agora consulta o PostgreSQL.
     public List<ClienteBuscaResponseDTO> buscar(String busca) {
-        List<Cliente> clientes;
+        Sort ordem = Sort.by("id");
+        List<ClienteEntity> clientes;
 
         if (busca == null || busca.isBlank()) {
-            clientes = store.listarTodos();
+            clientes = repository.findAll(ordem);
         } else if (busca.trim().length() < 3) {
             throw ApiException.validacao("A busca deve possuir pelo menos 3 caracteres.");
         } else {
-            String termo = busca.trim().toLowerCase();
-            clientes = store.listarTodos().stream()
-                    .filter(c -> (c.getNome() != null && c.getNome().toLowerCase().contains(termo))
-                            || (c.getTelefones() != null && c.getTelefones().stream()
-                                    .anyMatch(t -> t.toLowerCase().contains(termo))))
-                    .toList();
+            String termo = busca.trim();
+            clientes = repository.findByNomeContainingIgnoreCaseOrTelefoneContainingIgnoreCase(termo, termo, ordem);
         }
 
-        // adicionei o marpemento de busca que tava retornando coisa errada 
+        // O banco guarda um telefone por cliente; o contrato devolve uma lista.
         return clientes.stream()
-                .map(c -> new ClienteBuscaResponseDTO(
-                        c.getId(),
-                        c.getNome(),
-                        c.getTelefones()
-                ))
+                .map(c -> new ClienteBuscaResponseDTO(c.getId().longValue(), c.getNome(), List.of(c.getTelefone())))
                 .toList();
     }
 
+    // POST /clientes/cadastro continua nos dados fixos (falta decidir a questão dos telefones).
     public Cliente cadastrar(Cliente cliente) {
         if (cliente.getNome() == null || cliente.getNome().isBlank()
                 || cliente.getTelefones() == null || cliente.getTelefones().isEmpty()) {
