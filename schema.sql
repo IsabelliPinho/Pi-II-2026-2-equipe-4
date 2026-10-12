@@ -1,1 +1,0 @@
--- Tabelas serao criadas na Sprint 2, a partir do MER.
