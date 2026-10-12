@@ -1,11 +1,13 @@
 package com.gabicake.api.service;
 
-import com.gabicake.api.model.Produto;
-import com.gabicake.api.repository.ProdutoRepository;
+import java.util.List;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.gabicake.api.entity.ProdutoEntity;
+import com.gabicake.api.model.Produto;
+import com.gabicake.api.repository.ProdutoRepository;
 
 @Service
 public class ProdutoService {
@@ -16,10 +18,16 @@ public class ProdutoService {
         this.repository = repository;
     }
 
-    // Lê do PostgreSQL e devolve no formato do contrato (id, nome, preco).
+    // Lê do PostgreSQL através do repositório e mapeia para o modelo de contrato (Produto).
     public List<Produto> listar() {
-        return repository.findAll(Sort.by("id")).stream()
-                .map(p -> new Produto(p.getId().longValue(), p.getNome(), p.getPreco()))
+        List<ProdutoEntity> entidades = repository.findAll(Sort.by("id"));
+        
+        return entidades.stream()
+                .map(p -> new Produto(
+                    p.getId().longValue(), 
+                    p.getNome(), 
+                    p.getPreco()
+                ))
                 .toList();
     }
 }

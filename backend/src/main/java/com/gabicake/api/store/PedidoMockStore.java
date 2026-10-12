@@ -10,12 +10,6 @@ package com.gabicake.api.store;
  * @author Sanara Carvalho
  */
 
-import com.gabicake.api.dto.PedidoConsultaResponseDTO;
-import com.gabicake.api.model.Cliente;
-import com.gabicake.api.model.ItemPedido;
-import com.gabicake.api.model.Pedido;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +18,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.gabicake.api.dto.PedidoConsultaResponseDTO;
+import com.gabicake.api.model.ItemPedido;
+import com.gabicake.api.model.Pedido;
 
 @Component
 public class PedidoMockStore {
@@ -98,18 +98,14 @@ public class PedidoMockStore {
         return pedidos.stream()
             .filter(p -> status == null || status.isBlank() || p.getStatusPedido().equalsIgnoreCase(status))
             .map(p -> {
-                String nomeCliente = clienteMockStore.listarTodos().stream()
-                        .filter(c -> c.getId().equals(p.getIdCliente()))
-                        .map(Cliente::getNome)
-                        .findFirst()
-                        .orElse("Cliente Não Encontrado");
-
                 return new PedidoConsultaResponseDTO(
                     p.getId(),
-                    nomeCliente,
+                    p.getIdCliente(),
+                    p.getNomeGerente(),
+                    p.getDataPedido(),
                     p.getDataPrevista(),
-                    p.getFormaEntrega(),
-                    p.getStatusPedido()
+                    p.getStatusPedido(),
+                    p.getFormaEntrega()
                 );
             })
             .collect(Collectors.toList());

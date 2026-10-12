@@ -34,7 +34,7 @@ public class ClienteEntity {
     @Column(nullable = false, length = 9)
     private String cep;
 
-    protected ClienteEntity() {
+    public ClienteEntity() {
     }
 
     public Integer getId() {
