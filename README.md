@@ -4,7 +4,7 @@ Sistema de gestão de pedidos para a loja de bolos Gabi Cake, desenvolvido na di
 
 O sistema permite à gerente da loja cadastrar clientes, registrar e acompanhar pedidos, controlar entregas e retiradas e consultar a agenda de encomendas.
 
-> **Status:** Sprint 1 (esqueleto em containers). O backend e o banco sobem com um comando. Tabelas, rotas e integração com o frontend entram na Sprint 2.
+> **Status:** Sprint 1 concluída (esqueleto em containers). Sprint 2 em andamento: o banco já tem as tabelas do MER e dados de teste, e as rotas `GET /listar/produtos` e `GET /clientes/busca` consultam o PostgreSQL. As demais rotas ainda usam dados fixos.
 
 ## Tecnologias
 
@@ -20,18 +20,28 @@ O sistema permite à gerente da loja cadastrar clientes, registrar e acompanhar 
 ```
 .
 ├── backend/                # API Spring Boot
-│   ├── src/main/java/gabicake/
+│   ├── src/main/java/com/gabicake/api/
+│   │   ├── ApiApplication.java   # classe principal
+│   │   ├── config/               # CORS
 │   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/               # entidades JPA (tabelas do banco)
+│   │   ├── exception/
+│   │   ├── model/
+│   │   ├── repository/           # acesso ao banco (Spring Data)
 │   │   ├── service/
-│   │   ├── repository/
-│   │   └── model/
+│   │   └── store/                # dados fixos (mock) das rotas ainda não ligadas ao banco
 │   ├── src/main/resources/application.properties
 │   ├── Dockerfile
 │   └── pom.xml
 ├── frontend/               # Aplicação web (Node + nginx)
-├── docs/                   # Requisitos, MER, contrato da API, casos de teste
+├── db/
+│   ├── init/
+│   │   ├── 01-schema.sql   # tabelas, chaves e restrições (a partir do MER)
+│   │   └── 02-seed.sql     # dados sintéticos para demonstração
+│   └── verificar.sql       # consultas de conferência do banco
+├── docs/                   # Requisitos, MER, contrato da API, casos de teste, guia de QA
 ├── docker-compose.yml      # Sobe banco, backend e frontend
-├── schema.sql              # Criação das tabelas (provisório até a Sprint 2)
 ├── .env.example            # Modelo das variáveis de ambiente
 └── README.md
 ```
@@ -96,7 +106,7 @@ Definidas no arquivo `.env` (modelo em `.env.example`):
 
 O `docker-compose.yml` repassa ao backend os dados de conexão como `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD`, que o Spring Boot reconhece automaticamente. Dentro do Docker, o backend acessa o banco pelo nome do serviço (`db`), e não por `localhost`.
 
-O frontend chama a API pelo caminho `/api/`, e o nginx encaminha essas requisições para o serviço `backend`. Por isso o navegador só conversa com um endereço e não é preciso configurar CORS.
+O frontend é servido pelo nginx na porta 3000, e a API fica na porta 8080. O navegador chama a API diretamente em `http://localhost:8080`, e o backend libera essa origem (`localhost:3000`) por CORS, na classe `CorsConfig`.
 
 ## Endereços
 
@@ -105,14 +115,16 @@ O frontend chama a API pelo caminho `/api/`, e o nginx encaminha essas requisiç
 | Saúde da API | http://localhost:8080/actuator/health |
 | Banco de dados (cliente externo) | `localhost:5432` (usuário e senha do `.env`) |
 | Frontend | http://localhost:3000 |
-| API pelo frontend (proxy do nginx) | http://localhost:3000/api/ |
+| Lista de produtos (vem do banco) | http://localhost:8080/listar/produtos |
+| Busca de clientes (vem do banco) | http://localhost:8080/clientes/busca?busca=mar |
 
 ## Banco de dados
 
 - O PostgreSQL cria o banco e o usuário na primeira inicialização, a partir das variáveis do `.env`.
-- O arquivo `schema.sql` é executado **apenas na primeira inicialização**, quando o volume `db_data` está vazio.
+- Os arquivos da pasta `db/init` são executados em ordem, **apenas na primeira inicialização**, quando o volume `db_data` está vazio: o `01-schema.sql` cria as tabelas (`cliente`, `gerente`, `produto`, `pedido` e `item_pedido`, com chaves primárias, estrangeiras e restrições) e o `02-seed.sql` insere os dados de teste (10 ou mais linhas por tabela).
 - Os dados ficam no volume `db_data` e **persistem** entre `docker compose down` e `up`.
-- O Hibernate está em modo `validate`: ele não cria nem altera tabelas, apenas confere se as entidades batem com o `schema.sql`.
+- O Hibernate está em modo `validate` (definido no `docker-compose.yml`): ele não cria nem altera tabelas, apenas confere se as entidades batem com o banco. Uma entidade com coluna ou tipo errado impede o backend de iniciar.
+- O arquivo `db/verificar.sql` reúne consultas de conferência (contagens, junções e testes de integridade que devem falhar de propósito).
 
 ## Comandos úteis
 
@@ -125,12 +137,23 @@ O frontend chama a API pelo caminho `/api/`, e o nginx encaminha essas requisiç
 | Parar e **apagar os dados do banco** | `docker compose down -v` |
 | Recompilar o backend | `docker compose up --build backend` |
 | Listar as tabelas do banco | `docker compose exec db psql -U gabicake -d gabicake -c "\dt"` |
+| Rodar as consultas de conferência | `docker compose exec -T db psql -U gabicake -d gabicake < db/verificar.sql` |
 
-Se alterar o `schema.sql` depois da primeira execução, use `docker compose down -v` para recriar o banco com o novo conteúdo.
+Se alterar os arquivos de `db/init` depois da primeira execução, use `docker compose down -v` para recriar o banco com o novo conteúdo.
+
+## Rotas da API
+
+| Rota | De onde vêm os dados |
+|---|---|
+| `GET /listar/produtos` | PostgreSQL |
+| `GET /clientes/busca` | PostgreSQL (o banco guarda um telefone por cliente, e a resposta o devolve como lista de um item) |
+| `POST /clientes/cadastro`, `/pedidos/...` | Dados fixos (em memória), ainda não ligados ao banco |
+
+O contrato completo está em `docs/`.
 
 ## Documentação
 
-A pasta [`docs/`](docs/) reúne o documento de requisitos, o relatório de análise de requisitos funcionais, o modelo entidade-relacionamento (`ER.drawio`), a definição do contrato da API e os casos de teste.
+A pasta [`docs/`](docs/) reúne o documento de requisitos, o relatório de análise de requisitos funcionais, o modelo entidade-relacionamento (`ER.drawio`), a definição do contrato da API, os casos de teste e o guia de QA (`GUIA-QA.md`), com o roteiro para subir o ambiente e verificar o sistema.
 
 ## Como contribuir
 
