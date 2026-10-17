@@ -64,47 +64,6 @@ function Pedido({ adicionarCarrinho }) {
                         <h2>Estrutura do Bolo</h2>
 
 
-                        {/* PRODUTO */}
-
-                        <div className="campo-pedido">
-
-                            <label>
-                                Produto <span>*</span>
-                            </label>
-
-                            <select
-                                value={produtoSelecionado}
-                                onChange={(e) =>
-                                    setProdutoSelecionado(e.target.value)
-                                }
-                            >
-
-                                {produtos.length === 0 ? (
-
-                                    <option value="">
-                                        Carregando...
-                                    </option>
-
-                                ) : (
-
-                                    produtos.map((produto) => (
-
-                                        <option
-                                            key={produto.id}
-                                            value={produto.id}
-                                        >
-                                            {produto.nome}
-                                        </option>
-
-                                    ))
-
-                                )}
-
-                            </select>
-
-                        </div>
-
-
                         {/* TAMANHO */}
 
                         <div className="campo-pedido">
