@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { listarProdutos, ApiError } from "../api"; // Ajuste o caminho de importação conforme sua estrutura
+import { listarProdutos, ApiError } from "../api";
 
-export function TelaProdutos() {
+export function TelaProdutos({ adicionarCarrinho }) {
   const [produtos, setProdutos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
@@ -46,20 +46,43 @@ export function TelaProdutos() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "16px", marginTop: "20px" }}>
           {produtos.map((p) => (
             <div
-              key={p.id ?? p.nome}
+              key={p.id ?? p.idProduto ?? p.nome}
               style={{
                 border: "1px solid #ddd",
                 borderRadius: "8px",
                 padding: "16px",
                 backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between"
               }}
             >
-              <h3 style={{ margin: "0 0 8px 0" }}>{p.nome}</h3>
-              <p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px 0" }}>{p.descricao || "Sem descrição disponível."}</p>
-              <strong style={{ fontSize: "18px", color: "#2e7d32" }}>
-                R$ {Number(p.preco || 0).toFixed(2)}
-              </strong>
+              <div>
+                <h3 style={{ margin: "0 0 8px 0" }}>{p.nome}</h3>
+                <p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px 0" }}>
+                  {p.descricao || "Sem descrição disponível."}
+                </p>
+                <strong style={{ fontSize: "18px", color: "#2e7d32" }}>
+                  R$ {Number(p.preco || 0).toFixed(2)}
+                </strong>
+              </div>
+
+              <button
+                onClick={() => adicionarCarrinho && adicionarCarrinho(p)}
+                style={{
+                  marginTop: "16px",
+                  padding: "10px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                Adicionar ao Carrinho
+              </button>
             </div>
           ))}
         </div>
