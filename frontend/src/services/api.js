@@ -1,6 +1,10 @@
 // Módulo único de chamadas ao backend
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+export const BASE_URL = import.meta.env.VITE_API_URL || (
+    typeof window !== "undefined" && window.location.hostname
+        ? `http://${window.location.hostname}:8080`
+        : "http://localhost:8080"
+);
 
 export class ApiError extends Error {
     constructor(status, codigo, message){
@@ -61,3 +65,7 @@ export const atualizarPedido = (id, alteracoes) =>
 
 //RF003
 export const listarProdutos = () => request("/listar/produtos");
+
+//RF003
+export const cadastrarPedido = (pedido) =>
+    request("/pedidos/cadastro", { method: "POST", body: JSON.stringify(pedido) });
