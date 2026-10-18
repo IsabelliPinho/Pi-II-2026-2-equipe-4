@@ -124,6 +124,8 @@ function Clientes({
                         <input
                             type="text"
                             placeholder="Busque por nome ou telefone"
+                            value={termo}
+                            onChange={(e) => setTermo(e.target.value)}
                         />
 
                     </div>
@@ -194,11 +196,11 @@ function Clientes({
 
                         <div
                             className="cliente-linha"
-                            key={cliente.numero}
+                            key={cliente.id ?? cliente.numero}
                         >
 
                             <div className="coluna-numero">
-                                {cliente.numero}
+                                {cliente.id ?? cliente.numero}
                             </div>
 
                             <div className="coluna-cliente">
@@ -206,11 +208,11 @@ function Clientes({
                             </div>
 
                             <div className="coluna-contato">
-                                {cliente.contato}
+                                {cliente.telefones ? cliente.telefones[0] : (cliente.contato ?? "—")}
                             </div>
 
                             <div className="coluna-pedidos">
-                                {cliente.pedidos}
+                                {cliente.pedidos ?? "—"}
                             </div>
 
                             <div className="coluna-acoes">

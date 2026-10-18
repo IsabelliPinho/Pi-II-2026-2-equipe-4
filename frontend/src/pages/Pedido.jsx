@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../styles/Pedido.css";
+import { listarProdutos } from "../services/api";
 
 function Pedido({ adicionarCarrinho }) {
 
@@ -7,14 +8,7 @@ function Pedido({ adicionarCarrinho }) {
     const [produtoSelecionado, setProdutoSelecionado] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:8080/listar/produtos")
-            .then((resposta) => {
-                if (!resposta.ok) {
-                    throw new Error("Erro ao buscar produtos");
-                }
-
-                return resposta.json();
-            })
+        listarProdutos()
             .then((dados) => {
                 setProdutos(dados);
 
