@@ -10,19 +10,17 @@ package com.gabicake.api.exception;
  * @author Sanara Carvalho
  */
 
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/**
- * Captura qualquer ApiException lançada pelos services e converte no
- * JSON de erro padrão, com o status HTTP correto. Qualquer outra
- * exceção não prevista cai no 500 genérico.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // puxa o status e código definidos na própria exceção
+    
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex) {
         return ResponseEntity
@@ -30,10 +28,32 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getCodigo(), ex.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
+    // HTTP 400 - Validação de campos de formulário (DTO)
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String msg = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
         return ResponseEntity
-                .internalServerError()
-                .body(new ErrorResponse("INTERNAL_SERVER_ERROR", "Não foi possível concluir a operação."));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("REQUISICAO_INVALIDA", msg));
+    }
+
+    // HTTP 401 - Não Autorizado
+    
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(SecurityException ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Acesso não autorizado.";
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("NAO_AUTORIZADO", msg));
+    }
+
+    // HTTP 404 - Recurso Não Encontrado (ex: IllegalArgumentException)
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("NAO_ENCONTRADO", ex.getMessage()));
     }
 }

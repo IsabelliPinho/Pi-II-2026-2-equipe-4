@@ -13,10 +13,11 @@ package com.gabicake.api.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exceção genérica da API. Cada regra de negócio que falha lança uma
- * ApiException com o status HTTP correto e um código de erro legível
- * (ex.: VALIDATION_ERROR, NOT_FOUND, BUSINESS_RULE_VIOLATION).
+*classe de exceção base para o dominio da aplicação.
+*tem como prposito encapsular as violações de regras de negócio,
+* mapeando-as rigorosamente para a semântica dos códigos de estudo HTTP ( como : 400,404 e 402).
  */
+
 public class ApiException extends RuntimeException {
 
     private final HttpStatus status;
