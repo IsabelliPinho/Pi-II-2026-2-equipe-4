@@ -1,8 +1,15 @@
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.gabicake.api.service;
 
 /**
+ *
  * @author Sanara Carvalho
  */
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,8 +47,8 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
+    // RF010: Consulta resumida de pedidos
     public List<PedidoConsultaResponseDTO> consultarPedidosResumidos(String status) {
-        // Implementação da consulta resumida utilizando os dados do banco
         List<PedidoEntity> pedidos = pedidoRepository.findAll(Sort.by("id"));
         return pedidos.stream()
                 .filter(p -> status == null || status.isBlank() || status.equalsIgnoreCase(p.getStatusPedido()))
@@ -76,7 +83,13 @@ public class PedidoService {
                 .toList();
     }
 
+    /**
+     * RF003 / RN001 / RN002 / RN003 / RN005:
+     * Registo de pedidos com validação de payload, obrigatoriedade de cliente/gerente,
+     * prazos, pesos mínimos e modalidades de entrega.
+     */
     public Pedido registrar(Pedido pedidoDto) {
+        // RN001: Validação da integridade estrutural e campos obrigatórios do payload
         if (pedidoDto.getIdCliente() == null
                 || pedidoDto.getNomeGerente() == null || pedidoDto.getNomeGerente().isBlank()
                 || pedidoDto.getDataPrevista() == null
@@ -86,11 +99,13 @@ public class PedidoService {
                     "idCliente, nomeGerente, dataPrevista, formaEntrega e itens são obrigatórios.");
         }
 
+        // RN005: Validação da forma de entrega permitida
         if (!"ENTREGA".equalsIgnoreCase(pedidoDto.getFormaEntrega())
                 && !"RETIRADA".equalsIgnoreCase(pedidoDto.getFormaEntrega())) {
             throw ApiException.validacao("formaEntrega deve ser ENTREGA ou RETIRADA.");
         }
 
+        // RN005: Validação condicional de morada caso seja ENTREGA
         if ("ENTREGA".equalsIgnoreCase(pedidoDto.getFormaEntrega())
                 && (pedidoDto.getEntregaBairro() == null
                     || pedidoDto.getEntregaRua() == null
@@ -99,31 +114,31 @@ public class PedidoService {
                     "entregaBairro, entregaRua e entregaNumCasa são obrigatórios quando formaEntrega for ENTREGA.");
         }
 
+        // RN003: Validação de antecedência mínima (data prevista não pode ser anterior a hoje)
         LocalDate hoje = LocalDate.now();
         if (pedidoDto.getDataPrevista().toLocalDate().isBefore(hoje)) {
             throw ApiException.validacao("A data prevista não pode ser anterior à data atual.");
         }
 
+        // RN003: Validação de quantidades e pesos mínimos dos itens
         validarItens(pedidoDto.getItens());
 
-        // Busca o cliente associado no banco
+        // RN002: Associação e rastreabilidade com o cliente cadastrado
         ClienteEntity cliente = clienteRepository.findById(pedidoDto.getIdCliente().intValue())
                 .orElseThrow(() -> ApiException.naoEncontrado("Cliente não encontrado."));
 
-        // Monta a entidade do pedido
         PedidoEntity entity = new PedidoEntity();
         entity.setCliente(cliente);
         entity.setNomeGerente(pedidoDto.getNomeGerente());
         entity.setDataPedido(pedidoDto.getDataPedido() != null ? pedidoDto.getDataPedido() : LocalDate.now());
         entity.setDataPrevista(pedidoDto.getDataPrevista());
-        entity.setStatusPedido("PENDENTE"); // Status padrão inicial
+        entity.setStatusPedido("PENDENTE"); // Status inicial padrão
         entity.setFormaEntrega(pedidoDto.getFormaEntrega().toUpperCase());
         entity.setEntregaBairro(pedidoDto.getEntregaBairro());
         entity.setEntregaRua(pedidoDto.getEntregaRua());
         entity.setEntregaNumCasa(pedidoDto.getEntregaNumCasa());
         entity.setEntregaCep(pedidoDto.getEntregaCep());
 
-        // Mapeia os itens do pedido
         List<ItemPedidoEntity> itensEntity = pedidoDto.getItens().stream().map(dtoItem -> {
             ProdutoEntity produto = produtoRepository.findById(dtoItem.getIdProduto().intValue())
                     .orElseThrow(() -> ApiException.naoEncontrado("Produto com ID " + dtoItem.getIdProduto() + " não encontrado."));
@@ -145,6 +160,10 @@ public class PedidoService {
         return converterParaModelo(salvo);
     }
 
+    /**
+     * RF004 / RF009 / RN004:
+     * Atualização de pedidos e controlo rigoroso de transição de status (ex: restrição de cancelamento).
+     */
     public Pedido atualizar(Long id, Pedido alteracoes) {
         PedidoEntity existente = pedidoRepository.findById(id.intValue())
                 .orElseThrow(() -> ApiException.naoEncontrado("Pedido não encontrado."));
@@ -155,6 +174,7 @@ public class PedidoService {
                 throw ApiException.validacao(
                         "statusPedido deve ser um de: PENDENTE, ATENDIDO, CANCELADO.");
             }
+            // RN004: Validação de transição de status antes de aplicar alterações
             validarTransicaoDeStatus(existente.getStatusPedido(), novoStatus);
             existente.setStatusPedido(novoStatus);
         }
@@ -170,6 +190,7 @@ public class PedidoService {
         return converterParaModelo(atualizado);
     }
 
+    // RN003: Validação auxiliar de restrições de itens e pesos mínimos
     private void validarItens(List<ItemPedido> itens) {
         for (ItemPedido item : itens) {
             if (item.getIdProduto() == null) {
@@ -186,6 +207,7 @@ public class PedidoService {
         }
     }
 
+    // RN004: Regra estrita de restrição de cancelamento (só permite se estiver PENDENTE)
     private void validarTransicaoDeStatus(String statusAtual, String novoStatus) {
         if ("CANCELADO".equalsIgnoreCase(novoStatus) && !"PENDENTE".equalsIgnoreCase(statusAtual)) {
             throw ApiException.conflito("Só é possível cancelar um pedido que ainda esteja PENDENTE.");
