@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import "../styles/Pedido.css";
 
-function Pedido({ adicionarCarrinho }) {
+function Pedido({ adicionarCarrinho, voltarDashboard }) {
 
     const [produtos, setProdutos] = useState([]);
     const [produtoSelecionado, setProdutoSelecionado] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:8080/listar/produtos")
+        fetch("/api/listar/produtos")
             .then((resposta) => {
                 if (!resposta.ok) {
                     throw new Error("Erro ao buscar produtos");
@@ -34,6 +34,11 @@ function Pedido({ adicionarCarrinho }) {
             (item) => String(item.id) === produtoSelecionado
         );
 
+        if (produtos.length === 0) {
+            alert("Não foi possível carregar os produtos. Verifique a conexão com o servidor.");
+            return;
+        }
+
         if (!produto) {
             alert("Selecione um produto.");
             return;
@@ -52,6 +57,14 @@ function Pedido({ adicionarCarrinho }) {
 
             <header className="pedido-header">
                 <h1>Faça seu Pedido</h1>
+
+                <button
+                    className="botao-voltar-painel"
+                    onClick={voltarDashboard}
+                    aria-label="Voltar ao painel"
+                >
+                    ×
+                </button>
             </header>
 
 

@@ -1,6 +1,6 @@
 // Módulo único de chamadas ao backend
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
 
 export class ApiError extends Error {
     constructor(status, codigo, message){

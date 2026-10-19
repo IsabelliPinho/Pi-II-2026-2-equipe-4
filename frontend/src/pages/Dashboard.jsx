@@ -7,6 +7,7 @@ function Dashboard({
     abrirPendentes,
     abrirFinanceiro,
     abrirClientes,
+    abrirAlertas,
     fecharDashboard
 }) {
     return (
@@ -57,7 +58,7 @@ function Dashboard({
 
 
                 {/* NOTIFICAÇÃO */}
-                <button className="botao-notificacao">
+                <button className="botao-notificacao" onClick={abrirAlertas}>
                     🔔
                 </button>
 

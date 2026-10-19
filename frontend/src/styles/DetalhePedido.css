@@ -494,3 +494,22 @@
         margin: 15px 0 20px auto;
     }
 }
+
+
+/* INTEGRAÇÃO COM A API */
+
+.detalhe-estado {
+    padding: 14px;
+    text-align: center;
+    color: #5B292B;
+}
+
+.card-status .status-entregue {
+    color: #1E6B1E;
+    font-weight: bold;
+}
+
+.card-status .status-cancelado {
+    color: #777777;
+    font-weight: bold;
+}
