@@ -8,9 +8,9 @@ import CarrinhoVazio from "./pages/CarrinhoVazio";
 import PedidoRealizado from "./pages/PedidoRealizado";
 
 import Dashboard from "./pages/Dashboard";
-import { TelaClientes } from "./pages/cliente"; // Ajuste o caminho se necessário
-import { TelaPedidos } from "./pages/Pedidos";   // Ajuste o caminho se necessário
-import { TelaProdutos } from "./pages/Produtos"; // Ajuste o caminho se necessário
+import { TelaClientes } from "./services/Clientes"; // Ajuste o caminho se necessário
+import { TelaPedidos } from "./services/Pedidos";   // Ajuste o caminho se necessário
+import { TelaProdutos } from "./services/Produtos"; // Ajuste o caminho se necessário
 import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
 

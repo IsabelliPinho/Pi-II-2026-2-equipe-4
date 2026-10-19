@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { listarProdutos, ApiError } from "../api";
+import { listarProdutos, ApiError } from "./api.js";
 
 export function TelaProdutos({ adicionarCarrinho }) {
   const [produtos, setProdutos] = useState([]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { consultarPedidos, ApiError } from "../api";
+import { consultarPedidos, ApiError } from "./api.js";
 
 export function TelaPedidos() {
   const [pedidos, setPedidos] = useState([]);

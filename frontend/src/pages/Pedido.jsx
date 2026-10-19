@@ -5,7 +5,16 @@ function Pedido({ adicionarCarrinho }) {
     const [produtos, setProdutos] = useState([]);
     const [produtoSelecionado, setProdutoSelecionado] = useState("");
 
+    // Estados visuais (Critérios de Aceite)
+    const [carregandoProdutos, setCarregandoProdutos] = useState(true);
+    const [erroApi, setErroApi] = useState(null);
+    const [statusModal, setStatusModal] = useState("idle"); // 'idle' | 'processing' | 'success' | 'error'
+    const [mensagemErro, setMensagemErro] = useState("");
+
     useEffect(() => {
+        setCarregandoProdutos(true);
+        setErroApi(null);
+
         fetch("http://localhost:8080/listar/produtos")
             .then((resposta) => {
                 if (!resposta.ok) {
@@ -14,36 +23,58 @@ function Pedido({ adicionarCarrinho }) {
                 return resposta.json();
             })
             .then((dados) => {
-                setProdutos(dados);
-                if (dados.length > 0) {
-                    setProdutoSelecionado(String(dados[0].id));
+                // Normaliza o ID para evitar discrepâncias entre id e idProduto
+                const produtosNormalizados = dados.map((item) => ({
+                    ...item,
+                    id: item.id ?? item.idProduto ?? item.codigo
+                }));
+
+                setProdutos(produtosNormalizados);
+
+                if (produtosNormalizados.length > 0) {
+                    setProdutoSelecionado(String(produtosNormalizados[0].id));
                 }
+                setCarregandoProdutos(false);
             })
             .catch((erro) => {
                 console.error("Erro ao carregar produtos:", erro);
+                setErroApi("Não foi possível carregar o catálogo de produtos. Verifique a conexão com o servidor.");
+                setCarregandoProdutos(false);
             });
     }, []);
 
     function adicionarProdutoAoCarrinho() {
-        console.log("Estado atual - produtos:", produtos);
-        console.log("Estado atual - produtoSelecionado:", produtoSelecionado);
-
-        const produto = produtos.find(
-            (item) => String(item.id ?? item.idProduto) === String(produtoSelecionado)
-        );
-
-        console.log("Produto encontrado na busca:", produto);
-
-        if (!produto) {
-            alert("Selecione um produto.");
+        if (produtos.length === 0) {
+            setMensagemErro("Nenhum produto disponível no catálogo.");
             return;
         }
 
-        adicionarCarrinho({
-            idProduto: produto.id ?? produto.idProduto,
-            nome: produto.nome,
-            preco: produto.preco
-        });
+        const idParaBuscar = produtoSelecionado || (produtos.length > 0 ? String(produtos[0].id) : "");
+        const produto = produtos.find(
+            (item) => String(item.id ?? item.idProduto) === String(idParaBuscar)
+        );
+
+        if (!produto) {
+            setMensagemErro("Por favor, selecione um produto válido.");
+            return;
+        }
+
+        setMensagemErro("");
+
+        // 1. Ativa o estado de Loading (Processing Modal)
+        setStatusModal("processing");
+
+        // Simulação do processamento do pedido
+        setTimeout(() => {
+            adicionarCarrinho({
+                idProduto: produto.id ?? produto.idProduto,
+                nome: produto.nome,
+                preco: produto.preco
+            });
+
+            // 2. Transiciona para o estado de Sucesso (Pedido Aprovado)
+            setStatusModal("success");
+        }, 1200);
     }
 
     return (
@@ -54,6 +85,14 @@ function Pedido({ adicionarCarrinho }) {
 
             <main className="pedido-main">
                 <div className="pedido-card">
+
+                    {/* MENSAGEM DE ERRO AO CARREGAR A API */}
+                    {erroApi && (
+                        <div className="alerta-erro-api">
+                            ⚠️ {erroApi}
+                        </div>
+                    )}
+
                     <section className="estrutura-bolo">
                         <h2>Estrutura do Bolo</h2>
 
@@ -65,9 +104,12 @@ function Pedido({ adicionarCarrinho }) {
                             <select
                                 value={produtoSelecionado}
                                 onChange={(e) => setProdutoSelecionado(e.target.value)}
+                                disabled={carregandoProdutos || produtos.length === 0}
                             >
-                                {produtos.length === 0 ? (
-                                    <option value="">Carregando produtos...</option>
+                                {carregandoProdutos ? (
+                                    <option value="">⏳ Carregando produtos...</option>
+                                ) : produtos.length === 0 ? (
+                                    <option value="">📦 Nenhum produto disponível</option>
                                 ) : (
                                     produtos.map((p) => (
                                         <option key={p.id} value={String(p.id)}>
@@ -77,6 +119,10 @@ function Pedido({ adicionarCarrinho }) {
                                 )}
                             </select>
                         </div>
+
+                        {mensagemErro && (
+                            <span className="mensagem-validacao-erro">{mensagemErro}</span>
+                        )}
 
                         {/* TAMANHO */}
                         <div className="campo-pedido">
@@ -200,6 +246,7 @@ function Pedido({ adicionarCarrinho }) {
                     <button
                         className="botao-carrinho"
                         onClick={adicionarProdutoAoCarrinho}
+                        disabled={statusModal === "processing" || carregandoProdutos}
                     >
                         <span className="icone-carrinho">
                             🛒
@@ -208,6 +255,30 @@ function Pedido({ adicionarCarrinho }) {
                     </button>
                 </div>
             </main>
+
+            {/* MODAL 1: PROCESSING (Not-Loading) */}
+            {statusModal === "processing" && (
+                <div className="modal-overlay">
+                    <div className="card-modal card-loading">
+                        <button className="btn-fechar-modal" onClick={() => setStatusModal("idle")}>×</button>
+                        <div className="reticencias">...</div>
+                        <div className="spinner-modal"></div>
+                        <p className="texto-processing">Processando Pedido...</p>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL 2: PEDIDO APROVADO (Not-Pedido aprovado) */}
+            {statusModal === "success" && (
+                <div className="modal-overlay">
+                    <div className="card-modal card-sucesso">
+                        <button className="btn-fechar-modal" onClick={() => setStatusModal("idle")}>×</button>
+                        <div className="icone-check">✓</div>
+                        <h3 className="titulo-aprovado">Pedido Aprovado!</h3>
+                        <p className="subtitulo-confirmacao">Aguardar Confirmação</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,0 +1,116 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.card-modal {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.btn-fechar-modal {
+    position: absolute;
+    top: 18px;
+    right: 32px;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+/* Modal Processing (Cinza) */
+.card-loading {
+    background-color: #d8d6d6;
+}
+
+.reticencias {
+    color: #888888;
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+.spinner-modal {
+    width: 26px;
+    height: 26px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top: 3px solid #555;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+.texto-processing {
+    color: #4a2d21;
+    font-weight: bold;
+    font-size: 15px;
+    margin: 0;
+}
+
+/* Modal Sucesso (Azul) */
+.card-sucesso {
+    background-color: #a8d5ff;
+}
+
+.icone-check {
+    color: #2e7d32;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.titulo-aprovado {
+    color: #631212;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 4px 0;
+}
+
+.subtitulo-confirmacao {
+    color: #1b5e20;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alertas de validação e erro da API */
+.alerta-erro-api {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border: 1px solid #ef9a9a;
+}
+
+.mensagem-validacao-erro {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+}
