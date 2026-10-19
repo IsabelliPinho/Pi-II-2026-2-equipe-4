@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "pedido")
@@ -28,14 +29,14 @@ public class PedidoEntity {
     @JoinColumn(name = "cliente_id", nullable = false)
     private ClienteEntity cliente;
 
-    @Column(name = "nome_gerente", length = 120)
+    @Transient
     private String nomeGerente;
 
-    @Column(name = "data_pedido", nullable = false)
+    @Transient
     private LocalDate dataPedido;
 
     @Column(name = "data_prevista")
-    private LocalDateTime dataPrevista;
+    private LocalDate dataPrevista;
 
     @Column(name = "status_pedido", length = 50, nullable = false)
     private String statusPedido;
@@ -58,7 +59,7 @@ public class PedidoEntity {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedidoEntity> itens;
 
-    @Column(name = "atualizado_em")
+    @Transient
     private LocalDateTime atualizadoEm;
 
     public PedidoEntity() {
@@ -93,11 +94,11 @@ public class PedidoEntity {
     }
 
     public LocalDateTime getDataPrevista() {
-        return dataPrevista;
+        return dataPrevista != null ? dataPrevista.atStartOfDay() : null;
     }
 
     public void setDataPrevista(LocalDateTime dataPrevista) {
-        this.dataPrevista = dataPrevista;
+        this.dataPrevista = dataPrevista != null ? dataPrevista.toLocalDate() : null;
     }
 
     public String getStatusPedido() {

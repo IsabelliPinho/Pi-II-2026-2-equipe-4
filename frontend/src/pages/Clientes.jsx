@@ -223,11 +223,12 @@ function Clientes({
  
                         <div
                             className="cliente-linha"
-                            key={cliente.id}
+                            key={cliente.id ?? cliente.numero}
                         >
  
                             <div className="coluna-numero">
-                                {String(cliente.id).padStart(3, "0")}
+                                {String(cliente.id ?? cliente.numero).padStart(3, "0")}
+
                             </div>
  
                             <div className="coluna-cliente">
@@ -235,7 +236,7 @@ function Clientes({
                             </div>
  
                             <div className="coluna-contato">
-                                {cliente.telefones?.[0] ?? "—"}
+                                {cliente.telefones ? cliente.telefones[0] : (cliente.contato ?? "—")}
                             </div>
  
                             <div className="coluna-pedidos">

@@ -1,6 +1,6 @@
 // Módulo único de chamadas ao backend
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+export const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
 
 export class ApiError extends Error {
     constructor(status, codigo, message){
@@ -61,3 +61,7 @@ export const atualizarPedido = (id, alteracoes) =>
 
 //RF003
 export const listarProdutos = () => request("/listar/produtos");
+
+//RF003
+export const cadastrarPedido = (pedido) =>
+    request("/pedidos/cadastro", { method: "POST", body: JSON.stringify(pedido) });
