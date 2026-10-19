@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import "../styles/Pedido.css";
+import { listarProdutos } from "../services/api";
 
-function Pedido({ adicionarCarrinho }) {
+function Pedido({ adicionarCarrinho, voltarDashboard }) {
     const [produtos, setProdutos] = useState([]);
     const [produtoSelecionado, setProdutoSelecionado] = useState("");
 
@@ -15,13 +16,7 @@ function Pedido({ adicionarCarrinho }) {
         setCarregandoProdutos(true);
         setErroApi(null);
 
-        fetch("http://localhost:8080/listar/produtos")
-            .then((resposta) => {
-                if (!resposta.ok) {
-                    throw new Error("Erro ao buscar produtos");
-                }
-                return resposta.json();
-            })
+        listarProdutos()
             .then((dados) => {
                 // Normaliza o ID para evitar discrepâncias entre id e idProduto
                 const produtosNormalizados = dados.map((item) => ({
@@ -81,6 +76,16 @@ function Pedido({ adicionarCarrinho }) {
         <div className="pedido-container">
             <header className="pedido-header">
                 <h1>Faça seu Pedido</h1>
+
+                {voltarDashboard && (
+                    <button
+                        className="botao-voltar-painel"
+                        onClick={voltarDashboard}
+                        aria-label="Voltar ao painel"
+                    >
+                        ×
+                    </button>
+                )}
             </header>
 
             <main className="pedido-main">
@@ -256,7 +261,7 @@ function Pedido({ adicionarCarrinho }) {
                 </div>
             </main>
 
-            {/* MODAL 1: PROCESSING (Not-Loading) */}
+            {/* MODAL 1: PROCESSING */}
             {statusModal === "processing" && (
                 <div className="modal-overlay">
                     <div className="card-modal card-loading">
@@ -268,7 +273,7 @@ function Pedido({ adicionarCarrinho }) {
                 </div>
             )}
 
-            {/* MODAL 2: PEDIDO APROVADO (Not-Pedido aprovado) */}
+            {/* MODAL 2: PEDIDO APROVADO */}
             {statusModal === "success" && (
                 <div className="modal-overlay">
                     <div className="card-modal card-sucesso">

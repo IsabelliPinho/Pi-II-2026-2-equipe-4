@@ -1,4 +1,14 @@
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.gabicake.api.service;
+
+/**
+ *
+ * @author Sanara Carvalho
+ */
 
 import java.util.List;
 
@@ -18,7 +28,10 @@ public class ProdutoService {
         this.repository = repository;
     }
 
-    // Lê do PostgreSQL através do repositório e mapeia para o modelo de contrato (Produto).
+    /**
+     * Consulta o catálogo de produtos no PostgreSQL.
+     * Correlacionado à listagem e seleção de itens para composição de pedidos.
+     */
     public List<Produto> listar() {
         List<ProdutoEntity> entidades = repository.findAll(Sort.by("id"));
         
