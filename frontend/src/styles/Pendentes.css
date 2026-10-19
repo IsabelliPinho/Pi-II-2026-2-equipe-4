@@ -493,3 +493,48 @@ body {
         width: 100%;
     }
 }
+
+/*INTEGRAÇAO COM A API */
+
+.linha-pendente{
+    cursor: pointer;
+}
+
+.linha-selecionada{
+    background-color: #f4cdd6;
+}
+
+.resumo-card strong{
+    display: block;
+    font-size: 14px;
+}
+
+.estado-pendentes{
+    padding: 12px;
+    text-align: center;
+    color: #5b292b;
+}
+
+.aviso-pendentes{
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.aviso-sucesso{
+    background-color: #dff2df;
+    color: #1e6b1e;
+}
+
+.aviso-erro{
+    background-color: #fbdada;
+    color: #A00000;
+}
+
+.botao-editar:disabled,
+.marcar-atendida input:disabled + .checkbox-personalizado{
+    opacity: 0.5;
+    cursor: not-allowed;
+}

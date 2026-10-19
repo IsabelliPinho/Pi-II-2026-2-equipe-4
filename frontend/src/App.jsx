@@ -13,11 +13,18 @@ import Clientes from "./pages/Clientes";
 import ConsultarPedido from "./pages/ConsultarPedido";
 import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
+import Alertas from "./pages/Alertas";
 
 function App() {
     const [tela, setTela] = useState("dashboard");
     const [carrinho, setCarrinho] = useState([]);
     const [cliente, setCliente] = useState(null);
+    const [idPedidoAberto, setIdPedidoAberto] = useState(null);
+
+    function abrirDetalhe(id) {
+        setIdPedidoAberto(id);
+        setTela("detalhePedido");
+    }
 
     async function finalizarPedido(clienteCadastrado) {
         try {
@@ -26,7 +33,15 @@ function App() {
                 quantidade: 1
             }));
 
-            const resposta = await fetch("http://localhost:8080/pedidos/cadastro", {
+            // data prevista = daqui a 7 dias, às 15h (o backend rejeita datas passadas)
+            const prevista = new Date();
+            prevista.setDate(prevista.getDate() + 7);
+            const dataPrevista =
+                `${prevista.getFullYear()}-` +
+                `${String(prevista.getMonth() + 1).padStart(2, "0")}-` +
+                `${String(prevista.getDate()).padStart(2, "0")}T15:00:00`;
+
+            const resposta = await fetch("/api/pedidos/cadastro", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -34,7 +49,7 @@ function App() {
                 body: JSON.stringify({
                     idCliente: clienteCadastrado.id,
                     nomeGerente: "Gabriela",
-                    dataPrevista: "2026-10-05T15:00:00",
+                    dataPrevista: dataPrevista,
                     formaEntrega: "RETIRADA",
                     itens: itens
                 })
@@ -43,7 +58,13 @@ function App() {
             if (!resposta.ok) {
                 const erro = await resposta.text();
                 console.error("Erro ao criar pedido:", erro);
-                alert("Não foi possível criar o pedido.");
+                let motivo = "";
+                try {
+                    motivo = JSON.parse(erro).message ?? "";
+                } catch {
+                    // resposta não era JSON
+                }
+                alert(`Não foi possível criar o pedido. ${motivo}`);
                 return;
             }
 
@@ -72,6 +93,7 @@ function App() {
     if (tela === "pedido") {
         return (
             <Pedido
+                voltarDashboard={() => setTela("dashboard")}
                 adicionarCarrinho={(produto) => {
                     setCarrinho([...carrinho, produto]);
                     setTela("carrinho");
@@ -127,8 +149,9 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 fecharDashboard={() => setTela("login")}
             />
         );
@@ -141,8 +164,9 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 fecharClientes={() => setTela("dashboard")}
             />
         );
@@ -155,8 +179,10 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
+                abrirDetalhe={abrirDetalhe}
                 fecharConsultarPedido={() => setTela("dashboard")}
             />
         );
@@ -166,6 +192,21 @@ function App() {
         return (
             <Pendentes
                 voltarDashboard={() => setTela("dashboard")}
+                abrirDetalhe={abrirDetalhe}
+            />
+        );
+    }
+
+    if (tela === "alertas") {
+        return (
+            <Alertas
+                voltarDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirClientes={() => setTela("clientes")}
+                abrirDetalhe={abrirDetalhe}
             />
         );
     }
@@ -173,7 +214,14 @@ function App() {
     if (tela === "detalhePedido") {
         return (
             <DetalhePedido
+                idPedido={idPedidoAberto}
                 voltarDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 editarPedido={() => {}}
             />
         );
@@ -194,8 +242,9 @@ function App() {
             abrirNovoPedido={() => setTela("pedido")}
             abrirConsultarPedido={() => setTela("consultarPedido")}
             abrirPendentes={() => setTela("pendentes")}
-            abrirFinanceiro={() => setTela("detalhePedido")}
+            abrirFinanceiro={() => abrirDetalhe(null)}
             abrirClientes={() => setTela("clientes")}
+            abrirAlertas={() => setTela("alertas")}
             fecharDashboard={() => setTela("login")}
         />
     );

@@ -588,3 +588,11 @@ body {
         overflow-x: auto;
     }
 }
+
+/* ESTADOS DA LISTA (API) */
+
+.cliente-estado{
+    padding: 14px;
+    text-align: center;
+    color: #5B292B;
+}

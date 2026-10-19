@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "../styles/Clientes.css";
-import { buscarClientes } from "../services/api";
+import { buscarClientes, consultarPedidos } from "../services/api";
 
 function Clientes({
     abrirDashboard,
@@ -9,6 +9,7 @@ function Clientes({
     abrirPendentes,
     abrirFinanceiro,
     abrirClientes,
+    abrirAlertas,
     fecharClientes
 }) {
 
@@ -16,6 +17,21 @@ function Clientes({
     const [clientes, setClientes] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
+    const [contagem, setContagem] = useState(null);
+
+    useEffect(() => {
+        consultarPedidos()
+            .then((pedidos) => {
+                const conta = {};
+                pedidos.forEach((p) => {
+                    conta[p.idCliente] = (conta[p.idCliente] ?? 0) + 1;
+                });
+                setContagem(conta);
+            })
+            .catch(() => setContagem(null));
+    }, []);
+
+    const termoCurto = termo.trim().length > 0 && termo.trim().length < 3;
 
     // RF002: só busca com 3+ caracteres; campo vazio lista todos.
     useEffect(() => {
@@ -83,7 +99,7 @@ function Clientes({
                 </nav>
 
                 {/* SINO */}
-                <button className="clientes-notificacao">
+                <button className="clientes-notificacao" onClick={abrirAlertas}>
                     🔔
                 </button>
 
@@ -191,32 +207,44 @@ function Clientes({
                     </div>
 
 
-                    {/* CLIENTES */}
-                    {clientes.map((cliente) => (
+                    {termoCurto && (
+                        <p className="cliente-estado">Digite ao menos 3 caracteres para buscar.</p>
+                    )}
+ 
+                    {carregando && <p className="cliente-estado">Carregando...</p>}
+ 
+                    {!carregando && erro && <p className="cliente-estado">{erro}</p>}
+ 
+                    {!carregando && !erro && clientes.length === 0 && (
+                        <p className="cliente-estado">Nenhum cliente encontrado.</p>
+                    )}
 
+   {!carregando && !erro && clientes.map((cliente) => (
+ 
                         <div
                             className="cliente-linha"
                             key={cliente.id ?? cliente.numero}
                         >
-
+ 
                             <div className="coluna-numero">
-                                {cliente.id ?? cliente.numero}
-                            </div>
+                                {String(cliente.id ?? cliente.numero).padStart(3, "0")}
 
+                            </div>
+ 
                             <div className="coluna-cliente">
                                 {cliente.nome}
                             </div>
-
+ 
                             <div className="coluna-contato">
                                 {cliente.telefones ? cliente.telefones[0] : (cliente.contato ?? "—")}
                             </div>
-
+ 
                             <div className="coluna-pedidos">
-                                {cliente.pedidos ?? "—"}
+                                {contagem ? (contagem[cliente.id] ?? 0) : "—"}
                             </div>
-
+ 
                             <div className="coluna-acoes">
-
+ 
                                 {/* OLHO */}
                                 <button
                                     className="botao-visualizar"
@@ -234,8 +262,8 @@ function Clientes({
                                         <circle cx="12" cy="12" r="2.8" />
                                     </svg>
                                 </button>
-
-
+ 
+ 
                                 {/* LIXEIRA */}
                                 <button
                                     className="botao-excluir"
@@ -256,19 +284,19 @@ function Clientes({
                                         <line x1="14" y1="11" x2="14" y2="18" />
                                     </svg>
                                 </button>
-
+ 
                             </div>
-
+ 
                         </div>
-
+ 
                     ))}
-
+ 
                 </div>
-
+ 
             </main>
-
+ 
         </div>
     );
 }
-
+ 
 export default Clientes;

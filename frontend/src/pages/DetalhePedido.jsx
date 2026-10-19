@@ -1,6 +1,10 @@
+import { useEffect, useState } from "react";
 import "../styles/DetalhePedido.css";
+import { buscarClientes, buscarPedido, listarProdutos } from "../services/api";
+import { STATUS, diasAte, formatarData, formatarDia } from "../utils/Pedidos";
 
 function DetalhePedido({
+    idPedido,
     voltarDashboard,
     abrirNovoPedido,
     abrirConsultarPedido,
@@ -9,6 +13,44 @@ function DetalhePedido({
     abrirClientes,
     editarPedido
 }) {
+    const [pedido, setPedido] = useState(null);
+    const [cliente, setCliente] = useState(null);
+    const [produtos, setProdutos] = useState({});
+    const [carregando, setCarregando] = useState(Boolean(idPedido));
+    const [erro, setErro] = useState("");
+
+    // RF003: GET /pedidos/{id}
+    useEffect(() => {
+        if (!idPedido) return;
+
+        setCarregando(true);
+        setErro("");
+
+        Promise.all([buscarPedido(idPedido), buscarClientes(""), listarProdutos()])
+            .then(([ped, clientes, lista]) => {
+                setPedido(ped);
+                setCliente(clientes.find((c) => c.id === ped.idCliente) ?? null);
+                const mapa = {};
+                lista.forEach((p) => {
+                    mapa[p.id ?? p.idProduto] = p.nome;
+                });
+                setProdutos(mapa);
+            })
+            .catch((e) => setErro(e.message))
+            .finally(() => setCarregando(false));
+    }, [idPedido]);
+
+    const status = pedido ? STATUS[pedido.statusPedido] : null;
+    const dias = pedido?.dataPrevista ? diasAte(pedido.dataPrevista) : null;
+    const venceTexto =
+        dias === null
+            ? "—"
+            : dias < 0
+              ? "Atrasado"
+              : dias === 0
+                ? "Vence hoje"
+                : `Vence em ${dias} dia(s)`;
+
     return (
         <div className="detalhe-pedido-container">
 
@@ -101,8 +143,19 @@ function DetalhePedido({
                 <h1>Detalhes do Pedido</h1>
 
                 <div className="titulo-pedido">
-                    Pedido #003
+                    {pedido ? `Pedido #${String(pedido.id).padStart(3, "0")}` : "Pedido"}
                 </div>
+
+                {!idPedido && (
+                    <p className="detalhe-estado">
+                        Nenhum pedido selecionado. Abra um pedido pela tela Pendentes
+                        ou Consultar Pedido.
+                    </p>
+                )}
+
+                {idPedido && carregando && <p className="detalhe-estado">Carregando...</p>}
+
+                {idPedido && !carregando && erro && <p className="detalhe-estado">{erro}</p>}
 
                 <button
                     className="botao-editar-pedido"
@@ -111,6 +164,8 @@ function DetalhePedido({
                     Editar
                 </button>
 
+
+                {pedido && (<>
 
                 {/* PRIMEIRA LINHA */}
 
@@ -125,12 +180,11 @@ function DetalhePedido({
                         <div className="cliente-conteudo">
 
                             <div className="cliente-informacoes">
-                                <p>Ana Costa</p>
-                                <p>(xx) xxxxx-xxxx</p>
-                                <p>anacosta@gmail.com</p>
+                                <p>{cliente?.nome ?? "—"}</p>
+                                <p>{cliente?.telefones?.[0] ?? "—"}</p>
                             </div>
 
-                            <button className="botao-ver-cliente">
+                            <button className="botao-ver-cliente" onClick={abrirClientes}>
                                 Ver
                                 <br />
                                 Cliente
@@ -151,12 +205,11 @@ function DetalhePedido({
 
                             <div className="status-esquerda">
 
-                                <p className="status-pendente">
-                                    Pendente
+                                <p className={status?.classe}>
+                                    {status?.rotulo ?? pedido.statusPedido}
                                 </p>
-
                                 <p>
-                                    Vence: 12/10
+                                    {venceTexto}
                                 </p>
 
                             </div>
@@ -164,11 +217,10 @@ function DetalhePedido({
                             <div className="status-direita">
 
                                 <p>
-                                    Pedido: 15/09
+                                    Pedido: {formatarDia(pedido.dataPedido)}
                                 </p>
-
                                 <p>
-                                    Entrega: 12/10
+                                    Entrega: {formatarDia(pedido.dataPrevista)}
                                 </p>
 
                             </div>
@@ -192,17 +244,16 @@ function DetalhePedido({
 
                         <div className="descricao-conteudo">
 
-                            <p>
-                                Bolo de chocolate com morango, 2 kg
-                            </p>
-
-                            <p>
-                                Recheio: Brigadeiro
-                            </p>
-
-                            <p>
-                                Cobertura: Chantilly com morangos
-                            </p>
+                            {pedido.itens?.map((item, i) => (
+                                <p key={i}>
+                                    {item.quantidade}x{" "}
+                                    {produtos[item.idProduto] ?? `Produto ${item.idProduto}`}
+                                    {item.peso ? `, ${item.peso} kg` : ""}
+                                    {item.tipoMassa ? ` · massa: ${item.tipoMassa}` : ""}
+                                    {item.tipoRecheio ? ` · recheio: ${item.tipoRecheio}` : ""}
+                                    {item.tema ? ` · tema: ${item.tema}` : ""}
+                                </p>
+                            ))}
 
                         </div>
 
@@ -217,13 +268,7 @@ function DetalhePedido({
 
                         <div className="observacoes-conteudo">
 
-                            <p>
-                                Sem lactose, escrever: “Parabéns Ana”
-                            </p>
-
-                            <p>
-                                em cima
-                            </p>
+                            <p>Sem observações.</p>
 
                         </div>
 
@@ -239,15 +284,21 @@ function DetalhePedido({
                     <h2>Tipo</h2>
 
                     <p className="tipo-titulo">
-                        Entrega
+                        {pedido.formaEntrega === "ENTREGA" ? "Entrega" : "Retirada"}
+                        {" · "}
+                        {formatarData(pedido.dataPrevista)}
                     </p>
-
-                    <p>
-                        Rua X, Nº X - Bairro Z
-                    </p>
+                    {pedido.formaEntrega === "ENTREGA" && (
+                        <p>
+                            {[pedido.entregaRua, pedido.entregaNumCasa, pedido.entregaBairro]
+                                .filter(Boolean)
+                                .join(", ") || "Endereço não informado"}
+                        </p>
+                    )}
 
                 </section>
 
+            </>)}
             </main>
 
         </div>

@@ -1,25 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/ConsultarPedido.css";
-import { atualizarPedido, consultarPedidos } from "../services/api";
+import { atualizarPedido, buscarClientes, consultarPedidos } from "../services/api";
+import { STATUS, estaPendente, formatarDia } from "../utils/Pedidos";
 
 const POR_PAGINA = 5;
-
-const STATUS = {
-    PENDENTE: { rotulo: "Pendente", classe: "status-pendente" },
-    ATENDIDO: { rotulo: "Atendido", classe: "status-entregue" },
-    CANCELADO: { rotulo: "Cancelado", classe: "status-cancelado" }
-};
 
 // Date -> "YYYY-MM-DD" no fuso local
 function paraISO(d) {
     const mes = String(d.getMonth() + 1).padStart(2, "0");
     const dia = String(d.getDate()).padStart(2, "0");
     return `${d.getFullYear()}-${mes}-${dia}`;
-}
-
-// "2026-09-25T15:00:00" -> "25/09"
-function formatarDia(iso) {
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 }
 
 function ConsultarPedido({
@@ -29,6 +19,8 @@ function ConsultarPedido({
     abrirPendentes,
     abrirFinanceiro,
     abrirClientes,
+    abrirAlertas,
+    abrirDetalhe,
     fecharConsultarPedido
 }) {
     const [inicio, setInicio] = useState("");
@@ -37,6 +29,7 @@ function ConsultarPedido({
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [pagina, setPagina] = useState(1);
+    const [clientesPorId, setClientesPorId] = useState({});
 
     // RF009: cancelamento
     const [aCancelar, setACancelar] = useState(null); // pedido aguardando confirmação
@@ -63,8 +56,8 @@ function ConsultarPedido({
             const dados = await consultarPedidos({ inicio: de, fim: ate });
             // garante o filtro por período mesmo que o backend ignore inicio/fim
             const filtrados = dados.filter((p) => {
-                const dia = p.dataPrevista.slice(0, 10);
-                return (!de || dia >= de) && (!ate || dia <= ate);
+                const dia = p.dataPrevista?.slice(0, 10) ?? "";
+                return (!de || (dia && dia >= de)) && (!ate || (dia && dia <= ate));
             });
             setPedidos(filtrados);
             setPagina(1);
@@ -78,6 +71,17 @@ function ConsultarPedido({
 
     useEffect(() => {
         buscar("", "");
+
+        // a rota de pedidos devolve só idCliente: busca os nomes uma vez
+        buscarClientes("")
+            .then((lista) => {
+                const mapa = {};
+                lista.forEach((c) => {
+                    mapa[c.id] = c;
+                });
+                setClientesPorId(mapa);
+            })
+            .catch(() => {});
     }, []);
 
     // RF009: PATCH /pedidos/{id} com statusPedido = CANCELADO
@@ -96,7 +100,7 @@ function ConsultarPedido({
                 texto: `Pedido ${String(pedido.id).padStart(3, "0")} cancelado com sucesso.`
             });
         } catch (e) {
-            // ex.: 409 se o pedido não estiver mais PENDENTE
+            // ex.: 409 se o pedido não estiver mais PENDENTE (regra atual do backend)
             setAviso({ tipo: "erro", texto: e.message });
         } finally {
             setCancelando(false);
@@ -146,7 +150,7 @@ function ConsultarPedido({
 
     const totalPaginas = Math.max(1, Math.ceil(pedidos.length / POR_PAGINA));
     const visiveis = pedidos.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
-    const pendentes = pedidos.filter((p) => p.statusPedido === "PENDENTE").length;
+    const pendentes = pedidos.filter((p) => estaPendente(p.statusPedido)).length;
     const primeiro = pedidos.length === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1;
     const ultimo = Math.min(pagina * POR_PAGINA, pedidos.length);
 
@@ -206,7 +210,7 @@ function ConsultarPedido({
 
 
                 {/* SINO */}
-                <button className="consultar-notificacao">
+                <button className="consultar-notificacao" onClick={abrirAlertas}>
                     <svg
                         viewBox="0 0 24 24"
                         fill="none"
@@ -450,11 +454,11 @@ function ConsultarPedido({
                             </div>
 
                             <div>
-                                {pedido.nomeCliente}
+                                {pedido.nomeCliente ?? clientesPorId[pedido.idCliente]?.nome ?? "—"}
                             </div>
 
                             <div>
-                                —
+                                {formatarDia(pedido.dataPedido)}
                             </div>
 
                             <div>
@@ -477,6 +481,7 @@ function ConsultarPedido({
                                 <button
                                     className="botao-olho-pedido"
                                     title="Visualizar pedido"
+                                    onClick={() => abrirDetalhe?.(pedido.id)}
                                 >
                                     <svg
                                         viewBox="0 0 24 24"
