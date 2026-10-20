@@ -1,82 +1,80 @@
+
 import "../styles/Carrinho.css";
 
 function Carrinho({
-    carrinho,
+    carrinho = [],
     adicionarProduto,
     realizarPedido,
     fecharCarrinho,
     esvaziarCarrinho
 }) {
+    const total = carrinho.reduce(
+        (soma, produto) => soma + Number(produto.preco || 0),
+        0
+    );
+
     return (
         <div className="carrinho-container">
-
-            {/* BARRA SUPERIOR */}
             <header className="carrinho-header">
-
                 <button
                     className="botao-fechar"
                     onClick={fecharCarrinho}
+                    aria-label="Fechar carrinho"
                 >
                     ×
                 </button>
-
             </header>
 
-
-            {/* CONTEÚDO */}
             <main className="carrinho-conteudo">
-
-                {/* CLIENTE */}
                 <div className="cliente">
-
                     <div className="icone-cliente">
-
                         <div className="cabeca-cliente"></div>
-
                         <div className="corpo-cliente"></div>
-
                     </div>
 
-                    <strong>Ana</strong>
-
+                    <strong>Cliente</strong>
                 </div>
 
-
-                {/* BOLOS */}
                 <div className="lista-bolos">
-
-                    {carrinho && carrinho.length > 0 ? (
-
+                    {carrinho.length > 0 ? (
                         carrinho.map((produto, index) => (
-                            <p key={index}>
-                                1 {produto.nome}
-                            </p>
+                            <div key={`${produto.idProduto}-${index}`}>
+                                <p>{produto.nome}</p>
+                                <p>
+                                    {Number(produto.preco).toLocaleString(
+                                        "pt-BR",
+                                        {
+                                            style: "currency",
+                                            currency: "BRL"
+                                        }
+                                    )}
+                                </p>
+                            </div>
                         ))
-
                     ) : (
-
-                        <>
-                            <p>1 bolo de brigadeiro 1kg</p>
-                            <p>1 bolo de ninho 2kg</p>
-                        </>
-
+                        <p>Seu carrinho está vazio.</p>
                     )}
-
                 </div>
 
+                <p className="total-carrinho">
+                    <strong>
+                        Total:{" "}
+                        {total.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL"
+                        })}
+                    </strong>
+                </p>
 
-                {/* BOTÃO REALIZAR PEDIDO */}
                 <button
                     className="botao-realizar"
                     onClick={realizarPedido}
+                    disabled={carrinho.length === 0}
                 >
                     Realizar Pedido
                 </button>
 
-
-                {/* BOTÕES INFERIORES */}
                 <div className="botoes-carrinho">
-
                     <button
                         className="botao-adicionar"
                         onClick={adicionarProduto}
@@ -85,19 +83,16 @@ function Carrinho({
                         Adicionar Produto
                     </button>
 
-
                     <button
                         className="botao-esvaziar"
                         onClick={esvaziarCarrinho}
+                        disabled={carrinho.length === 0}
                     >
                         <span className="simbolo-x">×</span>
                         Esvaziar Carrinho
                     </button>
-
                 </div>
-
             </main>
-
         </div>
     );
 }

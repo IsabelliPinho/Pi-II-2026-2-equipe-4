@@ -1,76 +1,101 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/ConsultarPedido.css";
 import { atualizarPedido, consultarPedidos } from "../services/api";
 
 const POR_PAGINA = 5;
 
 const STATUS = {
-    PENDENTE: { rotulo: "Pendente", classe: "status-pendente" },
-    ATENDIDO: { rotulo: "Atendido", classe: "status-entregue" },
-    CANCELADO: { rotulo: "Cancelado", classe: "status-cancelado" }
+    PENDENTE: {
+        rotulo: "Pendente",
+        classe: "status-pendente",
+    },
+    CONFIRMADO: {
+        rotulo: "Confirmado",
+        classe: "status-pendente",
+    },
+    EM_PRODUCAO: {
+        rotulo: "Em produção",
+        classe: "status-pendente",
+    },
+    PRONTO: {
+        rotulo: "Pronto",
+        classe: "status-entregue",
+    },
+    ENTREGUE: {
+        rotulo: "Entregue",
+        classe: "status-entregue",
+    },
+    ATENDIDO: {
+        rotulo: "Atendido",
+        classe: "status-entregue",
+    },
+    CANCELADO: {
+        rotulo: "Cancelado",
+        classe: "status-cancelado",
+    },
 };
 
-// Date -> "YYYY-MM-DD" no fuso local
-function paraISO(d) {
-    const mes = String(d.getMonth() + 1).padStart(2, "0");
-    const dia = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mes}-${dia}`;
+function paraISO(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(data.getDate()).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
 }
 
-// "2026-09-25T15:00:00" -> "25/09"
-function formatarDia(iso) {
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+function formatarDia(data) {
+    if (!data) return "—";
+
+    const [ano, mes, dia] = data.slice(0, 10).split("-");
+
+    if (!ano || !mes || !dia) return "—";
+
+    return `${dia}/${mes}`;
 }
 
-function ConsultarPedido({
-    abrirDashboard,
-    abrirNovoPedido,
-    abrirConsultarPedido,
-    abrirPendentes,
-    abrirFinanceiro,
-    abrirClientes,
-    fecharConsultarPedido
-}) {
+export default function ConsultarPedido() {
     const [inicio, setInicio] = useState("");
     const [fim, setFim] = useState("");
     const [pedidos, setPedidos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [pagina, setPagina] = useState(1);
-
-    // RF009: cancelamento
-    const [aCancelar, setACancelar] = useState(null); // pedido aguardando confirmação
+    const [aCancelar, setACancelar] = useState(null);
     const [cancelando, setCancelando] = useState(false);
-    const [aviso, setAviso] = useState(null); // { tipo: "sucesso" | "erro", texto }
+    const [aviso, setAviso] = useState("");
 
-    const inicioRef = useRef(null);
-    const fimRef = useRef(null);
-
-    // RF003: consulta por mês/intervalo. Sem datas = todos os pedidos.
     async function buscar(de = inicio, ate = fim) {
         setErro("");
-        setAviso(null);
+        setAviso("");
 
         if (de && ate && de > ate) {
+            setErro("A data inicial não pode ser posterior à data final.");
             setPedidos([]);
-            setErro("Data inválida: a data inicial é maior que a final.");
+            setPagina(1);
             setCarregando(false);
             return;
         }
 
         setCarregando(true);
+
         try {
-            const dados = await consultarPedidos({ inicio: de, fim: ate });
-            // garante o filtro por período mesmo que o backend ignore inicio/fim
-            const filtrados = dados.filter((p) => {
-                const dia = p.dataPrevista.slice(0, 10);
+            const dados = await consultarPedidos();
+
+            const filtrados = dados.filter((pedido) => {
+                if (!pedido.dataPrevista) {
+                    return !de && !ate;
+                }
+
+                const dia = pedido.dataPrevista.slice(0, 10);
+
                 return (!de || dia >= de) && (!ate || dia <= ate);
             });
+
             setPedidos(filtrados);
             setPagina(1);
         } catch (e) {
             setPedidos([]);
-            setErro(e.message);
+            setErro(e.message || "Não foi possível carregar os pedidos.");
         } finally {
             setCarregando(false);
         }
@@ -80,513 +105,336 @@ function ConsultarPedido({
         buscar("", "");
     }, []);
 
-    // RF009: PATCH /pedidos/{id} com statusPedido = CANCELADO
     async function confirmarCancelamento() {
-        const pedido = aCancelar;
+        if (!aCancelar) return;
+
         setCancelando(true);
+        setAviso("");
+        setErro("");
+
         try {
-            await atualizarPedido(pedido.id, { statusPedido: "CANCELADO" });
-            setPedidos((atual) =>
-                atual.map((p) =>
-                    p.id === pedido.id ? { ...p, statusPedido: "CANCELADO" } : p
+            await atualizarPedido(aCancelar.id, {
+                statusPedido: "CANCELADO",
+            });
+
+            setPedidos((anteriores) =>
+                anteriores.map((pedido) =>
+                    pedido.id === aCancelar.id
+                        ? { ...pedido, statusPedido: "CANCELADO" }
+                        : pedido
                 )
             );
-            setAviso({
-                tipo: "sucesso",
-                texto: `Pedido ${String(pedido.id).padStart(3, "0")} cancelado com sucesso.`
-            });
+
+            setAviso(
+                `Pedido #${String(aCancelar.id).padStart(3, "0")} cancelado com sucesso.`
+            );
+
+            setACancelar(null);
         } catch (e) {
-            // ex.: 409 se o pedido não estiver mais PENDENTE
-            setAviso({ tipo: "erro", texto: e.message });
+            setErro(e.message || "Não foi possível cancelar o pedido.");
         } finally {
             setCancelando(false);
-            setACancelar(null);
         }
     }
 
-    function aplicarPeriodo(de, ate) {
-        const a = paraISO(de);
-        const b = paraISO(ate);
-        setInicio(a);
-        setFim(b);
-        buscar(a, b);
+    function aplicarPeriodo(tipo) {
+        const hoje = new Date();
+        const dataFim = paraISO(hoje);
+        const dataInicio = new Date(hoje);
+
+        if (tipo === "hoje") {
+            setInicio(dataFim);
+            setFim(dataFim);
+            buscar(dataFim, dataFim);
+            return;
+        }
+
+        if (tipo === "semana") {
+            dataInicio.setDate(hoje.getDate() - 6);
+        } else if (tipo === "mes") {
+            dataInicio.setDate(1);
+        } else if (tipo === "30dias") {
+            dataInicio.setDate(hoje.getDate() - 29);
+        }
+
+        const inicioISO = paraISO(dataInicio);
+
+        setInicio(inicioISO);
+        setFim(dataFim);
+        buscar(inicioISO, dataFim);
     }
 
-    function filtroHoje() {
-        const h = new Date();
-        aplicarPeriodo(h, h);
-    }
-
-    function filtroSemana() {
-        const h = new Date();
-        const dif = (h.getDay() + 6) % 7; // semana de segunda a domingo
-        const seg = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dif);
-        const dom = new Date(seg.getFullYear(), seg.getMonth(), seg.getDate() + 6);
-        aplicarPeriodo(seg, dom);
-    }
-
-    function filtroMes() {
-        const h = new Date();
-        aplicarPeriodo(
-            new Date(h.getFullYear(), h.getMonth(), 1),
-            new Date(h.getFullYear(), h.getMonth() + 1, 0)
-        );
-    }
-
-    function filtro30Dias() {
-        const h = new Date();
-        aplicarPeriodo(new Date(h.getFullYear(), h.getMonth(), h.getDate() - 29), h);
-    }
-
-    function limpar() {
+    function limparFiltros() {
         setInicio("");
         setFim("");
         buscar("", "");
     }
 
-    const totalPaginas = Math.max(1, Math.ceil(pedidos.length / POR_PAGINA));
-    const visiveis = pedidos.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
-    const pendentes = pedidos.filter((p) => p.statusPedido === "PENDENTE").length;
-    const primeiro = pedidos.length === 0 ? 0 : (pagina - 1) * POR_PAGINA + 1;
-    const ultimo = Math.min(pagina * POR_PAGINA, pedidos.length);
+    const pedidosPendentes = pedidos.filter((pedido) =>
+        ["PENDENTE", "CONFIRMADO", "EM_PRODUCAO", "PRONTO"].includes(
+            pedido.statusPedido
+        )
+    ).length;
 
-    const numerosPagina = [];
-    for (let n = Math.max(1, pagina - 2); n <= Math.min(totalPaginas, pagina + 2); n++) {
-        numerosPagina.push(n);
-    }
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(pedidos.length / POR_PAGINA)
+    );
+
+    const pedidosPagina = pedidos.slice(
+        (pagina - 1) * POR_PAGINA,
+        pagina * POR_PAGINA
+    );
 
     return (
-        <div className="consultar-container">
-
-            {/* =========================
-                BARRA SUPERIOR
-            ========================= */}
-
-            <header className="consultar-header">
-
-                {/* LOGO */}
-                <div className="consultar-logo">
-                    <div className="logo-circulo-consultar">
-                        <span>GM</span>
-                    </div>
+        <div className="consultar-pedido-container">
+            <header className="consultar-pedido-header">
+                <div className="consultar-pedido-logo">
+                    <div className="logo-circulo">GM</div>
                 </div>
 
-
-                {/* MENU */}
-                <nav className="consultar-menu">
-
-                    <button onClick={abrirDashboard}>
+                <nav className="consultar-pedido-menu">
+                    <button onClick={() => (window.location.href = "/")}>
                         Dashboard
                     </button>
 
-                    <button onClick={abrirNovoPedido}>
+                    <button onClick={() => (window.location.href = "/")}>
                         Novo Pedido
                     </button>
 
-                    <button
-                        className="menu-ativo"
-                        onClick={abrirConsultarPedido}
-                    >
+                    <button className="menu-ativo">
                         Consultar Pedido
                     </button>
 
-                    <button onClick={abrirPendentes}>
+                    <button onClick={() => (window.location.href = "/")}>
                         Pendentes
                     </button>
 
-                    <button onClick={abrirFinanceiro}>
+                    <button onClick={() => (window.location.href = "/")}>
                         Controle Financeiro
                     </button>
 
-                    <button onClick={abrirClientes}>
+                    <button onClick={() => (window.location.href = "/")}>
                         Clientes
                     </button>
-
                 </nav>
 
-
-                {/* SINO */}
-                <button className="consultar-notificacao">
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                        <path d="M10 21h4" />
-                    </svg>
-                </button>
-
-
-                {/* FECHAR */}
-                <button
-                    className="botao-fechar-consultar"
-                    onClick={fecharConsultarPedido}
-                >
-                    ×
-                </button>
-
+                <div className="consultar-pedido-notificacao">🔔</div>
             </header>
 
+            <main className="consultar-pedido-main">
+                <div className="consultar-pedido-titulo">
+                    <h1>Consultar Pedidos</h1>
+                    <p>Consulte e acompanhe os pedidos cadastrados.</p>
+                </div>
 
-            {/* =========================
-                CONTEÚDO
-            ========================= */}
-
-            <main className="consultar-main">
-
-                <h1>Consultar Pedido</h1>
-
-
-                {/* =========================
-                    FILTROS DE DATA
-                ========================= */}
-
-                <div className="filtros-data">
-
-                    {/* DE */}
-                    <div className="campo-data">
-
-                        <span>De</span>
-
+                <section className="filtros-pedidos">
+                    <div className="filtro-data">
+                        <label htmlFor="data-inicio">Data inicial</label>
                         <input
+                            id="data-inicio"
                             type="date"
-                            ref={inicioRef}
                             value={inicio}
                             onChange={(e) => setInicio(e.target.value)}
                         />
-
-                        <svg
-                            onClick={() => inicioRef.current?.showPicker?.()}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <rect x="3" y="5" width="18" height="16" rx="2" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                            <line x1="8" y1="3" x2="8" y2="7" />
-                            <line x1="16" y1="3" x2="16" y2="7" />
-                            <line x1="7" y1="14" x2="7" y2="14" />
-                            <line x1="12" y1="14" x2="12" y2="14" />
-                            <line x1="17" y1="14" x2="17" y2="14" />
-                            <line x1="7" y1="17" x2="7" y2="17" />
-                            <line x1="12" y1="17" x2="12" y2="17" />
-                            <line x1="17" y1="17" x2="17" y2="17" />
-                        </svg>
-
                     </div>
 
-
-                    {/* PARA */}
-                    <div className="campo-data">
-
-                        <span>Para</span>
-
+                    <div className="filtro-data">
+                        <label htmlFor="data-fim">Data final</label>
                         <input
+                            id="data-fim"
                             type="date"
-                            ref={fimRef}
                             value={fim}
                             onChange={(e) => setFim(e.target.value)}
                         />
-
-                        <svg
-                            onClick={() => fimRef.current?.showPicker?.()}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <rect x="3" y="5" width="18" height="16" rx="2" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                            <line x1="8" y1="3" x2="8" y2="7" />
-                            <line x1="16" y1="3" x2="16" y2="7" />
-                            <line x1="7" y1="14" x2="7" y2="14" />
-                            <line x1="12" y1="14" x2="12" y2="14" />
-                            <line x1="17" y1="14" x2="17" y2="14" />
-                            <line x1="7" y1="17" x2="7" y2="17" />
-                            <line x1="12" y1="17" x2="12" y2="17" />
-                            <line x1="17" y1="17" x2="17" y2="17" />
-                        </svg>
-
                     </div>
 
-                </div>
-
-
-                {/* =========================
-                    FILTROS RÁPIDOS
-                ========================= */}
-
-                <div className="filtros-rapidos">
-
-                    <button className="filtro-hoje" onClick={filtroHoje}>
-                        Hoje
-                    </button>
-
-                    <button className="filtro-semana" onClick={filtroSemana}>
-                        Esta Sem.
-                    </button>
-
-                    <button className="filtro-mes" onClick={filtroMes}>
-                        Este Mês
-                    </button>
-
-                    <button className="filtro-30dias" onClick={filtro30Dias}>
-                        Últim. 30d
-                    </button>
-
-                </div>
-
-
-                {/* =========================
-                    BOTÕES
-                ========================= */}
-
-                <div className="botoes-filtro">
-
-                    <button className="botao-buscar" onClick={() => buscar()}>
+                    <button onClick={() => buscar()}>
                         Buscar
                     </button>
 
-                    <button className="botao-limpar" onClick={limpar}>
+                    <button onClick={limparFiltros}>
                         Limpar
                     </button>
 
-                </div>
+                    <div className="filtros-rapidos">
+                        <button onClick={() => aplicarPeriodo("hoje")}>
+                            Hoje
+                        </button>
 
+                        <button onClick={() => aplicarPeriodo("semana")}>
+                            Últimos 7 dias
+                        </button>
 
-                {/* =========================
-                    RESUMO
-                ========================= */}
+                        <button onClick={() => aplicarPeriodo("mes")}>
+                            Este mês
+                        </button>
 
-                <section className="resumo-periodo">
-
-                    <h2>
-                        Resumo do Período
-                    </h2>
-
-                    <div className="cards-periodo">
-
-                        <div className="card-periodo">
-                            <span>Total Pedi.</span>
-                            <strong>{pedidos.length}</strong>
-                        </div>
-
-                        <div className="card-periodo">
-                            <span>Valor Total (R$)</span>
-                            <strong>—</strong>
-                        </div>
-
-                        <div className="card-periodo">
-                            <span>Pedidos Pendentes</span>
-                            <strong>{pendentes}</strong>
-                        </div>
-
+                        <button onClick={() => aplicarPeriodo("30dias")}>
+                            Últimos 30 dias
+                        </button>
                     </div>
-
                 </section>
-
-
-                {/* =========================
-                    TABELA
-                ========================= */}
 
                 {aviso && (
-                    <p className={`aviso-pedido aviso-${aviso.tipo}`} role="status">
-                        {aviso.texto}
-                    </p>
+                    <p className="pedido-estado">{aviso}</p>
                 )}
 
-                <section className="tabela-pedidos">
+                {erro && (
+                    <div className="pedido-estado">
+                        <p>{erro}</p>
+                        <button onClick={() => buscar()}>
+                            Tentar novamente
+                        </button>
+                    </div>
+                )}
 
-                    {/* CABEÇALHO */}
-                    <div className="tabela-pedidos-header">
-
-                        <div>#</div>
-
-                        <div>Cliente</div>
-
-                        <div>Data Pedi.</div>
-
-                        <div>Entrega</div>
-
-                        <div>Valor (R$)</div>
-
-                        <div>Status</div>
-
-                        <div>Ações</div>
-
+                <section className="resumo-pedidos">
+                    <div>
+                        <span>Total de pedidos</span>
+                        <strong>{pedidos.length}</strong>
                     </div>
 
-
-                    {carregando && <p className="pedido-estado">Carregando...</p>}
-
-                    {!carregando && erro && <p className="pedido-estado">{erro}</p>}
-
-                    {!carregando && !erro && pedidos.length === 0 && (
-                        <p className="pedido-estado">
-                            Nenhum pedido encontrado no período selecionado.
-                        </p>
-                    )}
-
-                    {/* PEDIDOS */}
-                    {!carregando && !erro && visiveis.map((pedido) => (
-
-                        <div
-                            className="pedido-linha"
-                            key={pedido.id}
-                        >
-
-                            <div>
-                                {String(pedido.id).padStart(3, "0")}
-                            </div>
-
-                            <div>
-                                {pedido.nomeCliente}
-                            </div>
-
-                            <div>
-                                —
-                            </div>
-
-                            <div>
-                                {formatarDia(pedido.dataPrevista)}
-                            </div>
-
-                            <div>
-                                —
-                            </div>
-
-                            <div
-                                className={STATUS[pedido.statusPedido]?.classe}
-                            >
-                                {STATUS[pedido.statusPedido]?.rotulo ?? pedido.statusPedido}
-                            </div>
-
-                            <div className="acoes-pedido">
-
-                                {/* OLHO */}
-                                <button
-                                    className="botao-olho-pedido"
-                                    title="Visualizar pedido"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
-                                        <circle cx="12" cy="12" r="2.8" />
-                                    </svg>
-                                </button>
-
-
-                                {/* LIXEIRA */}
-                                <button
-                                    className="botao-lixeira-pedido"
-                                    title={
-                                        pedido.statusPedido === "PENDENTE"
-                                            ? "Cancelar pedido"
-                                            : "Só pedidos pendentes podem ser cancelados"
-                                    }
-                                    disabled={pedido.statusPedido !== "PENDENTE"}
-                                    onClick={() => setACancelar(pedido)}
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="4 7 20 7" />
-                                        <path d="M9 7V4h6v3" />
-                                        <path d="M6 7l1 14h10l1-14" />
-                                        <line x1="10" y1="11" x2="10" y2="18" />
-                                        <line x1="14" y1="11" x2="14" y2="18" />
-                                    </svg>
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    ))}
-
-
-                    {/* =========================
-                        RODAPÉ DA TABELA
-                    ========================= */}
-
-                    <div className="tabela-rodape">
-
-                        <span>
-                            Mostrando {primeiro}–{ultimo} de {pedidos.length} Pedidos
-                        </span>
-
-                        <div className="paginacao">
-
-                            <button
-                                className="pagina-seta"
-                                disabled={pagina === 1}
-                                onClick={() => setPagina(pagina - 1)}
-                            >
-                                ←
-                            </button>
-
-                            {numerosPagina.map((n) => (
-                                <button
-                                    key={n}
-                                    className={n === pagina ? "pagina-ativa" : ""}
-                                    onClick={() => setPagina(n)}
-                                >
-                                    {n}
-                                </button>
-                            ))}
-
-                            <button
-                                className="pagina-seta"
-                                disabled={pagina === totalPaginas}
-                                onClick={() => setPagina(pagina + 1)}
-                            >
-                                →
-                            </button>
-
-                        </div>
-
+                    <div>
+                        <span>Valor total</span>
+                        <strong>—</strong>
                     </div>
 
+                    <div>
+                        <span>Pedidos pendentes</span>
+                        <strong>{pedidosPendentes}</strong>
+                    </div>
                 </section>
 
+                <section className="tabela-pedidos">
+                    <div className="tabela-pedidos-header">
+                        <div>#</div>
+                        <div>Cliente</div>
+                        <div>Data Pedi.</div>
+                        <div>Entrega</div>
+                        <div>Valor (R$)</div>
+                        <div>Status</div>
+                        <div>Ações</div>
+                    </div>
+
+                    {carregando ? (
+                        <p className="pedido-estado">
+                            Carregando pedidos...
+                        </p>
+                    ) : erro ? null : pedidosPagina.length === 0 ? (
+                        <p className="pedido-estado">
+                            Nenhum pedido encontrado para esse período.
+                        </p>
+                    ) : (
+                        pedidosPagina.map((pedido) => (
+                            <div className="pedido-linha" key={pedido.id}>
+                                <div>
+                                    {String(pedido.id).padStart(3, "0")}
+                                </div>
+
+                                <div>
+                                    {pedido.nomeCliente ??
+                                        `Cliente #${pedido.idCliente}`}
+                                </div>
+
+                                <div>
+                                    {formatarDia(pedido.dataPedido)}
+                                </div>
+
+                                <div>
+                                    {formatarDia(pedido.dataPrevista)}
+                                </div>
+
+                                <div>—</div>
+
+                                <div
+                                    className={
+                                        STATUS[pedido.statusPedido]?.classe ?? ""
+                                    }
+                                >
+                                    {STATUS[pedido.statusPedido]?.rotulo ??
+                                        pedido.statusPedido ??
+                                        "—"}
+                                </div>
+
+                                <div className="acoes-pedido">
+                                    <button
+                                        type="button"
+                                        className="botao-visualizar"
+                                        title="Visualizar pedido"
+                                        onClick={() =>
+                                            setAviso(
+                                                "A visualização detalhada ainda não está conectada nesta tela."
+                                            )
+                                        }
+                                    >
+                                        👁
+                                    </button>
+
+                                    {pedido.statusPedido === "PENDENTE" && (
+                                        <button
+                                            type="button"
+                                            className="botao-excluir"
+                                            title="Cancelar pedido"
+                                            onClick={() => setACancelar(pedido)}
+                                        >
+                                            🗑
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </section>
+
+                {!carregando && !erro && pedidos.length > 0 && (
+                    <footer className="paginacao-pedidos">
+                        <span>
+                            Página {pagina} de {totalPaginas}
+                        </span>
+
+                        <div>
+                            <button
+                                disabled={pagina <= 1}
+                                onClick={() =>
+                                    setPagina((atual) => atual - 1)
+                                }
+                            >
+                                Anterior
+                            </button>
+
+                            <button
+                                disabled={pagina >= totalPaginas}
+                                onClick={() =>
+                                    setPagina((atual) => atual + 1)
+                                }
+                            >
+                                Próxima
+                            </button>
+                        </div>
+                    </footer>
+                )}
             </main>
 
-
-            {/* CONFIRMAÇÃO DE CANCELAMENTO */}
             {aCancelar && (
                 <div className="modal-fundo">
-                    <div className="modal-cancelar" role="dialog" aria-modal="true">
-                        <h2>Cancelar pedido?</h2>
+                    <div className="modal-cancelar-pedido">
+                        <h2>Cancelar pedido</h2>
 
                         <p>
-                            Pedido {String(aCancelar.id).padStart(3, "0")} de{" "}
-                            {aCancelar.nomeCliente}. Essa ação não pode ser desfeita.
+                            Deseja realmente cancelar o pedido #
+                            {String(aCancelar.id).padStart(3, "0")}?
                         </p>
 
-                        <div className="modal-botoes">
+                        <p>
+                            Cliente:{" "}
+                            {aCancelar.nomeCliente ??
+                                `Cliente #${aCancelar.idCliente}`}
+                        </p>
+
+                        <div className="modal-acoes">
                             <button
-                                className="modal-voltar"
+                                type="button"
                                 onClick={() => setACancelar(null)}
                                 disabled={cancelando}
                             >
@@ -594,19 +442,18 @@ function ConsultarPedido({
                             </button>
 
                             <button
-                                className="modal-confirmar"
+                                type="button"
                                 onClick={confirmarCancelamento}
                                 disabled={cancelando}
                             >
-                                {cancelando ? "Cancelando..." : "Cancelar pedido"}
+                                {cancelando
+                                    ? "Cancelando..."
+                                    : "Confirmar cancelamento"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 }
-
-export default ConsultarPedido;

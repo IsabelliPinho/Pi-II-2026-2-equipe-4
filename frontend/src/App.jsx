@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import Login from "./pages/Login";
@@ -19,31 +20,68 @@ function App() {
     const [carrinho, setCarrinho] = useState([]);
     const [cliente, setCliente] = useState(null);
 
+    function calcularDataPrevista() {
+        const data = new Date();
+
+        data.setDate(data.getDate() + 7);
+        data.setHours(15, 0, 0, 0);
+
+        const ajustar = (numero) => String(numero).padStart(2, "0");
+
+        return (
+            `${data.getFullYear()}-` +
+            `${ajustar(data.getMonth() + 1)}-` +
+            `${ajustar(data.getDate())}T15:00:00`
+        );
+    }
+
     async function finalizarPedido(clienteCadastrado) {
         try {
+            if (!clienteCadastrado?.id) {
+                alert("Não foi possível identificar o cliente cadastrado.");
+                return;
+            }
+
+            if (carrinho.length === 0) {
+                alert("Adicione pelo menos um produto ao carrinho.");
+                return;
+            }
+
             const itens = carrinho.map((produto) => ({
                 idProduto: produto.idProduto,
                 quantidade: 1
             }));
 
-            const resposta = await fetch("http://localhost:8080/pedidos/cadastro", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    idCliente: clienteCadastrado.id,
-                    nomeGerente: "Gabriela",
-                    dataPrevista: "2026-10-05T15:00:00",
-                    formaEntrega: "RETIRADA",
-                    itens: itens
-                })
-            });
+            const dadosPedido = {
+                idCliente: clienteCadastrado.id,
+                nomeGerente: "Gabriela",
+                dataPrevista: calcularDataPrevista(),
+                formaEntrega: "RETIRADA",
+                itens: itens
+            };
+
+            console.log("Dados enviados para criar pedido:", dadosPedido);
+
+            const resposta = await fetch(
+                "http://localhost:8080/pedidos/cadastro",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dadosPedido)
+                }
+            );
 
             if (!resposta.ok) {
                 const erro = await resposta.text();
+
                 console.error("Erro ao criar pedido:", erro);
-                alert("Não foi possível criar o pedido.");
+
+                alert(
+                    "O cliente foi cadastrado, mas não foi possível criar o pedido. Verifique o console."
+                );
+
                 return;
             }
 
@@ -54,10 +92,10 @@ function App() {
             setCliente(clienteCadastrado);
             setCarrinho([]);
             setTela("pedidoRealizado");
-
         } catch (erro) {
             console.error("Erro ao criar pedido:", erro);
-            alert("Erro de conexão com o servidor.");
+
+            alert("Erro de conexão ao tentar criar o pedido.");
         }
     }
 
@@ -73,7 +111,11 @@ function App() {
         return (
             <Pedido
                 adicionarCarrinho={(produto) => {
-                    setCarrinho([...carrinho, produto]);
+                    setCarrinho((carrinhoAtual) => [
+                        ...carrinhoAtual,
+                        produto
+                    ]);
+
                     setTela("carrinho");
                 }}
             />

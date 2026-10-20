@@ -1,18 +1,17 @@
+
 package com.gabicake.api.service;
 
-/**
- * @author Sanara Carvalho
- */
+import java.util.List;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import com.gabicake.api.dto.ClienteBuscaResponseDTO;
 import com.gabicake.api.entity.ClienteEntity;
 import com.gabicake.api.exception.ApiException;
 import com.gabicake.api.model.Cliente;
 import com.gabicake.api.repository.ClienteRepository;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ClienteService {
@@ -23,7 +22,6 @@ public class ClienteService {
         this.repository = repository;
     }
 
-    // GET /clientes/busca: consulta o PostgreSQL.
     public List<ClienteBuscaResponseDTO> buscar(String busca) {
         Sort ordem = Sort.by("id");
         List<ClienteEntity> clientes;
@@ -31,53 +29,96 @@ public class ClienteService {
         if (busca == null || busca.isBlank()) {
             clientes = repository.findAll(ordem);
         } else if (busca.trim().length() < 3) {
-            throw ApiException.validacao("A busca deve possuir pelo menos 3 caracteres.");
+            throw ApiException.validacao(
+                "A busca deve possuir pelo menos 3 caracteres."
+            );
         } else {
             String termo = busca.trim();
-            clientes = repository.findByNomeContainingIgnoreCaseOrTelefoneContainingIgnoreCase(termo, termo, ordem);
+
+            clientes = repository
+                .findByNomeContainingIgnoreCaseOrTelefoneContainingIgnoreCase(
+                    termo, termo, ordem
+                );
         }
 
-        // O banco guarda um telefone por cliente; o contrato devolve uma lista.
         return clientes.stream()
-                .map(c -> new ClienteBuscaResponseDTO(c.getId().longValue(), c.getNome(), List.of(c.getTelefone())))
-                .toList();
+            .map(c -> new ClienteBuscaResponseDTO(
+                c.getId().longValue(),
+                c.getNome(),
+                List.of(c.getTelefone())
+            ))
+            .toList();
     }
 
-    // POST /clientes/cadastro: persiste diretamente no PostgreSQL utilizando a ClienteEntity.
     public Cliente cadastrar(Cliente clienteDto) {
-        if (clienteDto.getNome() == null || clienteDto.getNome().isBlank()
-                || clienteDto.getTelefones() == null || clienteDto.getTelefones().isEmpty()) {
-            throw ApiException.validacao("Nome e ao menos um telefone são obrigatórios.");
+        if (clienteDto == null) {
+            throw ApiException.validacao(
+                "Os dados do cliente são obrigatórios."
+            );
         }
 
-        // Pega o primeiro telefone enviado no DTO
-        String telefonePrincipal = clienteDto.getTelefones().get(0);
+        if (clienteDto.getNome() == null
+                || clienteDto.getNome().isBlank()) {
+            throw ApiException.validacao(
+                "O nome do cliente é obrigatório."
+            );
+        }
 
-        // Instancia e preenche a entidade mapeada para o banco com todos os campos necessários
+        if (clienteDto.getTelefones() == null
+                || clienteDto.getTelefones().isEmpty()
+                || clienteDto.getTelefones().get(0) == null
+                || clienteDto.getTelefones().get(0).isBlank()) {
+            throw ApiException.validacao(
+                "Informe ao menos um telefone válido."
+            );
+        }
+
+        if (clienteDto.getRua() == null
+                || clienteDto.getRua().isBlank()
+                || clienteDto.getNumCasa() == null
+                || clienteDto.getNumCasa().isBlank()
+                || clienteDto.getBairro() == null
+                || clienteDto.getBairro().isBlank()
+                || clienteDto.getCep() == null
+                || clienteDto.getCep().isBlank()) {
+            throw ApiException.validacao(
+                "Rua, número da casa, bairro e CEP são obrigatórios."
+            );
+        }
+
         ClienteEntity entity = new ClienteEntity();
-        // Nota: Como o setId não está visível explicitamente na entity (gerado pelo banco), 
-        // os campos são definidos via atributos ou se houver construtor/setters adequados.
-        // Certifique-se de que sua ClienteEntity possui setters para esses campos caso precise atribuí-los diretamente,
-        // ou utilize um construtor se preferir.
-        
+
+        entity.setNome(clienteDto.getNome().trim());
+        entity.setTelefone(
+            clienteDto.getTelefones().get(0).trim()
+        );
+        entity.setRua(clienteDto.getRua().trim());
+        entity.setNumCasa(clienteDto.getNumCasa().trim());
+        entity.setBairro(clienteDto.getBairro().trim());
+        entity.setCep(clienteDto.getCep().trim());
+
         try {
-            // Salva no banco de dados através do Spring Data JPA
             ClienteEntity salvo = repository.save(entity);
 
-            // Retorna no formato de modelo esperado pela API
             Cliente clienteRetorno = new Cliente();
             clienteRetorno.setId(salvo.getId().longValue());
             clienteRetorno.setNome(salvo.getNome());
-            clienteRetorno.setTelefones(List.of(salvo.getTelefone()));
+            clienteRetorno.setTelefones(
+                List.of(salvo.getTelefone())
+            );
             clienteRetorno.setRua(salvo.getRua());
             clienteRetorno.setNumCasa(salvo.getNumCasa());
             clienteRetorno.setBairro(salvo.getBairro());
             clienteRetorno.setCep(salvo.getCep());
-            
+
             return clienteRetorno;
-            
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw ApiException.duplicado("Erro de integridade no banco de dados. Verifique os dados informados.");
+
+        } catch (DataIntegrityViolationException e) {
+            throw ApiException.duplicado(
+                "Não foi possível cadastrar o cliente. "
+                + "Verifique se o telefone já está cadastrado "
+                + "e se os dados informados são válidos."
+            );
         }
     }
 }

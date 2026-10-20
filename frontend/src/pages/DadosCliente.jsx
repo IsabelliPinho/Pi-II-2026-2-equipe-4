@@ -4,150 +4,258 @@ import "../styles/DadosCliente.css";
 function DadosCliente({ voltarCarrinho, confirmarContato }) {
     const [nome, setNome] = useState("");
     const [telefone, setTelefone] = useState("");
-    const [endereco, setEndereco] = useState("");
-    const [enviando, setEnviando] = useState(false);
+    const [rua, setRua] = useState("");
+    const [numCasa, setNumCasa] = useState("");
+    const [bairro, setBairro] = useState("");
+    const [cep, setCep] = useState("");
+    const [erro, setErro] = useState("");
+    const [carregando, setCarregando] = useState(false);
 
-    async function cadastrarCliente() {
-        if (!nome || !telefone || !endereco) {
-            alert("Preencha todos os campos.");
+    function formatarTelefone(valor) {
+        const numeros = valor.replace(/\D/g, "").slice(0, 11);
+
+        if (numeros.length <= 2) {
+            return numeros.length ? `(${numeros}` : "";
+        }
+
+        if (numeros.length <= 6) {
+            return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
+        }
+
+        if (numeros.length <= 10) {
+            return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+        }
+
+        return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+    }
+
+    function formatarCep(valor) {
+        const numeros = valor.replace(/\D/g, "").slice(0, 8);
+
+        if (numeros.length > 5) {
+            return `${numeros.slice(0, 5)}-${numeros.slice(5)}`;
+        }
+
+        return numeros;
+    }
+
+    async function handleConfirmar(event) {
+        event.preventDefault();
+
+        if (carregando) return;
+
+        setErro("");
+
+        const telefoneNumeros = telefone.replace(/\D/g, "");
+        const cepFormatado = formatarCep(cep);
+
+        if (!nome.trim()) {
+            setErro("Informe seu nome completo.");
             return;
         }
 
-        setEnviando(true);
+        if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+            setErro("Informe um telefone com DDD válido.");
+            return;
+        }
+
+        if (!rua.trim()) {
+            setErro("Informe o nome da rua.");
+            return;
+        }
+
+        if (!numCasa.trim()) {
+            setErro("Informe o número da casa.");
+            return;
+        }
+
+        if (!bairro.trim()) {
+            setErro("Informe seu bairro.");
+            return;
+        }
+
+        if (!/^\d{5}-\d{3}$/.test(cepFormatado)) {
+            setErro("Informe um CEP válido no formato 00000-000.");
+            return;
+        }
+
+        if (typeof confirmarContato !== "function") {
+            setErro("A função de confirmação não foi configurada.");
+            return;
+        }
+
+        const dadosCliente = {
+            nome: nome.trim(),
+            telefones: [formatarTelefone(telefone)],
+            rua: rua.trim(),
+            numCasa: numCasa.trim(),
+            bairro: bairro.trim(),
+            cep: cepFormatado,
+        };
 
         try {
+            setCarregando(true);
+
             const resposta = await fetch("http://localhost:8080/clientes/cadastro", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    nome: nome,
-                    telefones: [telefone],
-                    bairro: "",
-                    rua: endereco,
-                    numCasa: "",
-                    cep: ""
-                })
+                body: JSON.stringify(dadosCliente),
             });
 
+            const resultado = await resposta.json().catch(() => null);
+
             if (!resposta.ok) {
-                throw new Error("Erro ao cadastrar cliente");
+                throw new Error(
+                    resultado?.message ||
+                    resultado?.mensagem ||
+                    "Não foi possível cadastrar o cliente. Verifique os dados."
+                );
             }
 
-            const cliente = await resposta.json();
+            if (!resultado?.id) {
+                throw new Error(
+                    "A API não retornou o ID do cliente cadastrado."
+                );
+            }
 
-            console.log("Cliente cadastrado:", cliente);
+            await confirmarContato(resultado);
+        } catch (error) {
+            console.error("Erro ao confirmar contato:", error);
 
-            confirmarContato(cliente);
-
-        } catch (erro) {
-            console.error("Erro ao cadastrar cliente:", erro);
-            alert("Não foi possível cadastrar o cliente.");
+            setErro(
+                error.message ||
+                "Não foi possível concluir a operação. Tente novamente."
+            );
         } finally {
-            setEnviando(false);
+            setCarregando(false);
         }
     }
 
     return (
-        <div className="dados-container">
-
-            {/* BARRA SUPERIOR */}
-            <header className="dados-header">
-
+        <div className="dados-cliente">
+            <header className="dados-cliente-header">
                 <button
-                    className="botao-fechar-dados"
+                    type="button"
+                    className="dados-cliente-fechar"
                     onClick={voltarCarrinho}
+                    aria-label="Fechar"
+                    disabled={carregando}
                 >
                     ×
                 </button>
-
             </header>
 
-
-            {/* BARRA VERDE */}
-            <div className="barra-quase-la">
+            <div className="dados-cliente-progresso">
                 Quase lá...
             </div>
 
-
-            {/* CONTEÚDO */}
-            <main className="dados-conteudo">
-
-                {/* TÍTULO */}
-                <div className="titulo-dados">
-
-                    <div className="icone-usuario-dados">
-
-                        <div className="cabeca-dados"></div>
-
-                        <div className="corpo-dados"></div>
-
+            <main className="dados-cliente-conteudo">
+                <div className="dados-cliente-titulo">
+                    <div className="dados-cliente-icone">
+                        <span className="dados-cliente-cabeca" />
+                        <span className="dados-cliente-corpo" />
                     </div>
 
                     <h1>Dados pra contato</h1>
-
                 </div>
 
-
-                {/* FORMULÁRIO */}
-                <div className="formulario-dados">
-
-                    {/* NOME */}
-                    <div className="campo-dados">
-
-                        <label>Nome</label>
-
+                <form
+                    className="dados-cliente-formulario"
+                    onSubmit={handleConfirmar}
+                >
+                    <div className="dados-cliente-campo">
+                        <label htmlFor="nome">Nome</label>
                         <input
+                            id="nome"
                             type="text"
                             value={nome}
                             onChange={(e) => setNome(e.target.value)}
+                            required
+                            disabled={carregando}
                         />
-
                     </div>
 
-
-                    {/* TELEFONE */}
-                    <div className="campo-dados">
-
-                        <label>Telefone</label>
-
+                    <div className="dados-cliente-campo">
+                        <label htmlFor="telefone">Telefone</label>
                         <input
+                            id="telefone"
                             type="tel"
                             value={telefone}
-                            onChange={(e) => setTelefone(e.target.value)}
+                            onChange={(e) =>
+                                setTelefone(formatarTelefone(e.target.value))
+                            }
+                            maxLength={16}
+                            required
+                            disabled={carregando}
                         />
-
                     </div>
 
-
-                    {/* ENDEREÇO */}
-                    <div className="campo-dados">
-
-                        <label>Endereço</label>
-
+                    <div className="dados-cliente-campo">
+                        <label htmlFor="rua">Endereço</label>
                         <input
+                            id="rua"
                             type="text"
-                            value={endereco}
-                            onChange={(e) => setEndereco(e.target.value)}
+                            value={rua}
+                            onChange={(e) => setRua(e.target.value)}
+                            required
+                            disabled={carregando}
                         />
-
                     </div>
 
+                    <div className="dados-cliente-campo dados-cliente-campo-extra">
+                        <label htmlFor="numCasa">Número</label>
+                        <input
+                            id="numCasa"
+                            type="text"
+                            value={numCasa}
+                            onChange={(e) => setNumCasa(e.target.value)}
+                            required
+                            disabled={carregando}
+                        />
+                    </div>
 
-                    {/* CONFIRMAR */}
+                    <div className="dados-cliente-campo dados-cliente-campo-extra">
+                        <label htmlFor="bairro">Bairro</label>
+                        <input
+                            id="bairro"
+                            type="text"
+                            value={bairro}
+                            onChange={(e) => setBairro(e.target.value)}
+                            required
+                            disabled={carregando}
+                        />
+                    </div>
+
+                    <div className="dados-cliente-campo dados-cliente-campo-extra">
+                        <label htmlFor="cep">CEP</label>
+                        <input
+                            id="cep"
+                            type="text"
+                            value={cep}
+                            onChange={(e) => setCep(formatarCep(e.target.value))}
+                            maxLength={9}
+                            required
+                            disabled={carregando}
+                        />
+                    </div>
+
+                    {erro && (
+                        <p className="dados-cliente-erro" role="alert">
+                            {erro}
+                        </p>
+                    )}
+
                     <button
-                        className="botao-confirmar-contato"
-                        onClick={cadastrarCliente}
-                        disabled={enviando}
+                        type="submit"
+                        className="dados-cliente-confirmar"
+                        disabled={carregando}
                     >
-                        {enviando ? "Cadastrando..." : "Confirmar Contato"}
+                        {carregando ? "Processando..." : "Confirmar Contato"}
                     </button>
-
-                </div>
-
+                </form>
             </main>
-
         </div>
     );
 }

@@ -11,40 +11,64 @@ function Clientes({
     abrirClientes,
     fecharClientes
 }) {
-
     const [termo, setTermo] = useState("");
     const [clientes, setClientes] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
+    const [tentativa, setTentativa] = useState(0);
 
-    // RF002: só busca com 3+ caracteres; campo vazio lista todos.
     useEffect(() => {
-        const t = termo.trim();
-        if (t.length > 0 && t.length < 3) return;
+        const busca = termo.trim();
+
+        if (busca.length > 0 && busca.length < 3) {
+            setCarregando(false);
+            setErro("");
+            setClientes([]);
+            return;
+        }
 
         let cancelado = false;
-        setCarregando(true);
-        setErro("");
 
-        const espera = setTimeout(() => {
-            buscarClientes(t)
-                .then((dados) => !cancelado && setClientes(dados))
-                .catch((e) => !cancelado && setErro(e.message))
-                .finally(() => !cancelado && setCarregando(false));
-        }, 300);
+        async function carregarClientes() {
+            setCarregando(true);
+            setErro("");
+
+            try {
+                const dados = await buscarClientes(busca);
+
+                if (!cancelado) {
+                    setClientes(Array.isArray(dados) ? dados : []);
+                }
+            } catch (e) {
+                if (!cancelado) {
+                    setClientes([]);
+                    setErro(
+                        e.message ||
+                        "Não foi possível carregar os clientes."
+                    );
+                }
+            } finally {
+                if (!cancelado) {
+                    setCarregando(false);
+                }
+            }
+        }
+
+        const espera = setTimeout(carregarClientes, 300);
 
         return () => {
             cancelado = true;
             clearTimeout(espera);
         };
-    }, [termo]);
+    }, [termo, tentativa]);
+
+    function tentarNovamente() {
+        setTentativa((atual) => atual + 1);
+    }
 
     return (
         <div className="clientes-container">
-
-            {/* BARRA SUPERIOR */}
             <header className="clientes-header">
-
                 <div className="clientes-logo">
                     <div className="logo-circulo-clientes">
                         <span>GM</span>
@@ -52,7 +76,6 @@ function Clientes({
                 </div>
 
                 <nav className="clientes-menu">
-
                     <button onClick={abrirDashboard}>
                         Dashboard
                     </button>
@@ -79,46 +102,46 @@ function Clientes({
                     >
                         Clientes
                     </button>
-
                 </nav>
 
-                {/* SINO */}
-                <button className="clientes-notificacao">
+                <button
+                    className="clientes-notificacao"
+                    type="button"
+                    aria-label="Notificações"
+                >
                     🔔
                 </button>
 
-                {/* FECHAR */}
                 <button
                     className="botao-fechar-clientes"
                     onClick={fecharClientes}
+                    type="button"
+                    aria-label="Fechar tela de clientes"
                 >
                     ×
                 </button>
-
             </header>
 
-
-            {/* CONTEÚDO */}
             <main className="clientes-main">
-
                 <h1>Clientes</h1>
 
-
-                {/* PESQUISA + CADASTRAR */}
                 <div className="clientes-acoes">
-
                     <div className="campo-pesquisa">
-
-                        {/* ÍCONE DE PESQUISA */}
                         <svg
                             className="icone-pesquisa"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2"
+                            aria-hidden="true"
                         >
                             <circle cx="11" cy="11" r="7" />
-                            <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                            <line
+                                x1="16.5"
+                                y1="16.5"
+                                x2="21"
+                                y2="21"
+                            />
                         </svg>
 
                         <input
@@ -126,19 +149,21 @@ function Clientes({
                             placeholder="Busque por nome ou telefone"
                             value={termo}
                             onChange={(e) => setTermo(e.target.value)}
+                            aria-label="Buscar clientes por nome ou telefone"
                         />
-
                     </div>
 
+                    <button
+                        className="botao-cadastrar"
+                        type="button"
+                        onClick={() => {
+                            alert(
+                                "A tela de cadastro de clientes ainda não está conectada."
+                            );
+                        }}
+                    >
+                        <span>Cadastrar</span>
 
-                    {/* CADASTRAR */}
-                    <button className="botao-cadastrar">
-
-                        <span>
-                            Cadastrar
-                        </span>
-
-                        {/* CONTORNO DE PESSOA */}
                         <svg
                             className="icone-pessoa"
                             viewBox="0 0 24 24"
@@ -147,37 +172,21 @@ function Clientes({
                             strokeWidth="1.8"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            aria-hidden="true"
                         >
                             <circle cx="9" cy="8" r="3.5" />
                             <path d="M2.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2" />
-
-                            {/* Sinal de + */}
                             <line x1="18" y1="9" x2="18" y2="16" />
                             <line x1="14.5" y1="12.5" x2="21.5" y2="12.5" />
                         </svg>
-
                     </button>
-
                 </div>
 
-
-                {/* TABELA */}
                 <div className="tabela-clientes">
-
-                    {/* CABEÇALHO */}
                     <div className="tabela-header">
-
-                        <div className="coluna-numero">
-                            #
-                        </div>
-
-                        <div className="coluna-cliente">
-                            Cliente
-                        </div>
-
-                        <div className="coluna-contato">
-                            Contato
-                        </div>
+                        <div className="coluna-numero">#</div>
+                        <div className="coluna-cliente">Cliente</div>
+                        <div className="coluna-contato">Contato</div>
 
                         <div className="coluna-pedidos">
                             Nº
@@ -185,88 +194,133 @@ function Clientes({
                             Pedidos
                         </div>
 
-                        <div className="coluna-acoes">
-                        </div>
-
+                        <div className="coluna-acoes"></div>
                     </div>
 
+                    {!carregando &&
+                        !erro &&
+                        termo.trim().length > 0 &&
+                        termo.trim().length < 3 && (
+                            <p className="estado-clientes" role="status">
+                                Digite pelo menos 3 caracteres para pesquisar.
+                            </p>
+                        )}
 
-                    {/* CLIENTES */}
-                    {clientes.map((cliente) => (
+                    {carregando && (
+                        <p className="estado-clientes" role="status">
+                            Carregando clientes...
+                        </p>
+                    )}
 
+                    {!carregando && erro && (
                         <div
-                            className="cliente-linha"
-                            key={cliente.id ?? cliente.numero}
+                            className="estado-clientes estado-clientes-erro"
+                            role="alert"
                         >
+                            <p>{erro}</p>
 
-                            <div className="coluna-numero">
-                                {cliente.id ?? cliente.numero}
-                            </div>
-
-                            <div className="coluna-cliente">
-                                {cliente.nome}
-                            </div>
-
-                            <div className="coluna-contato">
-                                {cliente.telefones ? cliente.telefones[0] : (cliente.contato ?? "—")}
-                            </div>
-
-                            <div className="coluna-pedidos">
-                                {cliente.pedidos ?? "—"}
-                            </div>
-
-                            <div className="coluna-acoes">
-
-                                {/* OLHO */}
-                                <button
-                                    className="botao-visualizar"
-                                    title="Visualizar cliente"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
-                                        <circle cx="12" cy="12" r="2.8" />
-                                    </svg>
-                                </button>
-
-
-                                {/* LIXEIRA */}
-                                <button
-                                    className="botao-excluir"
-                                    title="Excluir cliente"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="4 7 20 7" />
-                                        <path d="M9 7V4h6v3" />
-                                        <path d="M6 7l1 14h10l1-14" />
-                                        <line x1="10" y1="11" x2="10" y2="18" />
-                                        <line x1="14" y1="11" x2="14" y2="18" />
-                                    </svg>
-                                </button>
-
-                            </div>
-
+                            <button
+                                type="button"
+                                onClick={tentarNovamente}
+                            >
+                                Tentar novamente
+                            </button>
                         </div>
+                    )}
 
-                    ))}
+                    {!carregando &&
+                        !erro &&
+                        !(
+                            termo.trim().length > 0 &&
+                            termo.trim().length < 3
+                        ) &&
+                        clientes.length === 0 && (
+                            <p className="estado-clientes" role="status">
+                                Nenhum cliente encontrado.
+                            </p>
+                        )}
 
+                    {!carregando &&
+                        !erro &&
+                        clientes.map((cliente) => (
+                            <div
+                                className="cliente-linha"
+                                key={cliente.id}
+                            >
+                                <div className="coluna-numero">
+                                    {cliente.id}
+                                </div>
+
+                                <div className="coluna-cliente">
+                                    {cliente.nome}
+                                </div>
+
+                                <div className="coluna-contato">
+                                    {cliente.telefones?.[0] ?? "—"}
+                                </div>
+
+                                <div className="coluna-pedidos">
+                                    —
+                                </div>
+
+                                <div className="coluna-acoes">
+                                    <button
+                                        className="botao-visualizar"
+                                        type="button"
+                                        title="Visualizar cliente"
+                                        aria-label={`Visualizar cliente ${cliente.nome}`}
+                                        onClick={() => {
+                                            alert(
+                                                "A visualização de detalhes do cliente ainda não está conectada."
+                                            );
+                                        }}
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+                                            <circle cx="12" cy="12" r="2.8" />
+                                        </svg>
+                                    </button>
+
+                                    <button
+                                        className="botao-excluir"
+                                        type="button"
+                                        title="Excluir cliente"
+                                        aria-label={`Excluir cliente ${cliente.nome}`}
+                                        onClick={() => {
+                                            alert(
+                                                "A exclusão de clientes ainda não está conectada ao backend."
+                                            );
+                                        }}
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <polyline points="4 7 20 7" />
+                                            <path d="M9 7V4h6v3" />
+                                            <path d="M6 7l1 14h10l1-14" />
+                                            <line x1="10" y1="11" x2="10" y2="18" />
+                                            <line x1="14" y1="11" x2="14" y2="18" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                 </div>
-
             </main>
-
         </div>
     );
 }
