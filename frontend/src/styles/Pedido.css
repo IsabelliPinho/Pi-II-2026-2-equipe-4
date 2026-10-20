@@ -327,3 +327,25 @@ body {
         font-size: 20px;
     }
 }
+
+.botao-voltar-painel {
+    position: absolute;
+    right: 9px;
+    top: 7px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+    background: transparent;
+
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 35px;
+
+    cursor: pointer;
+}
+
+.botao-voltar-painel:hover {
+    opacity: 0.75;
+}

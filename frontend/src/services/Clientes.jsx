@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { buscarClientes, ApiError } from "../api";
+import { buscarClientes, ApiError } from "./api.js";
 
 export function TelaClientes() {
   const [termo, setTermo] = useState("");

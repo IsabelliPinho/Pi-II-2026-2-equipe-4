@@ -1,24 +1,30 @@
-
 import { useState } from "react";
 
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
-import Pedido from "./pages/Pedido";
 import Carrinho from "./pages/Carrinho";
 import DadosCliente from "./pages/DadosCliente";
 import CarrinhoVazio from "./pages/CarrinhoVazio";
 import PedidoRealizado from "./pages/PedidoRealizado";
+import Pedido from "./pages/Pedido";
 
 import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
 import ConsultarPedido from "./pages/ConsultarPedido";
 import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
+import Alertas from "./pages/Alertas";
 
 function App() {
     const [tela, setTela] = useState("dashboard");
     const [carrinho, setCarrinho] = useState([]);
     const [cliente, setCliente] = useState(null);
+    const [idPedidoAberto, setIdPedidoAberto] = useState(null);
+
+    function abrirDetalhe(id) {
+        setIdPedidoAberto(id);
+        setTela("detalhePedido");
+    }
 
     function calcularDataPrevista() {
         const data = new Date();
@@ -48,8 +54,8 @@ function App() {
             }
 
             const itens = carrinho.map((produto) => ({
-                idProduto: produto.idProduto,
-                quantidade: 1
+                idProduto: produto.idProduto ?? produto.id,
+                quantidade: produto.quantidade || 1
             }));
 
             const dadosPedido = {
@@ -57,7 +63,7 @@ function App() {
                 nomeGerente: "Gabriela",
                 dataPrevista: calcularDataPrevista(),
                 formaEntrega: "RETIRADA",
-                itens: itens
+                itens
             };
 
             console.log("Dados enviados para criar pedido:", dadosPedido);
@@ -78,15 +84,22 @@ function App() {
 
                 console.error("Erro ao criar pedido:", erro);
 
+                let motivo = "";
+
+                try {
+                    motivo = JSON.parse(erro).message ?? "";
+                } catch {
+                    // A resposta não era JSON.
+                }
+
                 alert(
-                    "O cliente foi cadastrado, mas não foi possível criar o pedido. Verifique o console."
+                    `Não foi possível criar o pedido. ${motivo || "Verifique o console."}`
                 );
 
                 return;
             }
 
             const pedidoCriado = await resposta.json();
-
             console.log("Pedido criado:", pedidoCriado);
 
             setCliente(clienteCadastrado);
@@ -99,21 +112,32 @@ function App() {
         }
     }
 
-    if (tela === "cadastro") {
+    if (tela === "login") {
         return (
-            <Cadastro
-                voltarLogin={() => setTela("login")}
+            <Login
+                abrirCadastro={() => setTela("cadastro")}
+                entrar={() => setTela("dashboard")}
             />
         );
+    }
+
+    if (tela === "cadastro") {
+        return <Cadastro voltarLogin={() => setTela("login")} />;
     }
 
     if (tela === "pedido") {
         return (
             <Pedido
+                voltarDashboard={() => setTela("dashboard")}
                 adicionarCarrinho={(produto) => {
+                    const produtoNormalizado = {
+                        ...produto,
+                        idProduto: produto.idProduto ?? produto.id
+                    };
+
                     setCarrinho((carrinhoAtual) => [
                         ...carrinhoAtual,
-                        produto
+                        produtoNormalizado
                     ]);
 
                     setTela("carrinho");
@@ -138,11 +162,7 @@ function App() {
     }
 
     if (tela === "carrinhoVazio") {
-        return (
-            <CarrinhoVazio
-                voltarCarrinho={() => setTela("carrinho")}
-            />
-        );
+        return <CarrinhoVazio voltarCarrinho={() => setTela("carrinho")} />;
     }
 
     if (tela === "dados") {
@@ -156,9 +176,7 @@ function App() {
 
     if (tela === "pedidoRealizado") {
         return (
-            <PedidoRealizado
-                voltarPedido={() => setTela("pedido")}
-            />
+            <PedidoRealizado voltarPedido={() => setTela("pedido")} />
         );
     }
 
@@ -169,8 +187,9 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 fecharDashboard={() => setTela("login")}
             />
         );
@@ -183,8 +202,9 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 fecharClientes={() => setTela("dashboard")}
             />
         );
@@ -197,8 +217,10 @@ function App() {
                 abrirNovoPedido={() => setTela("pedido")}
                 abrirConsultarPedido={() => setTela("consultarPedido")}
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => setTela("detalhePedido")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
+                abrirDetalhe={abrirDetalhe}
                 fecharConsultarPedido={() => setTela("dashboard")}
             />
         );
@@ -208,6 +230,21 @@ function App() {
         return (
             <Pendentes
                 voltarDashboard={() => setTela("dashboard")}
+                abrirDetalhe={abrirDetalhe}
+            />
+        );
+    }
+
+    if (tela === "alertas") {
+        return (
+            <Alertas
+                voltarDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirClientes={() => setTela("clientes")}
+                abrirDetalhe={abrirDetalhe}
             />
         );
     }
@@ -215,17 +252,15 @@ function App() {
     if (tela === "detalhePedido") {
         return (
             <DetalhePedido
+                idPedido={idPedidoAberto}
                 voltarDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
                 editarPedido={() => {}}
-            />
-        );
-    }
-
-    if (tela === "login") {
-        return (
-            <Login
-                abrirCadastro={() => setTela("cadastro")}
-                entrar={() => setTela("dashboard")}
             />
         );
     }
@@ -236,8 +271,9 @@ function App() {
             abrirNovoPedido={() => setTela("pedido")}
             abrirConsultarPedido={() => setTela("consultarPedido")}
             abrirPendentes={() => setTela("pendentes")}
-            abrirFinanceiro={() => setTela("detalhePedido")}
+            abrirFinanceiro={() => abrirDetalhe(null)}
             abrirClientes={() => setTela("clientes")}
+            abrirAlertas={() => setTela("alertas")}
             fecharDashboard={() => setTela("login")}
         />
     );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "../styles/Clientes.css";
-import { buscarClientes } from "../services/api";
+import { buscarClientes, consultarPedidos } from "../services/api";
 
 function Clientes({
     abrirDashboard,
@@ -9,6 +9,7 @@ function Clientes({
     abrirPendentes,
     abrirFinanceiro,
     abrirClientes,
+    abrirAlertas,
     fecharClientes
 }) {
     const [termo, setTermo] = useState("");
@@ -16,6 +17,44 @@ function Clientes({
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [tentativa, setTentativa] = useState(0);
+    const [contagem, setContagem] = useState(null);
+
+    const termoCurto =
+        termo.trim().length > 0 && termo.trim().length < 3;
+
+    useEffect(() => {
+        let cancelado = false;
+
+        async function carregarContagem() {
+            try {
+                const pedidos = await consultarPedidos();
+
+                if (cancelado) return;
+
+                const conta = {};
+
+                pedidos.forEach((pedido) => {
+                    const idCliente = pedido.idCliente;
+
+                    if (idCliente != null) {
+                        conta[idCliente] = (conta[idCliente] ?? 0) + 1;
+                    }
+                });
+
+                setContagem(conta);
+            } catch (e) {
+                if (!cancelado) {
+                    setContagem(null);
+                }
+            }
+        }
+
+        carregarContagem();
+
+        return () => {
+            cancelado = true;
+        };
+    }, []);
 
     useEffect(() => {
         const busca = termo.trim();
@@ -107,6 +146,7 @@ function Clientes({
                 <button
                     className="clientes-notificacao"
                     type="button"
+                    onClick={abrirAlertas}
                     aria-label="Notificações"
                 >
                     🔔
@@ -197,14 +237,11 @@ function Clientes({
                         <div className="coluna-acoes"></div>
                     </div>
 
-                    {!carregando &&
-                        !erro &&
-                        termo.trim().length > 0 &&
-                        termo.trim().length < 3 && (
-                            <p className="estado-clientes" role="status">
-                                Digite pelo menos 3 caracteres para pesquisar.
-                            </p>
-                        )}
+                    {termoCurto && (
+                        <p className="estado-clientes" role="status">
+                            Digite pelo menos 3 caracteres para pesquisar.
+                        </p>
+                    )}
 
                     {carregando && (
                         <p className="estado-clientes" role="status">
@@ -230,10 +267,7 @@ function Clientes({
 
                     {!carregando &&
                         !erro &&
-                        !(
-                            termo.trim().length > 0 &&
-                            termo.trim().length < 3
-                        ) &&
+                        !termoCurto &&
                         clientes.length === 0 && (
                             <p className="estado-clientes" role="status">
                                 Nenhum cliente encontrado.
@@ -242,13 +276,16 @@ function Clientes({
 
                     {!carregando &&
                         !erro &&
+                        !termoCurto &&
                         clientes.map((cliente) => (
                             <div
                                 className="cliente-linha"
                                 key={cliente.id}
                             >
                                 <div className="coluna-numero">
-                                    {cliente.id}
+                                    {String(
+                                        cliente.id ?? cliente.numero ?? "—"
+                                    ).padStart(3, "0")}
                                 </div>
 
                                 <div className="coluna-cliente">
@@ -256,11 +293,15 @@ function Clientes({
                                 </div>
 
                                 <div className="coluna-contato">
-                                    {cliente.telefones?.[0] ?? "—"}
+                                    {cliente.telefones?.[0] ??
+                                        cliente.contato ??
+                                        "—"}
                                 </div>
 
                                 <div className="coluna-pedidos">
-                                    —
+                                    {contagem
+                                        ? contagem[cliente.id] ?? 0
+                                        : "—"}
                                 </div>
 
                                 <div className="coluna-acoes">

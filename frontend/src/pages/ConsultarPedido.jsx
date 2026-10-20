@@ -1,39 +1,13 @@
 import { useEffect, useState } from "react";
 import "../styles/ConsultarPedido.css";
-import { atualizarPedido, consultarPedidos } from "../services/api";
+import {
+    atualizarPedido,
+    buscarClientes,
+    consultarPedidos
+} from "../services/api";
+import { STATUS, estaPendente, formatarDia } from "../utils/Pedidos";
 
 const POR_PAGINA = 5;
-
-const STATUS = {
-    PENDENTE: {
-        rotulo: "Pendente",
-        classe: "status-pendente",
-    },
-    CONFIRMADO: {
-        rotulo: "Confirmado",
-        classe: "status-pendente",
-    },
-    EM_PRODUCAO: {
-        rotulo: "Em produção",
-        classe: "status-pendente",
-    },
-    PRONTO: {
-        rotulo: "Pronto",
-        classe: "status-entregue",
-    },
-    ENTREGUE: {
-        rotulo: "Entregue",
-        classe: "status-entregue",
-    },
-    ATENDIDO: {
-        rotulo: "Atendido",
-        classe: "status-entregue",
-    },
-    CANCELADO: {
-        rotulo: "Cancelado",
-        classe: "status-cancelado",
-    },
-};
 
 function paraISO(data) {
     const ano = data.getFullYear();
@@ -43,23 +17,24 @@ function paraISO(data) {
     return `${ano}-${mes}-${dia}`;
 }
 
-function formatarDia(data) {
-    if (!data) return "—";
-
-    const [ano, mes, dia] = data.slice(0, 10).split("-");
-
-    if (!ano || !mes || !dia) return "—";
-
-    return `${dia}/${mes}`;
-}
-
-export default function ConsultarPedido() {
+function ConsultarPedido({
+    abrirDashboard,
+    abrirNovoPedido,
+    abrirConsultarPedido,
+    abrirPendentes,
+    abrirFinanceiro,
+    abrirClientes,
+    abrirAlertas,
+    abrirDetalhe,
+    fecharConsultarPedido
+}) {
     const [inicio, setInicio] = useState("");
     const [fim, setFim] = useState("");
     const [pedidos, setPedidos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
     const [pagina, setPagina] = useState(1);
+    const [clientesPorId, setClientesPorId] = useState({});
     const [aCancelar, setACancelar] = useState(null);
     const [cancelando, setCancelando] = useState(false);
     const [aviso, setAviso] = useState("");
@@ -79,16 +54,15 @@ export default function ConsultarPedido() {
         setCarregando(true);
 
         try {
-            const dados = await consultarPedidos();
+            const dados = await consultarPedidos({ inicio: de, fim: ate });
 
             const filtrados = dados.filter((pedido) => {
-                if (!pedido.dataPrevista) {
-                    return !de && !ate;
-                }
+                const dia = pedido.dataPrevista?.slice(0, 10) ?? "";
 
-                const dia = pedido.dataPrevista.slice(0, 10);
-
-                return (!de || dia >= de) && (!ate || dia <= ate);
+                return (
+                    (!de || (dia && dia >= de)) &&
+                    (!ate || (dia && dia <= ate))
+                );
             });
 
             setPedidos(filtrados);
@@ -103,6 +77,30 @@ export default function ConsultarPedido() {
 
     useEffect(() => {
         buscar("", "");
+
+        let cancelado = false;
+
+        buscarClientes("")
+            .then((lista) => {
+                if (cancelado) return;
+
+                const mapa = {};
+
+                lista.forEach((cliente) => {
+                    mapa[cliente.id] = cliente;
+                });
+
+                setClientesPorId(mapa);
+            })
+            .catch(() => {
+                if (!cancelado) {
+                    setClientesPorId({});
+                }
+            });
+
+        return () => {
+            cancelado = true;
+        };
     }, []);
 
     async function confirmarCancelamento() {
@@ -114,7 +112,7 @@ export default function ConsultarPedido() {
 
         try {
             await atualizarPedido(aCancelar.id, {
-                statusPedido: "CANCELADO",
+                statusPedido: "CANCELADO"
             });
 
             setPedidos((anteriores) =>
@@ -170,12 +168,6 @@ export default function ConsultarPedido() {
         buscar("", "");
     }
 
-    const pedidosPendentes = pedidos.filter((pedido) =>
-        ["PENDENTE", "CONFIRMADO", "EM_PRODUCAO", "PRONTO"].includes(
-            pedido.statusPedido
-        )
-    ).length;
-
     const totalPaginas = Math.max(
         1,
         Math.ceil(pedidos.length / POR_PAGINA)
@@ -186,6 +178,16 @@ export default function ConsultarPedido() {
         pagina * POR_PAGINA
     );
 
+    const pedidosPendentes = pedidos.filter((pedido) =>
+        estaPendente(pedido.statusPedido)
+    ).length;
+
+    const primeiro = pedidos.length === 0
+        ? 0
+        : (pagina - 1) * POR_PAGINA + 1;
+
+    const ultimo = Math.min(pagina * POR_PAGINA, pedidos.length);
+
     return (
         <div className="consultar-pedido-container">
             <header className="consultar-pedido-header">
@@ -194,32 +196,62 @@ export default function ConsultarPedido() {
                 </div>
 
                 <nav className="consultar-pedido-menu">
-                    <button onClick={() => (window.location.href = "/")}>
+                    <button onClick={abrirDashboard}>
                         Dashboard
                     </button>
 
-                    <button onClick={() => (window.location.href = "/")}>
+                    <button onClick={abrirNovoPedido}>
                         Novo Pedido
                     </button>
 
-                    <button className="menu-ativo">
+                    <button
+                        className="menu-ativo"
+                        onClick={abrirConsultarPedido}
+                    >
                         Consultar Pedido
                     </button>
 
-                    <button onClick={() => (window.location.href = "/")}>
+                    <button onClick={abrirPendentes}>
                         Pendentes
                     </button>
 
-                    <button onClick={() => (window.location.href = "/")}>
+                    <button onClick={abrirFinanceiro}>
                         Controle Financeiro
                     </button>
 
-                    <button onClick={() => (window.location.href = "/")}>
+                    <button onClick={abrirClientes}>
                         Clientes
                     </button>
                 </nav>
 
-                <div className="consultar-pedido-notificacao">🔔</div>
+                <button
+                    className="consultar-notificacao"
+                    type="button"
+                    onClick={abrirAlertas}
+                    aria-label="Notificações"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                        <path d="M10 21h4" />
+                    </svg>
+                </button>
+
+                <button
+                    className="botao-fechar-consultar"
+                    type="button"
+                    onClick={fecharConsultarPedido}
+                    aria-label="Fechar consulta de pedidos"
+                >
+                    ×
+                </button>
             </header>
 
             <main className="consultar-pedido-main">
@@ -277,13 +309,19 @@ export default function ConsultarPedido() {
                 </section>
 
                 {aviso && (
-                    <p className="pedido-estado">{aviso}</p>
+                    <p className="pedido-estado" role="status">
+                        {aviso}
+                    </p>
                 )}
 
                 {erro && (
-                    <div className="pedido-estado">
+                    <div className="pedido-estado" role="alert">
                         <p>{erro}</p>
-                        <button onClick={() => buscar()}>
+
+                        <button
+                            type="button"
+                            onClick={() => buscar()}
+                        >
                             Tentar novamente
                         </button>
                     </div>
@@ -317,24 +355,33 @@ export default function ConsultarPedido() {
                         <div>Ações</div>
                     </div>
 
-                    {carregando ? (
-                        <p className="pedido-estado">
+                    {carregando && (
+                        <p className="pedido-estado" role="status">
                             Carregando pedidos...
                         </p>
-                    ) : erro ? null : pedidosPagina.length === 0 ? (
-                        <p className="pedido-estado">
+                    )}
+
+                    {!carregando && !erro && pedidos.length === 0 && (
+                        <p className="pedido-estado" role="status">
                             Nenhum pedido encontrado para esse período.
                         </p>
-                    ) : (
+                    )}
+
+                    {!carregando &&
+                        !erro &&
                         pedidosPagina.map((pedido) => (
-                            <div className="pedido-linha" key={pedido.id}>
+                            <div
+                                className="pedido-linha"
+                                key={pedido.id}
+                            >
                                 <div>
                                     {String(pedido.id).padStart(3, "0")}
                                 </div>
 
                                 <div>
                                     {pedido.nomeCliente ??
-                                        `Cliente #${pedido.idCliente}`}
+                                        clientesPorId[pedido.idCliente]?.nome ??
+                                        `Cliente #${pedido.idCliente ?? "—"}`}
                                 </div>
 
                                 <div>
@@ -362,16 +409,20 @@ export default function ConsultarPedido() {
                                         type="button"
                                         className="botao-visualizar"
                                         title="Visualizar pedido"
-                                        onClick={() =>
-                                            setAviso(
-                                                "A visualização detalhada ainda não está conectada nesta tela."
-                                            )
-                                        }
+                                        onClick={() => {
+                                            if (abrirDetalhe) {
+                                                abrirDetalhe(pedido.id);
+                                            } else {
+                                                setAviso(
+                                                    "A visualização detalhada não está disponível."
+                                                );
+                                            }
+                                        }}
                                     >
                                         👁
                                     </button>
 
-                                    {pedido.statusPedido === "PENDENTE" && (
+                                    {estaPendente(pedido.statusPedido) && (
                                         <button
                                             type="button"
                                             className="botao-excluir"
@@ -383,31 +434,30 @@ export default function ConsultarPedido() {
                                     )}
                                 </div>
                             </div>
-                        ))
-                    )}
+                        ))}
                 </section>
 
                 {!carregando && !erro && pedidos.length > 0 && (
                     <footer className="paginacao-pedidos">
                         <span>
-                            Página {pagina} de {totalPaginas}
+                            Mostrando {primeiro}–{ultimo} de {pedidos.length} pedidos
                         </span>
 
                         <div>
                             <button
                                 disabled={pagina <= 1}
-                                onClick={() =>
-                                    setPagina((atual) => atual - 1)
-                                }
+                                onClick={() => setPagina((atual) => atual - 1)}
                             >
                                 Anterior
                             </button>
 
+                            <span>
+                                Página {pagina} de {totalPaginas}
+                            </span>
+
                             <button
                                 disabled={pagina >= totalPaginas}
-                                onClick={() =>
-                                    setPagina((atual) => atual + 1)
-                                }
+                                onClick={() => setPagina((atual) => atual + 1)}
                             >
                                 Próxima
                             </button>
@@ -429,7 +479,8 @@ export default function ConsultarPedido() {
                         <p>
                             Cliente:{" "}
                             {aCancelar.nomeCliente ??
-                                `Cliente #${aCancelar.idCliente}`}
+                                clientesPorId[aCancelar.idCliente]?.nome ??
+                                `Cliente #${aCancelar.idCliente ?? "—"}`}
                         </p>
 
                         <div className="modal-acoes">
@@ -457,3 +508,5 @@ export default function ConsultarPedido() {
         </div>
     );
 }
+
+export default ConsultarPedido;

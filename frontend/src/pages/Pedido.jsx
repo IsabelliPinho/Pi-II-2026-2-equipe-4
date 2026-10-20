@@ -1,64 +1,111 @@
-
 import { useEffect, useState } from "react";
 import "../styles/Pedido.css";
 import { listarProdutos } from "../services/api";
 
-function Pedido({ adicionarCarrinho }) {
+function Pedido({ adicionarCarrinho, voltarDashboard }) {
     const [produtos, setProdutos] = useState([]);
     const [produtoSelecionado, setProdutoSelecionado] = useState("");
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
+    const [mensagemErro, setMensagemErro] = useState("");
+    const [statusModal, setStatusModal] = useState("idle");
+
+    async function carregarProdutos() {
+        try {
+            setCarregando(true);
+            setErro("");
+            setMensagemErro("");
+
+            const dados = await listarProdutos();
+
+            const produtosNormalizados = Array.isArray(dados)
+                ? dados.map((item) => ({
+                      ...item,
+                      id: item.id ?? item.idProduto ?? item.codigo
+                  }))
+                : [];
+
+            setProdutos(produtosNormalizados);
+
+            if (produtosNormalizados.length > 0) {
+                setProdutoSelecionado(
+                    String(produtosNormalizados[0].id)
+                );
+            } else {
+                setProdutoSelecionado("");
+            }
+        } catch (erro) {
+            console.error("Erro ao carregar produtos:", erro);
+            setErro(
+                erro.message ||
+                    "Não foi possível carregar os produtos. Verifique a conexão com o servidor."
+            );
+            setProdutos([]);
+            setProdutoSelecionado("");
+        } finally {
+            setCarregando(false);
+        }
+    }
 
     useEffect(() => {
-        async function carregarProdutos() {
-            try {
-                setCarregando(true);
-                setErro("");
-
-                const dados = await listarProdutos();
-
-                setProdutos(dados);
-
-                if (dados.length > 0) {
-                    setProdutoSelecionado(String(dados[0].id));
-                } else {
-                    setProdutoSelecionado("");
-                }
-            } catch (erro) {
-                console.error("Erro ao carregar produtos:", erro);
-                setErro(
-                    erro.message ||
-                    "Não foi possível carregar os produtos."
-                );
-            } finally {
-                setCarregando(false);
-            }
-        }
-
         carregarProdutos();
     }, []);
 
     function adicionarProdutoAoCarrinho() {
+        setMensagemErro("");
+
+        if (carregando || erro) {
+            return;
+        }
+
+        if (produtos.length === 0) {
+            setMensagemErro("Nenhum produto disponível no catálogo.");
+            return;
+        }
+
         const produto = produtos.find(
             (item) => String(item.id) === produtoSelecionado
         );
 
         if (!produto) {
-            alert("Selecione um produto.");
+            setMensagemErro("Por favor, selecione um produto válido.");
             return;
         }
 
-        adicionarCarrinho({
-            idProduto: produto.id,
-            nome: produto.nome,
-            preco: produto.preco
-        });
+        setStatusModal("processing");
+
+        try {
+            adicionarCarrinho({
+                idProduto: produto.id,
+                nome: produto.nome,
+                preco: produto.preco
+            });
+
+            setStatusModal("success");
+        } catch (erro) {
+            console.error("Erro ao adicionar ao carrinho:", erro);
+            setStatusModal("idle");
+            setMensagemErro(
+                "Não foi possível adicionar o produto ao carrinho."
+            );
+        }
     }
 
     return (
         <div className="pedido-container">
             <header className="pedido-header">
                 <h1>Faça seu Pedido</h1>
+
+                {voltarDashboard && (
+                    <button
+                        type="button"
+                        className="botao-voltar-painel"
+                        onClick={voltarDashboard}
+                        aria-label="Voltar ao painel"
+                    >
+                        ×
+                    </button>
+                )}
             </header>
 
             <main className="pedido-main">
@@ -72,13 +119,14 @@ function Pedido({ adicionarCarrinho }) {
                             </p>
                         )}
 
-                        {erro && (
-                            <div role="alert">
+                        {!carregando && erro && (
+                            <div role="alert" className="alerta-erro-api">
                                 <p>{erro}</p>
 
                                 <button
                                     type="button"
-                                    onClick={() => window.location.reload()}
+                                    onClick={carregarProdutos}
+                                    disabled={carregando}
                                 >
                                     Tentar novamente
                                 </button>
@@ -98,7 +146,7 @@ function Pedido({ adicionarCarrinho }) {
                             produtos.length > 0 && (
                                 <div className="campo-pedido">
                                     <label htmlFor="produto">
-                                        Produto disponível <span>*</span>
+                                        Produto do catálogo <span>*</span>
                                     </label>
 
                                     <select
@@ -116,7 +164,7 @@ function Pedido({ adicionarCarrinho }) {
                                                 value={String(produto.id)}
                                             >
                                                 {produto.nome} — R${" "}
-                                                {Number(produto.preco)
+                                                {Number(produto.preco || 0)
                                                     .toFixed(2)
                                                     .replace(".", ",")}
                                             </option>
@@ -125,12 +173,21 @@ function Pedido({ adicionarCarrinho }) {
                                 </div>
                             )}
 
+                        {mensagemErro && (
+                            <p
+                                className="mensagem-validacao-erro"
+                                role="alert"
+                            >
+                                {mensagemErro}
+                            </p>
+                        )}
+
                         <div className="campo-pedido">
-                            <label>
+                            <label htmlFor="tamanho">
                                 Tamanho <span>*</span>
                             </label>
 
-                            <select defaultValue="1kg">
+                            <select id="tamanho" defaultValue="1kg">
                                 <option>1kg</option>
                                 <option>2kg</option>
                                 <option>3kg</option>
@@ -144,11 +201,14 @@ function Pedido({ adicionarCarrinho }) {
                         </p>
 
                         <div className="campo-pedido">
-                            <label>
+                            <label htmlFor="recheio1">
                                 1º Recheio <span>*</span>
                             </label>
 
-                            <select defaultValue="Brigadeiro">
+                            <select
+                                id="recheio1"
+                                defaultValue="Brigadeiro"
+                            >
                                 <option>Brigadeiro</option>
                                 <option>Beijinho</option>
                                 <option>Ninho</option>
@@ -157,9 +217,12 @@ function Pedido({ adicionarCarrinho }) {
                         </div>
 
                         <div className="campo-pedido">
-                            <label>2º Recheio</label>
+                            <label htmlFor="recheio2">2º Recheio</label>
 
-                            <select defaultValue="Brigadeiro">
+                            <select
+                                id="recheio2"
+                                defaultValue="Brigadeiro"
+                            >
                                 <option>Brigadeiro</option>
                                 <option>Beijinho</option>
                                 <option>Ninho</option>
@@ -168,11 +231,14 @@ function Pedido({ adicionarCarrinho }) {
                         </div>
 
                         <div className="campo-pedido">
-                            <label>
+                            <label htmlFor="andar">
                                 Andar <span>*</span>
                             </label>
 
-                            <select defaultValue="Andar único">
+                            <select
+                                id="andar"
+                                defaultValue="Andar único"
+                            >
                                 <option>Andar único</option>
                                 <option>2 andares</option>
                                 <option>3 andares</option>
@@ -180,11 +246,12 @@ function Pedido({ adicionarCarrinho }) {
                         </div>
 
                         <div className="campo-textarea">
-                            <label>
+                            <label htmlFor="tema">
                                 Tema <span>*</span>
                             </label>
 
                             <textarea
+                                id="tema"
                                 placeholder="Descreva aqui as características do seu pedido"
                             />
                         </div>
@@ -194,11 +261,14 @@ function Pedido({ adicionarCarrinho }) {
                         <h2>Acabamento do Bolo</h2>
 
                         <div className="campo-pedido">
-                            <label>
+                            <label htmlFor="cobertura">
                                 Cobertura <span>*</span>
                             </label>
 
-                            <select defaultValue="Ninho">
+                            <select
+                                id="cobertura"
+                                defaultValue="Ninho"
+                            >
                                 <option>Ninho</option>
                                 <option>Chantilly</option>
                                 <option>Ganache</option>
@@ -207,23 +277,24 @@ function Pedido({ adicionarCarrinho }) {
                         </div>
 
                         <div className="campo-textarea">
-                            <label>
+                            <label htmlFor="decoracao">
                                 Topo &amp;
                                 <br />
                                 Decoração
                             </label>
 
                             <textarea
+                                id="decoracao"
                                 placeholder="Descreva a decoração do bolo"
                             />
                         </div>
 
                         <div className="campo-pedido">
-                            <label>
+                            <label htmlFor="massa">
                                 Massa <span>*</span>
                             </label>
 
-                            <select defaultValue="Branca">
+                            <select id="massa" defaultValue="Branca">
                                 <option>Branca</option>
                                 <option>Chocolate</option>
                                 <option>Red Velvet</option>
@@ -231,36 +302,80 @@ function Pedido({ adicionarCarrinho }) {
                         </div>
 
                         <div className="campo-textarea">
-                            <label>
+                            <label htmlFor="restricoes">
                                 Restrições
                                 <br />
                                 Alimentares
                             </label>
 
                             <textarea
+                                id="restricoes"
                                 placeholder="Descreva se houver alguma restrição"
                             />
                         </div>
                     </section>
 
                     <button
+                        type="button"
                         className="botao-carrinho"
                         onClick={adicionarProdutoAoCarrinho}
                         disabled={
                             carregando ||
                             !!erro ||
                             produtos.length === 0 ||
-                            !produtoSelecionado
+                            !produtoSelecionado ||
+                            statusModal === "processing"
                         }
                     >
-                        <span className="icone-carrinho">
-                            🛒
-                        </span>
-
+                        <span className="icone-carrinho">🛒</span>
                         Adicionar ao carrinho
                     </button>
                 </div>
             </main>
+
+            {statusModal === "processing" && (
+                <div
+                    className="modal-overlay"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Adicionando produto ao carrinho"
+                >
+                    <div className="card-modal card-loading">
+                        <div className="spinner-modal"></div>
+                        <p className="texto-processing">
+                            Adicionando produto ao carrinho...
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {statusModal === "success" && (
+                <div
+                    className="modal-overlay"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Produto adicionado ao carrinho"
+                >
+                    <div className="card-modal card-sucesso">
+                        <button
+                            type="button"
+                            className="btn-fechar-modal"
+                            onClick={() => setStatusModal("idle")}
+                            aria-label="Fechar mensagem"
+                        >
+                            ×
+                        </button>
+
+                        <div className="icone-check">✓</div>
+                        <h3 className="titulo-aprovado">
+                            Produto adicionado!
+                        </h3>
+                        <p className="subtitulo-confirmacao">
+                            O produto foi adicionado ao carrinho.
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
