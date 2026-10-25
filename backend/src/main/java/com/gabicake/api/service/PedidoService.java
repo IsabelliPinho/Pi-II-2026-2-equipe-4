@@ -47,11 +47,13 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
-    // RF010: Consulta resumida de pedidos
+    // RF010: Consulta resumida de pedidos (otimizada com índice)
     public List<PedidoConsultaResponseDTO> consultarPedidosResumidos(String status) {
-        List<PedidoEntity> pedidos = pedidoRepository.findAll(Sort.by("id"));
+        List<PedidoEntity> pedidos = (status == null || status.isBlank())
+                ? pedidoRepository.findAll(Sort.by("id"))
+                : pedidoRepository.findByStatusPedido(status.trim().toUpperCase(), Sort.by("id"));
+
         return pedidos.stream()
-                .filter(p -> status == null || status.isBlank() || status.equalsIgnoreCase(p.getStatusPedido()))
                 .map(p -> {
                     PedidoConsultaResponseDTO dto = new PedidoConsultaResponseDTO();
                     dto.setId(p.getId().longValue());
@@ -64,24 +66,22 @@ public class PedidoService {
                     return dto;
                 })
                 .toList();
-    }
-    
+            }
     public Pedido buscarUm(Long id) {
         PedidoEntity entity = pedidoRepository.findById(id.intValue())
                 .orElseThrow(() -> ApiException.naoEncontrado("Pedido não encontrado."));
         return converterParaModelo(entity);
     }
 
-    public List<Pedido> buscar(String status) {
-        List<PedidoEntity> todos = pedidoRepository.findAll(Sort.by("id"));
-        if (status == null || status.isBlank()) {
-            return todos.stream().map(this::converterParaModelo).toList();
-        }
-        return todos.stream()
-                .filter(p -> status.equalsIgnoreCase(p.getStatusPedido()))
-                .map(this::converterParaModelo)
-                .toList();
-    }
+ public List<Pedido> buscar(String status) {
+    List<PedidoEntity> pedidos = (status == null || status.isBlank())
+            ? pedidoRepository.findAll(Sort.by("id"))
+            : pedidoRepository.findByStatusPedido(status.trim().toUpperCase(), Sort.by("id"));
+
+    return pedidos.stream()
+            .map(this::converterParaModelo)
+            .toList();
+}
 
     /**
      * RF003 / RN001 / RN002 / RN003 / RN005:
