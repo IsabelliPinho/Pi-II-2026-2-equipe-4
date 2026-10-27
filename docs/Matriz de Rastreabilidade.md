@@ -37,15 +37,22 @@ A Matriz de Rastreabilidade da Gabi Cake tem como objetivo organizar e acompanha
 | UC012 — Verificar raio de entrega | RF011 | — | — | RN005 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
 | UC013 – Realizar autenticação no sistema | RF012 | T001, T002 | — | RN006 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
 
-## 3. Matriz de Rastreabilidade por Tela
+## 3. Matriz de Rastreabilidade por Rota
 
-| Tela | Requisitos Funcionais | Casos de Uso | Rotas | Regras de Negócio | Issues |
+| Tela | Método / Caminho | RF no Contrato | Casos de Uso | Telas | Issues |
 |---|---|---|---|---|---|
-| |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| R001 – Cadastrar Cliente | POST /clientes/cadastro | RF001 | UC001 | T003 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R002 – Buscar clientes | GET /clientes/busca | RF002 | UC002 | T004, T005, T006 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R003 – Registrar Pedido | POST /pedidos/cadastro | RF003, RF005 | UC003, UC006 | T006, T007, T009 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R004 – Consultar Pedidos | GET /pedidos/consulta | RF003, RF007 | UC004, UC008 | T010, T012 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R005 – Atualizar Pedido | PATCH /pedidos/{id} | RF004, RF005, RF007, RF009 | UC005, UC006, UC008, UC010 | T011, T012 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R006 – Consultar Agenda | GET /agenda | RF006 | UC007 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R007 – Pedidos Próximos do Prazo | GET /lembretes/pedidos-proximos | RF008 | UC009 | T013 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R008 – Acesso à planilha financeira | GET /financeiro/acesso | RF010 | UC011 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R009 – Listar Produtos | GET /listar/produtos | RF003 | UC003 | T006 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
+| R010 – Consultar Pedido por ID | GET /pedidos/{id} | RF003, RF007 | UC005, UC007, UC008, UC009, UC010 | T011 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/16) |
 
-## 4. Matriz de Rastreabilidade por Rota
+## 4. Matriz de Rastreabilidade por Tela
 
 | Rota | Requisitos Funcionais | Casos de Uso | Telas | Regras de Negócio | Issues |
 |---|---|---|---|---|---|
