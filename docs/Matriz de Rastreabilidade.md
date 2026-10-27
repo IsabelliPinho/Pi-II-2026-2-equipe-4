@@ -74,6 +74,9 @@ A Matriz de Rastreabilidade da Gabi Cake tem como objetivo organizar e acompanha
 
 | Regra de Negócio | Requisitos Funcionais | Casos de Uso | Telas | Rotas | Issues |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| RN001 | RF003 | UC003 | T006, T007 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
+| RN002 | RF003 | UC003 | T006 | R003 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
+| RN003 | RF003 | UC003 | — | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
+| RN004 | RF006, RF007, RF009 | UC008, UC007, UC010 | T012 | R004, R005, R006 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
+| RN005 | RF011 | UC012 | — | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
+| RN006 | RF012 | UC013 | T001 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/30) |
