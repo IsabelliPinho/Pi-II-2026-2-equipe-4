@@ -283,8 +283,8 @@ Status HTTP: 404   Not Found
 ### **10\.Consultar Pedido por ID**
 
 * **Requisito:** RF003,RF007  
-* **Caminho:**/pedidos/{id}  
-* **Método:**Get  
+* **Caminho:** /pedidos/{id}  
+* **Método:** Get  
 * **Parâmetro de Rota:** id 
 * **Status HTTP de Sucesso:** 200 OK e 404 se o pedido não existir
   
