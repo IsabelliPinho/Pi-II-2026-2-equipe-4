@@ -10,6 +10,7 @@ Nesta seção estão reunidos os documentos relacionados aos requisitos do siste
 - **[Regras de Negócio](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/blob/main/docs/Documento%20de%20Requisitos.pdf):** Reúne as regras que devem ser respeitadas durante o funcionamento do sistema.
 - **[Critérios de Aceitação](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/blob/main/docs/Documento%20de%20Requisitos.pdf):** Descreve as condições utilizadas para verificar se cada requisito atende ao que foi definido.
 - **Matriz de Rastreabilidade:** Relaciona os requisitos funcionais aos casos de uso, às telas, às rotas, às regras de negócio e às issues do projeto.
+- **[Matriz de Autorização](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/blob/main/docs/Matriz%20de%20Autoriza%C3%A7%C3%A3o.pdf):** Define as permissões de acesso de cada perfil às funcionalidades, telas e recursos do sistema.
 
 ## Casos de uso e interface
 
