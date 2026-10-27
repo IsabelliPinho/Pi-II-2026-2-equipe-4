@@ -1,4 +1,4 @@
-# **Documento de rastreabilidade entre o código e as regras de negócio** 
+# **Documento de Rastreabilidade entre Código e Regras de Negócio** 
 
  Gabi Cake — Sistema de Gestão para Confeitaria
 
