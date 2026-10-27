@@ -23,15 +23,25 @@ A Matriz de Rastreabilidade da Gabi Cake tem como objetivo organizar e acompanha
 
 | Caso de Uso | Requisitos Funcionais | Telas | Rotas | Regras de Negócio | Issues |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| UC001 — Cadastrar cliente | RF001 | T003 | R001 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC002 — Buscar cliente | RF002 | T004, T005 | R002 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC003 — Registrar pedido | RF003, RF005 | T006, T007, T008, T009 | R002, R003, R009 | RN001, RN002, RN003 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC004 — Consultar pedidos | RF003 | T010 | R004 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC005 — Alterar pedido | RF004, RF005 | T011 | R005, R010 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC006 — Definir entrega ou retirada | RF005 | T006, T011 | R003, R005 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC007 — Consultar agenda | RF006 | — | R006, R010 | RN004 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC008 — Acompanhar pedidos pendentes | RF007 | T012, T011 | R004, R005, R010 | RN004 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC009 — Receber lembrete de pedido próximo do prazo | RF008 | T013, T011 | R007, R010 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC010 — Cancelar pedido | RF009 | T011 | R005, R010 | RN004, RA04 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC011 — Acessar planilha financeira | RF010 | — | R008 | — | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC012 — Verificar raio de entrega | RF011 | — | — | RN005 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
+| UC013 – Realizar autenticação no sistema | RF012 | T001, T002 | — | RN006 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/14) |
 
 ## 3. Matriz de Rastreabilidade por Tela
 
 | Tela | Requisitos Funcionais | Casos de Uso | Rotas | Regras de Negócio | Issues |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
+| |  |  |  |  |  |
 |  |  |  |  |  |  |
 |  |  |  |  |  |  |
 
@@ -46,14 +56,6 @@ A Matriz de Rastreabilidade da Gabi Cake tem como objetivo organizar e acompanha
 ## 5. Matriz de Rastreabilidade por Regra de Negócio
 
 | Regra de Negócio | Requisitos Funcionais | Casos de Uso | Telas | Rotas | Issues |
-|---|---|---|---|---|---|
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-
-## 6. Matriz de Rastreabilidade por Issue
-
-| Issue | Requisitos Funcionais | Casos de Uso | Telas | Rotas | Regras de Negócio |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
 |  |  |  |  |  |  |
