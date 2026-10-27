@@ -54,11 +54,21 @@ A Matriz de Rastreabilidade da Gabi Cake tem como objetivo organizar e acompanha
 
 ## 4. Matriz de Rastreabilidade por Tela
 
-| Rota | Requisitos Funcionais | Casos de Uso | Telas | Regras de Negócio | Issues |
-|---|---|---|---|---|---|
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| Rota | Requisitos Funcionais | Casos de Uso | Telas | Issues |
+|---|---|---|---|---|
+| T001 – Alertas | RF008 | UC009 | R007 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/65) |
+| T002 – Cadastro | RF001 | UC001 | R001 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/70) |
+| T003 – Carrinho | RF003 | UC003 | R003 | — |
+| T004 – CarrinhoVazio | — | — | — | — |
+| T005 – Clientes | RF002 | UC002 | R002 | — |
+| T006 – ConsultarPedidos | RF003 | UC004 | R004 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/70) |
+| T007 – DadosCliente | RF002, RF001 | UC002 | R002 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/70) |
+| T008 – Dashboard | RF012 | UC013 | — | — |
+| T009 – DetalhePedido | RF003, RF004, RF006, RF007, RF008, RF009 | UC005, UC007, UC008, UC009, UC010 | R005, R010 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/65) |
+| T010 – Login | RF012 | UC013 | — | — |
+| T011 – Pedido | RF003, RF005 | UC003, UC006 | R002, R003, R009 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/5) |
+| T012 – PedidoRealizado | RF003 | — | R003 | — |
+| T013 – Pendentes | RF007 | UC008 | R004, R005 | [Isseue](https://github.com/IsabelliPinho/Pi-II-2026-2-equipe-4/issues/65) |
 
 ## 5. Matriz de Rastreabilidade por Regra de Negócio
 
