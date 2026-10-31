@@ -7,6 +7,7 @@ public class PedidoConsultaResponseDTO {
 
     private Long id;
     private Long idCliente;
+    private String nomeCliente;
     private String nomeGerente;
     private LocalDate dataPedido;
     private LocalDateTime dataPrevista;
@@ -85,4 +86,12 @@ public class PedidoConsultaResponseDTO {
     public void setFormaEntrega(String formaEntrega) {
         this.formaEntrega = formaEntrega;
     }
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
 }

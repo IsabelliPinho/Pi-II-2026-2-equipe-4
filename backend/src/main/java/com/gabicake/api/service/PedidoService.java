@@ -56,6 +56,7 @@ public class PedidoService {
                     PedidoConsultaResponseDTO dto = new PedidoConsultaResponseDTO();
                     dto.setId(p.getId().longValue());
                     dto.setIdCliente(p.getCliente() != null ? p.getCliente().getId().longValue() : null);
+                    dto.setNomeCliente(p.getCliente() != null ? p.getCliente().getNome() : null);
                     dto.setNomeGerente(p.getNomeGerente());
                     dto.setDataPedido(p.getDataPedido());
                     dto.setDataPrevista(p.getDataPrevista());
