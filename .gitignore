@@ -11,3 +11,4 @@ nbactions.xml
 .vscode/
 .DS_Store
 *.iml
+backups/
