@@ -1,0 +1,31 @@
+Evidência: execução de db/testes/testes-senha-hash.sql
+Data: 01/11/2026 | PostgreSQL 16.15 | banco criado por 01-schema + 02-seed + 03-indices + 04-usuarios-perfis + 05-senha-hash-gerente
+Comando: psql -U gabicake -d gabicake -v ON_ERROR_STOP=1 -f db/testes/testes-senha-hash.sql
+
+=== Resultado: senhas armazenadas com hash BCrypt ===
+   id   |                                       teste                                        |          esperado           |           obtido            | resultado 
+--------+------------------------------------------------------------------------------------+-----------------------------+-----------------------------+-----------
+ SEG-01 | usuario.senha_hash: todas as linhas no formato BCrypt                              | verdadeiro                  | verdadeiro                  | PASSOU
+ SEG-02 | gerente.senha: todas as linhas no formato BCrypt                                   | verdadeiro                  | verdadeiro                  | PASSOU
+ SEG-03 | custo (work factor) mínimo 10 em todos os hashes                                   | verdadeiro                  | verdadeiro                  | PASSOU
+ SEG-04 | salt único: usuários com a MESMA senha têm hashes DIFERENTES                       | verdadeiro                  | verdadeiro                  | PASSOU
+ SEG-05 | o hash armazenado valida a senha certa e recusa a errada                           | verdadeiro                  | verdadeiro                  | PASSOU
+ SEG-06 | varredura: a senha do seed (Senha@123) não aparece em texto puro em nenhuma coluna | verdadeiro                  | verdadeiro                  | PASSOU
+ CK-01  | INSERT em usuario com senha em texto puro                                          | 23514 ck_usuario_senha_hash | 23514 ck_usuario_senha_hash | PASSOU
+ CK-02  | INSERT em gerente com senha em texto puro                                          | 23514 ck_gerente_senha_hash | 23514 ck_gerente_senha_hash | PASSOU
+ CK-03  | UPDATE de usuario.senha_hash para texto puro                                       | 23514 ck_usuario_senha_hash | 23514 ck_usuario_senha_hash | PASSOU
+ CK-04  | UPDATE de gerente.senha para texto puro                                            | 23514 ck_gerente_senha_hash | 23514 ck_gerente_senha_hash | PASSOU
+ CK-05  | hash truncado (menos de 60 caracteres)                                             | 23514 ck_usuario_senha_hash | 23514 ck_usuario_senha_hash | PASSOU
+ CK-06  | hash de outro algoritmo (MD5) é recusado                                           | 23514 ck_gerente_senha_hash | 23514 ck_gerente_senha_hash | PASSOU
+ OK-01  | hash BCrypt válido é aceito (controle)                                             | OK                          | aceito pelo banco           | PASSOU
+(13 rows)
+
+=== Resumo ===
+ resultado | qtd 
+-----------+-----
+ PASSOU    |  13
+(1 row)
+
+DO
+ROLLBACK
+Código de saída: 0

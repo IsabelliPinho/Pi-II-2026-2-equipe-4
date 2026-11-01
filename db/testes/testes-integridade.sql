@@ -125,7 +125,7 @@ SELECT pg_temp.testar('FK-09', 'DELETE produto que já foi vendido',
 -- =====================================================================
 SELECT pg_temp.testar('UQ-01', 'INSERT gerente com nome já existente',
  $q$ INSERT INTO gerente (nome, senha)
-     SELECT nome, 'x' FROM gerente ORDER BY id LIMIT 1 $q$,
+     SELECT nome, senha FROM gerente ORDER BY id LIMIT 1 $q$,
  '23505', 'uq_gerente_nome');
 
 SELECT pg_temp.testar('UQ-02', 'INSERT produto com nome já existente',
@@ -191,7 +191,7 @@ SELECT pg_temp.testar('OK-03', 'DELETE pedido apaga seus itens (ON DELETE CASCAD
 -- =====================================================================
 SELECT pg_temp.testar('INFO-01', 'gerente com mesmo nome mudando só maiúsculas/minúsculas',
  $q$ INSERT INTO gerente (nome, senha)
-     SELECT upper(nome), 'x' FROM gerente ORDER BY id LIMIT 1 $q$,
+     SELECT upper(nome), senha FROM gerente ORDER BY id LIMIT 1 $q$,
  '23505', NULL, TRUE);
 
 SELECT pg_temp.testar('INFO-02', 'produto com mesmo nome + espaço no final',

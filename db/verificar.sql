@@ -39,8 +39,10 @@ INSERT INTO pedido (cliente_id, data_prevista, forma_entrega) VALUES (1, '2026-1
 \echo '-- CHECK: status inválido'
 INSERT INTO pedido (cliente_id, gerente_id, data_prevista, forma_entrega, status_pedido) VALUES (1, 1, '2026-12-01', 'RETIRADA', 'XYZ');
 \echo '-- UNIQUE: gerente com nome repetido'
-INSERT INTO gerente (nome, senha) VALUES ('Gabriela Almeida', 'x');
+INSERT INTO gerente (nome, senha) VALUES ('Gabriela Almeida', '$2a$10$eb4pycYl7zdZ1G/c2gVU8Opw6oEeybaWu6nG3RzKh/t3xsGEGnQ2e');
+\echo '-- CHECK: gerente com senha em texto puro (o banco só aceita hash BCrypt)'
+INSERT INTO gerente (nome, senha) VALUES ('Teste Senha Pura', 'Senha@123');
 \echo '-- RESTRICT: apagar produto que já foi vendido'
 DELETE FROM produto WHERE id = 1;
 \echo '-- CHECK: preço negativo'
-INSERT INTO produto (nome, preco) VALUES ('Teste', -1); 
+INSERT INTO produto (nome, preco) VALUES ('Teste', -1);

@@ -46,6 +46,21 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <!-- Hash de senha (BCrypt). Só o módulo de criptografia, sem o filtro de login do
+         Spring Security: assim os endpoints atuais não passam a exigir autenticação.
+         A versão vem do Spring Boot (BOM). -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
+    <!-- Testes (JUnit): mvn test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

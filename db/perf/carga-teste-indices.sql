@@ -11,7 +11,7 @@
 -- Volume: 100.000 clientes, 300.000 pedidos (5% PENDENTE), 600.000 itens.
 -- =====================================================================
 
-INSERT INTO gerente (nome, senha) SELECT 'Gerente '||g, 'x' FROM generate_series(1,10) g;
+INSERT INTO gerente (nome, senha) SELECT 'Gerente '||g, '$2a$10$eb4pycYl7zdZ1G/c2gVU8Opw6oEeybaWu6nG3RzKh/t3xsGEGnQ2e' FROM generate_series(1,10) g;
 INSERT INTO produto (nome, preco) SELECT 'Produto '||g, 10+g%90 FROM generate_series(1,50) g;
 
 INSERT INTO cliente (nome, telefone, rua, num_casa, bairro, cep)
