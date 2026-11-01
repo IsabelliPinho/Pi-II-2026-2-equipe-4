@@ -8,6 +8,7 @@ import {
     listarProdutos
 } from "../services/api";
 import {
+    STATUS,
     STATUS_ATENDIDO,
     diasAte,
     estaPendente,
@@ -16,7 +17,7 @@ import {
     rotuloPrazo
 } from "../utils/Pedidos";
 
-function Pendentes({ voltarDashboard, abrirDetalhe }) {
+function Pendentes({ voltarDashboard, abrirDetalhe, abrirAprovar }) {
 
     const [pedidos, setPedidos] = useState([]);
     const [carregando, setCarregando] = useState(true);
@@ -80,7 +81,7 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
             .finally(() => setCarregandoDetalhe(false));
     }
 
-    // RF007 (fluxo 5 e 6): marcar como atendido e remover da lista
+    // RF007 (fluxo 5 e 6): atendido = ENTREGUE no banco; remove da lista
     async function marcarAtendido() {
         setMarcando(true);
         try {
@@ -88,7 +89,7 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
             setPedidos((atual) => atual.filter((p) => p.id !== selecionadoId));
             setAviso({
                 tipo: "sucesso",
-                texto: `Pedido ${String(selecionadoId).padStart(3, "0")} marcado como atendido.`
+                texto: `Pedido ${String(selecionadoId).padStart(3, "0")} marcado como entregue.`
             });
             setSelecionadoId(null);
             setDetalhe(null);
@@ -135,26 +136,6 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
     return (
         <div className="pendentes-container">
 
-            <header className="pendentes-header">
-
-                <button
-                    className="pendentes-fechar"
-                    onClick={voltarDashboard}
-                    aria-label="Fechar"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                    >
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                    </svg>
-                </button>
-
-            </header>
 
             <main className="pendentes-main">
 
@@ -199,6 +180,7 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
                         <div className="tabela-pendentes-header">
                             <div>#</div>
                             <div>Cliente</div>
+                            <div>Status</div>
                             <div>Data</div>
                             <div>Prazo</div>
                         </div>
@@ -231,6 +213,12 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
                                     <div>
                                         {pedido.nomeCliente ??
                                             clientesPorId[pedido.idCliente]?.nome ??
+                                            "—"}
+                                    </div>
+
+                                    <div>
+                                        {STATUS[pedido.statusPedido]?.rotulo ??
+                                            pedido.statusPedido ??
                                             "—"}
                                     </div>
 
@@ -307,9 +295,22 @@ function Pendentes({ voltarDashboard, abrirDetalhe }) {
                             />
                             <span className="checkbox-personalizado"></span>
                             <span>
-                                {marcando ? "Salvando..." : "Marcar como atendida?"}
+                                {marcando ? "Salvando..." : "Marcar como entregue?"}
                             </span>
                         </label>
+
+                        <button
+                            className="botao-editar"
+                            disabled={!detalhe || detalhe.statusPedido !== "PENDENTE"}
+                            title={
+                                detalhe && detalhe.statusPedido !== "PENDENTE"
+                                    ? `Pedido já está ${detalhe.statusPedido}. Só PENDENTE pode ser aprovado.`
+                                    : "Aprovar pedido"
+                            }
+                            onClick={() => abrirAprovar?.(selecionadoId)}
+                        >
+                            Aprovar
+                        </button>
 
                         <button
                             className="botao-editar"

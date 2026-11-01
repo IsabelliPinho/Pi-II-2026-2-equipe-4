@@ -1,0 +1,149 @@
+.aprovar-main {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+    box-sizing: border-box;
+    background-color: #faf8f7;
+    min-height: calc(100vh - 48px);
+}
+
+.aprovar-titulo {
+    text-align: center;
+    font-size: 18px;
+    color: #5B292B;
+    margin: 8px 0 28px;
+}
+
+.aprovar-grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+.aprovar-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.aprovar-card {
+    background: #f6d9de;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aprovar-card h2 {
+    margin: 0;
+    font-size: 14px;
+    color: #5B292B;
+}
+
+.aprovar-card input,
+.aprovar-campo {
+    background: #ecafbd;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #5B292B;
+    box-sizing: border-box;
+    width: 100%;
+    font-family: inherit;
+}
+
+.aprovar-descricao {
+    min-height: 150px;
+    resize: none;
+}
+
+.aprovar-observacoes {
+    min-height: 130px;
+    resize: none;
+}
+
+.aprovar-tipo {
+    display: flex;
+    gap: 24px;
+}
+
+.aprovar-tipo label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.aprovar-tipo input {
+    width: auto;
+}
+
+.aprovar-acoes {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.aprovar-botao {
+    flex: 1;
+    max-width: 160px;
+    padding: 12px 0;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.aprovar-botao-ok {
+    background: #64d98a;
+}
+
+.aprovar-botao-cancelar {
+    background: #b3202a;
+}
+
+.aprovar-botao:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.aprovar-voltar {
+    align-self: center;
+    background: transparent;
+    border: none;
+    color: #5B292B;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.aprovar-erro {
+    color: #b3261e;
+    text-align: center;
+}
+
+.aprovar-sucesso {
+    color: #1f7a3d;
+    text-align: center;
+    font-weight: bold;
+}
+
+.aprovar-aviso {
+    color: #5B292B;
+    text-align: center;
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+    .aprovar-grade {
+        grid-template-columns: 1fr;
+    }
+}
