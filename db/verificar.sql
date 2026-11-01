@@ -1,12 +1,22 @@
 -- Roda com:  docker compose exec -T db psql -U gabicake -d gabicake < db/verificar.sql
 -- (troque gabicake pelos valores de POSTGRES_USER e POSTGRES_DB do seu .env, se forem diferentes)
 
-\echo '== 1) Quantidade de linhas por tabela (mínimo 10) =='
+\echo '== 1) Quantidade de linhas por tabela (mínimo 10 nas tabelas de dados) =='
 SELECT 'cliente' AS tabela, count(*) FROM cliente
 UNION ALL SELECT 'gerente',     count(*) FROM gerente
 UNION ALL SELECT 'produto',     count(*) FROM produto
 UNION ALL SELECT 'pedido',      count(*) FROM pedido
-UNION ALL SELECT 'item_pedido', count(*) FROM item_pedido;
+UNION ALL SELECT 'item_pedido', count(*) FROM item_pedido
+UNION ALL SELECT 'perfil',         count(*) FROM perfil
+UNION ALL SELECT 'usuario',        count(*) FROM usuario
+UNION ALL SELECT 'usuario_perfil', count(*) FROM usuario_perfil;
+
+\echo '== 1b) Usuários de teste por perfil (senha de demonstração: Senha@123) =='
+SELECT p.nome AS perfil, u.login, u.nome, u.ativo
+FROM usuario u
+JOIN usuario_perfil up ON up.usuario_id = u.id
+JOIN perfil p          ON p.id = up.perfil_id
+ORDER BY p.nome, u.id;
 
 \echo '== 2) JOIN completo: pedido -> cliente -> gerente -> itens -> produto =='
 SELECT p.id AS pedido, c.nome AS cliente, COALESCE(g.nome, '(sem gerente)') AS gerente,

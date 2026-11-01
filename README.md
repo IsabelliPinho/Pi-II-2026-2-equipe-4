@@ -37,9 +37,15 @@ O sistema permite à gerente da loja cadastrar clientes, registrar e acompanhar 
 ├── frontend/               # Aplicação web (Node + nginx)
 ├── db/
 │   ├── init/
-│   │   ├── 01-schema.sql   # tabelas, chaves e restrições (a partir do MER)
-│   │   └── 02-seed.sql     # dados sintéticos para demonstração
-│   └── verificar.sql       # consultas de conferência do banco
+│   │   ├── 01-schema.sql             # tabelas, chaves e restrições (a partir do MER)
+│   │   ├── 02-seed.sql               # dados sintéticos para demonstração
+│   │   ├── 03-indices.sql            # índices de busca
+│   │   ├── 04-usuarios-perfis.sql    # tabelas de usuário e perfil; gerentes viram usuários
+│   │   ├── 05-senha-hash-gerente.sql # senha de gerente aceita só hash BCrypt
+│   │   └── 06-seed-usuarios.sql      # usuários de teste de todos os perfis
+│   ├── rollback/                     # desfazem as migrations
+│   ├── testes/                       # baterias de teste do banco (integridade, senhas, seed)
+│   └── verificar.sql                 # consultas de conferência do banco
 ├── docs/                   # Requisitos, MER, contrato da API, casos de teste, guia de QA
 ├── docker-compose.yml      # Sobe banco, backend e frontend
 ├── .env.example            # Modelo das variáveis de ambiente
@@ -121,7 +127,7 @@ O frontend é servido pelo nginx na porta 3000, e a API fica na porta 8080. O na
 ## Banco de dados
 
 - O PostgreSQL cria o banco e o usuário na primeira inicialização, a partir das variáveis do `.env`.
-- Os arquivos da pasta `db/init` são executados em ordem, **apenas na primeira inicialização**, quando o volume `db_data` está vazio: o `01-schema.sql` cria as tabelas (`cliente`, `gerente`, `produto`, `pedido` e `item_pedido`, com chaves primárias, estrangeiras e restrições) e o `02-seed.sql` insere os dados de teste (10 ou mais linhas por tabela).
+- Os arquivos da pasta `db/init` são executados em ordem, **apenas na primeira inicialização**, quando o volume `db_data` está vazio: o `01-schema.sql` cria as tabelas (`cliente`, `gerente`, `produto`, `pedido` e `item_pedido`, com chaves primárias, estrangeiras e restrições) e o `02-seed.sql` insere os dados de teste (10 ou mais linhas por tabela). Os arquivos seguintes criam os índices (`03`), as tabelas de usuários e perfis (`04`), a trava de hash nas senhas de gerente (`05`) e os usuários de teste de todos os perfis (`06`, senha de demonstração `Senha@123`, gravada só como hash BCrypt).
 - Os dados ficam no volume `db_data` e **persistem** entre `docker compose down` e `up`.
 - O Hibernate está em modo `validate` (definido no `docker-compose.yml`): ele não cria nem altera tabelas, apenas confere se as entidades batem com o banco. Uma entidade com coluna ou tipo errado impede o backend de iniciar.
 - O arquivo `db/verificar.sql` reúne consultas de conferência (contagens, junções e testes de integridade que devem falhar de propósito).

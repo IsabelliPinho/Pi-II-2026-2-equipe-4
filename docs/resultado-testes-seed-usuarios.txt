@@ -1,0 +1,31 @@
+Evidência: execução de db/testes/testes-seed-usuarios.sql
+Data: 01/11/2026 | PostgreSQL 16.15 | banco criado por 01-schema + 02-seed + 03-indices + 04-usuarios-perfis + 05-senha-hash-gerente + 06-seed-usuarios
+Comando: psql -U gabicake -d gabicake -v ON_ERROR_STOP=1 -f db/testes/testes-seed-usuarios.sql
+
+=== Resultado: seed de usuários e massa de dados ===
+   id   |                                 teste                                 | resultado 
+--------+-----------------------------------------------------------------------+-----------
+ USR-01 | todo perfil tem ao menos um usuário ATIVO                             | PASSOU
+ USR-02 | GERENTE: gabriela.almeida existe e está ativa                         | PASSOU
+ USR-03 | FUNCIONARIO: marina.costa e paulo.ribeiro existem e estão ativos      | PASSOU
+ USR-04 | existe um usuário INATIVO (renata.dias) para testar a recusa de login | PASSOU
+ USR-05 | todas as senhas estão em hash BCrypt com custo 10 ou mais             | PASSOU
+ USR-06 | todos os usuários de demonstração validam a senha Senha@123           | PASSOU
+ USR-07 | nenhum hash se repete (salt próprio em cada usuário)                  | PASSOU
+ USR-08 | gerentes têm gerente_id; funcionários não têm                         | PASSOU
+ USR-09 | nenhum usuário está sem perfil                                        | PASSOU
+ DAD-01 | ao menos 10 linhas em cliente, gerente, produto, pedido e item_pedido | PASSOU
+ DAD-02 | todos os status de pedido aparecem na massa                           | PASSOU
+ DAD-03 | as duas formas de entrega aparecem (RETIRADA e ENTREGA)               | PASSOU
+ DAD-04 | todo pedido tem ao menos um item                                      | PASSOU
+(13 rows)
+
+=== Resumo ===
+ resultado | qtd 
+-----------+-----
+ PASSOU    |  13
+(1 row)
+
+DO
+ROLLBACK
+Código de saída: 0
