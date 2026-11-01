@@ -63,11 +63,11 @@ body {
 ========================= */
 
 .pendentes-main {
-    width: 744px;
+    width: 814px;
     margin: 0 auto;
 
     display: grid;
-    grid-template-columns: 275px 308px;
+    grid-template-columns: 345px 308px;
     column-gap: 114px;
 
     padding-top: 51px;
@@ -87,7 +87,7 @@ body {
 }
 
 .resumo-pendentes {
-    width: 275px;
+    width: 345px;
     height: 94px;
 
     border: 1px solid #777777;
@@ -153,7 +153,7 @@ body {
 ========================= */
 
 .tabela-pendentes {
-    width: 275px;
+    width: 345px;
 
     margin-top: 26px;
 
@@ -168,10 +168,11 @@ body {
     display: grid;
 
     grid-template-columns:
-        50px
-        101px
-        51px
-        73px;
+        40px
+        100px
+        75px
+        55px
+        75px;
 
     align-items: center;
 
@@ -362,11 +363,14 @@ body {
     margin-top: 24px;
 
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 16px;
 }
 
 .marcar-atendida {
+    flex: 0 0 100%;
     display: flex;
     align-items: center;
 
@@ -446,10 +450,11 @@ body {
     .tabela-pendentes-header,
     .linha-pendente {
         grid-template-columns:
-            45px
+            40px
             1fr
-            55px
-            65px;
+            70px
+            50px
+            60px;
     }
 
     .campo-detalhe,

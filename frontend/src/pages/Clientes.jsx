@@ -107,60 +107,6 @@ function Clientes({
 
     return (
         <div className="clientes-container">
-            <header className="clientes-header">
-                <div className="clientes-logo">
-                    <div className="logo-circulo-clientes">
-                        <span>GM</span>
-                    </div>
-                </div>
-
-                <nav className="clientes-menu">
-                    <button onClick={abrirDashboard}>
-                        Dashboard
-                    </button>
-
-                    <button onClick={abrirNovoPedido}>
-                        Novo Pedido
-                    </button>
-
-                    <button onClick={abrirConsultarPedido}>
-                        Consultar Pedido
-                    </button>
-
-                    <button onClick={abrirPendentes}>
-                        Pendentes
-                    </button>
-
-                    <button onClick={abrirFinanceiro}>
-                        Controle Financeiro
-                    </button>
-
-                    <button
-                        className="menu-ativo"
-                        onClick={abrirClientes}
-                    >
-                        Clientes
-                    </button>
-                </nav>
-
-                <button
-                    className="clientes-notificacao"
-                    type="button"
-                    onClick={abrirAlertas}
-                    aria-label="Notificações"
-                >
-                    🔔
-                </button>
-
-                <button
-                    className="botao-fechar-clientes"
-                    onClick={fecharClientes}
-                    type="button"
-                    aria-label="Fechar tela de clientes"
-                >
-                    ×
-                </button>
-            </header>
 
             <main className="clientes-main">
                 <h1>Clientes</h1>

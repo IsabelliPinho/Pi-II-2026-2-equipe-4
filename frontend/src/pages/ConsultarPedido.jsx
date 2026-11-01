@@ -190,69 +190,6 @@ function ConsultarPedido({
 
     return (
         <div className="consultar-pedido-container">
-            <header className="consultar-pedido-header">
-                <div className="consultar-pedido-logo">
-                    <div className="logo-circulo">GM</div>
-                </div>
-
-                <nav className="consultar-pedido-menu">
-                    <button onClick={abrirDashboard}>
-                        Dashboard
-                    </button>
-
-                    <button onClick={abrirNovoPedido}>
-                        Novo Pedido
-                    </button>
-
-                    <button
-                        className="menu-ativo"
-                        onClick={abrirConsultarPedido}
-                    >
-                        Consultar Pedido
-                    </button>
-
-                    <button onClick={abrirPendentes}>
-                        Pendentes
-                    </button>
-
-                    <button onClick={abrirFinanceiro}>
-                        Controle Financeiro
-                    </button>
-
-                    <button onClick={abrirClientes}>
-                        Clientes
-                    </button>
-                </nav>
-
-                <button
-                    className="consultar-notificacao"
-                    type="button"
-                    onClick={abrirAlertas}
-                    aria-label="Notificações"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                        <path d="M10 21h4" />
-                    </svg>
-                </button>
-
-                <button
-                    className="botao-fechar-consultar"
-                    type="button"
-                    onClick={fecharConsultarPedido}
-                    aria-label="Fechar consulta de pedidos"
-                >
-                    ×
-                </button>
-            </header>
 
             <main className="consultar-pedido-main">
                 <div className="consultar-pedido-titulo">

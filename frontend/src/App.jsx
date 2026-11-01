@@ -1,4 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { cadastrarPedido } from "./services/api";
+import {
+    EVENTO_SESSAO_EXPIRADA,
+    estaAutenticado,
+    limparSessao
+} from "./services/auth";
 
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
@@ -14,12 +21,52 @@ import ConsultarPedido from "./pages/ConsultarPedido";
 import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
 import Alertas from "./pages/Alertas";
+import AprovarPedido from "./pages/AprovarPedido";
+import BarraNavegacao from "./components/BarraNavegacao";
+
+// Telas do painel que mostram a barra fixa (Novo Pedido e Detalhe ficam só com o X)
+const TELAS_COM_BARRA = [
+    "dashboard",
+    "clientes",
+    "consultarPedido",
+    "pendentes",
+    "alertas",
+    "aprovarPedido"
+];
 
 function App() {
-    const [tela, setTela] = useState("dashboard");
+    const [tela, setTela] = useState(
+        estaAutenticado() ? "dashboard" : "login"
+    );
+    const [avisoLogin, setAvisoLogin] = useState("");
     const [carrinho, setCarrinho] = useState([]);
     const [cliente, setCliente] = useState(null);
     const [idPedidoAberto, setIdPedidoAberto] = useState(null);
+
+    // 401 em qualquer requisição: volta para o login
+    useEffect(() => {
+        function aoExpirar() {
+            setAvisoLogin("Sua sessão expirou. Entre novamente.");
+            setCarrinho([]);
+            setTela("login");
+        }
+
+        window.addEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirar);
+        return () =>
+            window.removeEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirar);
+    }, []);
+
+    function sair() {
+        limparSessao();
+        setAvisoLogin("");
+        setCarrinho([]);
+        setTela("login");
+    }
+
+    function abrirAprovar(id) {
+        setIdPedidoAberto(id);
+        setTela("aprovarPedido");
+    }
 
     function abrirDetalhe(id) {
         setIdPedidoAberto(id);
@@ -68,39 +115,7 @@ function App() {
 
             console.log("Dados enviados para criar pedido:", dadosPedido);
 
-            const resposta = await fetch(
-                "http://localhost:8080/pedidos/cadastro",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(dadosPedido)
-                }
-            );
-
-            if (!resposta.ok) {
-                const erro = await resposta.text();
-
-                console.error("Erro ao criar pedido:", erro);
-
-                let motivo = "";
-
-                try {
-                    motivo = JSON.parse(erro).message ?? "";
-                } catch {
-                    // A resposta não era JSON.
-                }
-
-                alert(
-                    `Não foi possível criar o pedido. ${motivo || "Verifique o console."}`
-                );
-
-                return;
-            }
-
-            const pedidoCriado = await resposta.json();
-            console.log("Pedido criado:", pedidoCriado);
+            await cadastrarPedido(dadosPedido);
 
             setCliente(clienteCadastrado);
             setCarrinho([]);
@@ -108,21 +123,32 @@ function App() {
         } catch (erro) {
             console.error("Erro ao criar pedido:", erro);
 
-            alert("Erro de conexão ao tentar criar o pedido.");
+            // 401 já redireciona para o login; os demais mostram a mensagem da API
+            if (erro.status !== 401) {
+                alert(
+                    erro.message ||
+                    "Não foi possível criar o pedido."
+                );
+            }
         }
     }
 
-    if (tela === "login") {
+    function renderTela() {
+    // Sem login só abre a tela de login (Matriz de Autorização, T010)
+    if (tela === "login" || !estaAutenticado()) {
         return (
             <Login
-                abrirCadastro={() => setTela("cadastro")}
-                entrar={() => setTela("dashboard")}
+                aviso={avisoLogin}
+                entrar={() => {
+                    setAvisoLogin("");
+                    setTela("dashboard");
+                }}
             />
         );
     }
 
     if (tela === "cadastro") {
-        return <Cadastro voltarLogin={() => setTela("login")} />;
+        return <Cadastro voltarLogin={() => setTela("dashboard")} />;
     }
 
     if (tela === "pedido") {
@@ -190,7 +216,7 @@ function App() {
                 abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
                 abrirAlertas={() => setTela("alertas")}
-                fecharDashboard={() => setTela("login")}
+                fecharDashboard={sair}
             />
         );
     }
@@ -231,6 +257,7 @@ function App() {
             <Pendentes
                 voltarDashboard={() => setTela("dashboard")}
                 abrirDetalhe={abrirDetalhe}
+                abrirAprovar={abrirAprovar}
             />
         );
     }
@@ -245,6 +272,15 @@ function App() {
                 abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
                 abrirDetalhe={abrirDetalhe}
+            />
+        );
+    }
+
+    if (tela === "aprovarPedido") {
+        return (
+            <AprovarPedido
+                idPedido={idPedidoAberto}
+                voltar={() => setTela("pendentes")}
             />
         );
     }
@@ -274,8 +310,30 @@ function App() {
             abrirFinanceiro={() => abrirDetalhe(null)}
             abrirClientes={() => setTela("clientes")}
             abrirAlertas={() => setTela("alertas")}
-            fecharDashboard={() => setTela("login")}
+            fecharDashboard={sair}
         />
+    );
+    }
+
+    const mostrarBarra = estaAutenticado() && TELAS_COM_BARRA.includes(tela);
+
+    if (!mostrarBarra) return renderTela();
+
+    return (
+        <>
+            <BarraNavegacao
+                telaAtiva={tela === "aprovarPedido" ? "pendentes" : tela}
+                abrirDashboard={() => setTela("dashboard")}
+                abrirNovoPedido={() => setTela("pedido")}
+                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirPendentes={() => setTela("pendentes")}
+                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirClientes={() => setTela("clientes")}
+                abrirAlertas={() => setTela("alertas")}
+                fechar={tela === "dashboard" ? sair : () => setTela("dashboard")}
+            />
+            {renderTela()}
+        </>
     );
 }
 

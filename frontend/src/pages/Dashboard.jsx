@@ -17,61 +17,6 @@ function Dashboard({
                 BARRA SUPERIOR
             ========================= */}
 
-            <header className="dashboard-header">
-
-                {/* LOGO */}
-                <div className="dashboard-logo">
-                    <div className="logo-circulo">
-                        <span>GM</span>
-                    </div>
-                </div>
-
-
-                {/* MENU */}
-                <nav className="dashboard-menu">
-
-                    <button onClick={abrirDashboard}>
-                        Dashboard
-                    </button>
-
-                    <button onClick={abrirNovoPedido}>
-                        Novo Pedido
-                    </button>
-
-                    <button onClick={abrirConsultarPedido}>
-                        Consultar Pedido
-                    </button>
-
-                    <button onClick={abrirPendentes}>
-                        Pendentes
-                    </button>
-
-                    <button onClick={abrirFinanceiro}>
-                        Controle Financeiro
-                    </button>
-
-                    <button onClick={abrirClientes}>
-                        Clientes
-                    </button>
-
-                </nav>
-
-
-                {/* NOTIFICAÇÃO */}
-                <button className="botao-notificacao" onClick={abrirAlertas}>
-                    🔔
-                </button>
-
-
-                {/* FECHAR */}
-                <button
-                    className="botao-fechar-dashboard"
-                    onClick={fecharDashboard}
-                >
-                    ×
-                </button>
-
-            </header>
 
 
             {/* =========================
