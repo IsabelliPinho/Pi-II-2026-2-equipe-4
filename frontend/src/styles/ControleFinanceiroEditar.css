@@ -1,0 +1,227 @@
+.financeiro-editar-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    min-height: 100vh;
+    background-color: #faf7f6;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+/* BARRA SUPERIOR */
+
+.financeiro-editar-header {
+    height: 55px;
+    width: 100%;
+    background-color: #5b292b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.financeiro-editar-logo {
+    width: 55px;
+    height: 55px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.financeiro-editar-logo-circulo {
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    background-color: #5b292b;
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: Georgia, serif;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.financeiro-editar-fechar {
+    margin-right: 9px;
+    width: 34px;
+    height: 34px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 27px;
+    font-weight: 200;
+    cursor: pointer;
+}
+
+/* PAINEL CENTRAL */
+
+.financeiro-editar-painel {
+    position: absolute;
+    top: calc(50% + 24px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 708px;
+    height: 500px;
+    box-sizing: border-box;
+
+    padding: 63px 44px 30px;
+
+    background-color: #faf7f6;
+    border: 1px solid #b99c9c;
+    border-radius: 14px;
+}
+
+.financeiro-editar-painel h2 {
+    margin: 0 0 14px;
+
+    color: #693a3a;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* BOTÃO X DO PAINEL */
+
+.financeiro-editar-fechar-painel {
+    position: absolute;
+    top: 24px;
+    right: 15px;
+
+    width: 28px;
+    height: 28px;
+
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 200;
+    cursor: pointer;
+}
+
+/* LISTA DE CATEGORIAS */
+
+.financeiro-editar-lista {
+    display: grid;
+    grid-template-columns: 241px 241px;
+    column-gap: 45px;
+    row-gap: 19px;
+}
+
+.financeiro-editar-campo {
+    position: relative;
+    width: 100%;
+    height: 32px;
+}
+
+/* CAMPOS SELECT */
+
+.financeiro-editar-campo select {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 100%;
+    height: 32px;
+    box-sizing: border-box;
+
+    padding: 0 35px 0 22px;
+
+    background-color: #fff;
+    border: 1px solid #c5c5c5;
+    border-radius: 8px;
+
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: underline;
+
+    cursor: pointer;
+    outline: none;
+}
+
+.financeiro-editar-campo select:focus {
+    border-color: #754b4b;
+}
+
+/* SETA DOS SELECTS */
+
+.financeiro-editar-campo::after {
+    content: "";
+    position: absolute;
+
+    right: 10px;
+    top: 10px;
+
+    width: 8px;
+    height: 8px;
+
+    border-right: 1.5px solid #603132;
+    border-bottom: 1.5px solid #603132;
+
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+/* BOTÃO SALVAR */
+
+.financeiro-editar-salvar {
+    position: absolute;
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 113px;
+    height: 35px;
+
+    background-color: #75d982;
+    color: white;
+
+    border: none;
+    border-radius: 9px;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
+
+    transition: background-color 0.2s;
+}
+
+.financeiro-editar-salvar:hover {
+    background-color: #63c971;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 760px) {
+    .financeiro-editar-painel {
+        width: calc(100% - 30px);
+        height: 500px;
+        padding: 63px 25px 30px;
+    }
+
+    .financeiro-editar-lista {
+        grid-template-columns: 1fr 1fr;
+        column-gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .financeiro-editar-painel {
+        height: 470px;
+        padding: 63px 22px 30px;
+    }
+
+    .financeiro-editar-lista {
+        grid-template-columns: 1fr;
+        row-gap: 13px;
+    }
+
+    .financeiro-editar-salvar {
+        bottom: 30px;
+    }
+}

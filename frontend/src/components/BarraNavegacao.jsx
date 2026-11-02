@@ -5,7 +5,7 @@ const ITENS = [
     { tela: "pedido", rotulo: "Novo Pedido", acao: "abrirNovoPedido" },
     { tela: "consultarPedido", rotulo: "Consultar Pedido", acao: "abrirConsultarPedido" },
     { tela: "pendentes", rotulo: "Pendentes", acao: "abrirPendentes" },
-    { tela: "detalhePedido", rotulo: "Controle Financeiro", acao: "abrirFinanceiro" },
+    { tela: "financeiro", rotulo: "Controle Financeiro", acao: "abrirFinanceiro" },
     { tela: "clientes", rotulo: "Clientes", acao: "abrirClientes" }
 ];
 
