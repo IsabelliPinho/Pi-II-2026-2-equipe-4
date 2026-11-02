@@ -28,6 +28,17 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * Status de pedido permitidos: PENDENTE, ATENDIDO, CANCELADO  
 * Formas de atendimento permitidas: ENTREGA, RETIRADA  
 
+## **Códigos de Resposta HTTP**
+
+* 200 OK: Sucesso em requisições GET e PATCH que retornam dados.
+* 201 Created: Sucesso na criação de um novo recurso (ex.: cadastro de clientes ou registro de pedidos).
+* 400 Bad Request: Erro de validação de dados, campos obrigatórios ausentes ou parâmetros incorretos.
+* 404 Not Found: Recurso solicitado não encontrado na base de dados (ex.: ID de pedido ou de cliente inexistente).
+* 409 Conflict: Violação de regra de negócio (ex.: cancelar pedido que não está pendente, ou cadastrar cliente repetido).
+* 500 Internal Server Error: Erro inesperado no servidor ao processar a requisição.
+* Formato das respostas de erro: {"error": "CODIGO", "message": "texto explicativo"}
+* Códigos do campo error: VALIDATION_ERROR, NOT_FOUND, BUSINESS_RULE_VIOLATION, DUPLICATE_CLIENT, INTERNAL_SERVER_ERROR
+
 
 **ROTAS :**
 
@@ -90,11 +101,11 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Método:** POST  
 * **Status HTTP de Sucesso:** 201 Created
 
-*Nota: Se formaEntrega for "RETIRADA", os campos entregaBairro,entregaRua e entregaNumCasa não são obrigatórios.*
+**Nota: Se formaEntrega for "RETIRADA", os campos entregaBairro,entregaRua e entregaNumCasa não são obrigatórios.**
 
-*Nota: dataPrevista não pode ser anterior a data atual .*
+**Nota: dataPrevista não pode ser anterior a data atual .**
 
-*Nota: em cada item, quantidade deve ser maior que 0 ( assumindo 1 se não for informado ) ; peso, quando informado , deve ser no mínimo 2 kilos*
+**Nota: em cada item, quantidade deve ser maior que 0 ( assumindo 1 se não for informado ) ; peso, quando informado , deve ser no mínimo 2 kilos**
 
 **Body de Entrada:**
 
@@ -175,8 +186,8 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Parâmetro de Rota:** id 
 * **Status HTTP de Sucesso:** 200 OK
 
-*Valores possíveis para statusPedido: PENDENTE, ATENDIDO, CANCELADO*
-*Regra só é permitido alterar Cancelado se o status atual for PENDENTE.*
+**Valores possíveis para statusPedido: PENDENTE, ATENDIDO, CANCELADO**
+**Regra só é permitido alterar Cancelado se o status atual for PENDENTE.**
 
 **Body de Entrada:**
 
@@ -244,9 +255,9 @@ O documento define as 10 rotas HTTP da API do sistema Gabi Cake, derivadas diret
 * **Método:** GET    
 * **Status HTTP de Sucesso:** 200 OK
   
-* Nota: os dados financeiros ficam numa planilha externa (Google Sheets), não
+**Nota: os dados financeiros ficam numa planilha externa (Google Sheets), não
 no banco — por isso esta rota só devolve o link de acesso, sem gerenciar
-lançamentos.*
+lançamentos.**
 
 **Resposta:**
 {"url":"https://docs.google.com/spreadsheets/d/EXEMPLO-ID/edit"}
@@ -288,9 +299,10 @@ Status HTTP: 404   Not Found
 * **Parâmetro de Rota:** id 
 * **Status HTTP de Sucesso:** 200 OK e 404 se o pedido não existir
   
-* Nota: diferente da rota 4 ( que lista vários pedidos resumidos ) , esta retorna um único pedido com todos os detalhes, incluindo os itens .*
+**Nota: diferente da rota 4 ( que lista vários pedidos resumidos ) , esta retorna um único pedido com todos os detalhes, incluindo os itens .**
   
   **Resposta:**
+
   {
   "id": 100,
   "idCliente": 1,
@@ -314,6 +326,31 @@ Status HTTP: 404   Not Found
     }
   ]
 }
+
+### **11\.Verificar entrega**
+
+* **Requisito:** RF005 
+* **Caminho:**/verificar/entrega 
+* **Método:**POST
+* **Status HTTP de Sucesso:** 200 ok 
+
+**Body de Entrada:**
+
+{  
+  "cep": "60000-000",
+  "bairro": "Centro",
+  "rua": "Rua das Flores",
+  "numCasa": "120"
+}
+
+  **Resposta:**
+
+{
+  "valido": true,
+  "mensagem": "Endereço dentro da área de cobertura para entrega."
+}
+
+**Nota: Todos os campos do corpo de entrada (cep, bairro, rua e numCasa) são obrigatórios para que o sistema consiga calcular corretamente a rota e a viabilidade da entrega. Se algum campo obrigatório estiver em branco ou ausente, a API retornará o status 400 Bad Request.**
   
 
 
