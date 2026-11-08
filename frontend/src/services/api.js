@@ -40,33 +40,13 @@ async function request(path, { semToken = false, headers, ...options } = {}){
     return resposta.status === 204 ? null : resposta.json();
 }
 
-/* Autenticação - POST /auth/login -> { token, perfil, nome } */
+/* Autenticação - POST /auth/login { login, senha } -> { id, nome, login, perfis } (ainda sem token) */
 export const login = (usuario, senha) =>
-    LOGIN_FAKE
-        ? loginFake(usuario, senha)
-        : request("/auth/login", { method: "POST", semToken: true, body: JSON.stringify({ usuario, senha }) });
-
-// ---------------------------------------------------------------
-// APENAS DESENVOLVIMENTO: login sem backend (VITE_LOGIN_FAKE=true no .env.local).
-// REMOVER quando o POST /auth/login do backend estiver pronto.
-// ---------------------------------------------------------------
-const LOGIN_FAKE = import.meta.env.VITE_LOGIN_FAKE === "true";
-
-async function loginFake(usuario, senha) {
-    const gerentes = [
-        "Gabriela Almeida",
-        "Rafael Monteiro",
-        "Camila Duarte",
-        "Lucas Ferreira",
-        "Beatriz Nogueira"
-    ];
-
-    if (!gerentes.includes(usuario) || senha !== "Senha@123") {
-        throw new ApiError(401, "CREDENCIAIS_INVALIDAS", "Usuário ou senha inválidos.");
-    }
-
-    return { token: "token-fake-dev", perfil: "GERENTE", nome: usuario };
-}
+    request("/auth/login", {
+        method: "POST",
+        semToken: true,
+        body: JSON.stringify({login: usuario, senha})
+    });
 
 /* Recuperação de senha - POST /auth/recuperar-senha { usuario } (resposta sempre genérica) */
 export const recuperarSenha = (usuario) =>
