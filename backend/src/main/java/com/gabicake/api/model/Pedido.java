@@ -1,23 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.gabicake.api.model;
 
-/**
- *
- * @author Sanara Carvalho
- */
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// 1.Modificando a ordem igual ao exigido no contrato 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({
     "id",
@@ -33,11 +22,10 @@ import java.util.List;
     "entregaCep",
     "itens"
 })
-// 2. Esconde os campos de endereço se forem null (ex: quando formaEntrega é "RETIRADA")
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Pedido {
 
+    private BigDecimal desconto;
     private Long id;
     private Long idCliente;
     private String nomeGerente;
@@ -53,6 +41,14 @@ public class Pedido {
     private LocalDateTime atualizadoEm;
 
     public Pedido() {
+    }
+
+    public BigDecimal getDesconto() {
+        return desconto;
+    }
+
+    public void setDesconto(BigDecimal desconto) {
+        this.desconto = desconto;
     }
 
     public Long getId() {
