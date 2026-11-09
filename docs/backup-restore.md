@@ -43,14 +43,14 @@ bash scripts/restore.sh                     # restaura o backup mais recente
 bash scripts/restore.sh backups/ARQUIVO.sql # restaura um backup específico
 ```
 
-O script mostra qual arquivo será usado, pede para digitar `SIM`, para o backend, restaura e religa o backend.
+O script mostra qual arquivo será usado, pede para digitar `SIM`, para o backend, restaura e sobe o ambiente de novo (`up -d`, que funciona mesmo depois de um `docker compose down -v`, quando os containers do backend e do frontend não existem mais).
 
 O mesmo, sem o script (troque `ARQUIVO` pelo nome real do arquivo):
 
 ```bash
 docker compose stop backend
 docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 --single-transaction' < backups/ARQUIVO.sql
-docker compose start backend
+docker compose up -d
 ```
 
 Por que essas opções:
@@ -64,18 +64,20 @@ Por que essas opções:
 
 ## Teste realizado
 
-Realizado em 01/11/2026, em ambiente de desenvolvimento.
+Realizado em 09/11/2026, em ambiente de desenvolvimento, com os scripts `backup.sh` e `restore.sh` e o banco completo (10 tabelas, incluindo `sessao` e `configuracao_loja`).
 
 | Passo | Resultado |
 |---|---|
 | 1. Gravar um cliente marcador (`Marcador Backup`) | `INSERT 0 1` |
-| 2. Fazer o backup | Arquivo `gabicake-20261101-182532.sql` (25 KB) |
+| 2. `bash scripts/backup.sh` | Arquivo `gabicake-20261108-235752.sql` criado |
 | 3. Destruir o banco (`docker compose down -v` e `up -d db`) | O banco voltou só com o seed, e a consulta pelo marcador devolveu `(0 rows)` |
-| 4. Restaurar o backup mais recente | 8 tabelas recriadas e preenchidas, índices e extensões recriados, sem erro |
-| 5. Consultar o marcador | O cliente `Marcador Backup` voltou (id 13) |
-| 6. Subir o ambiente e apagar o marcador | `Healthy`, `Started` nos três serviços e `DELETE 1` |
+| 4. `bash scripts/restore.sh` (confirmando com `SIM`) | Tabelas recriadas e preenchidas, índices recriados, sem erro, `Restauração concluída.` |
+| 5. Consultar o marcador e listar as tabelas | O cliente `Marcador Backup` voltou (id 13) e as 10 tabelas estavam presentes |
+| 6. Conferir os serviços e apagar o marcador | `db` healthy e `backend` no ar, e `DELETE 1` |
 
-Evidências (prints dos passos 2 a 5) nos comentários da issue.
+Durante o teste, o primeiro `restore.sh` usava `docker compose start backend`, que falha depois de um `down -v` (o container não existe mais). O script foi corrigido para `docker compose up -d` e o passo 4 foi repetido com sucesso.
+
+Evidências (prints dos passos 2 a 6) nos comentários da issue #113.
 
 ## Limitações
 
