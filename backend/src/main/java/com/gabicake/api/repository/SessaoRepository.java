@@ -26,4 +26,6 @@ public interface SessaoRepository extends JpaRepository<SessaoEntity, Integer> {
             @Param("agora") LocalDateTime agora,
             @Param("limiteInatividade") LocalDateTime limiteInatividade
     );
+
+    Optional<SessaoEntity> findByTokenHash(String tokenHash);
 }
