@@ -216,6 +216,7 @@ function App() {
                 abrirFinanceiro={() => abrirDetalhe(null)}
                 abrirClientes={() => setTela("clientes")}
                 abrirAlertas={() => setTela("alertas")}
+                abrirDetalhe={abrirDetalhe}
                 fecharDashboard={sair}
             />
         );
@@ -310,6 +311,7 @@ function App() {
             abrirFinanceiro={() => abrirDetalhe(null)}
             abrirClientes={() => setTela("clientes")}
             abrirAlertas={() => setTela("alertas")}
+            abrirDetalhe={abrirDetalhe}
             fecharDashboard={sair}
         />
     );

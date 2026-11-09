@@ -3,8 +3,8 @@ const CHAVE = "gabicake.sessao";
 
 export const EVENTO_SESSAO_EXPIRADA = "gabicake:sessao-expirada";
 
-export function salvarSessao({ token, perfil, nome }) {
-    localStorage.setItem(CHAVE, JSON.stringify({ token, perfil, nome }));
+export function salvarSessao({ token = null, id, nome, login, perfis = []}) {
+    localStorage.setItem(CHAVE, JSON.stringify({ token, id, nome, login, perfis}));
 }
 
 export function obterSessao() {
@@ -17,7 +17,7 @@ export function obterSessao() {
 
 export const obterToken = () => obterSessao()?.token ?? null;
 export const obterPerfil = () => obterSessao()?.perfil ?? null;
-export const estaAutenticado = () => Boolean(obterToken());
+export const estaAutenticado = () => Boolean(obterSessao()?.id);
 
 export function limparSessao() {
     localStorage.removeItem(CHAVE);
