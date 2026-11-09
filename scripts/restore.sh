@@ -22,13 +22,13 @@ if [ "$RESPOSTA" != "SIM" ]; then
 fi
 
 # Com o backend parado não há conexões abertas durante a restauração.
-docker compose stop backend
+docker compose stop backend || true
 
 if docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 --single-transaction' < "$ARQUIVO"; then
-  docker compose start backend
+  docker compose up -d
   echo "Restauração concluída."
 else
   echo "ERRO na restauração. A transação foi desfeita, e o banco ficou como estava."
-  echo "Para religar o backend: docker compose start backend"
+  echo "Para religar o ambiente: docker compose up -d"
   exit 1
 fi
