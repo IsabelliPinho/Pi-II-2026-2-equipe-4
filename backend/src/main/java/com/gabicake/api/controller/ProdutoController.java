@@ -23,7 +23,7 @@ public class ProdutoController {
         this.service = service;
     }
 
-    // GET /listar/produtos (agora lendo do banco)
+    // GET /listar/produtos 
     @GetMapping
     public List<Produto> listar() {
         return service.listar();

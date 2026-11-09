@@ -1,7 +1,16 @@
 package com.gabicake.api.entity;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "item_pedido")
@@ -22,16 +31,16 @@ public class ItemPedidoEntity {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(name = "tipo_massa", length = 50)
+    @Column(name = "tipo_massa", length = 60)
     private String tipoMassa;
 
-    @Column(length = 100)
+    @Column(length = 80)
     private String tema;
 
-    @Column(precision = 5, scale = 2)
+    @Column(precision = 6, scale = 3)
     private BigDecimal peso;
 
-    @Column(name = "tipo_recheio", length = 50)
+    @Column(name = "tipo_recheio", length = 60)
     private String tipoRecheio;
 
     public ItemPedidoEntity() {
