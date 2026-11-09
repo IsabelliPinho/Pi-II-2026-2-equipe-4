@@ -43,6 +43,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PerfilRepository perfilRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SessaoService sessaoService;
 
     // Hash de uma senha qualquer, usado quando o login informado não existe: assim o servidor faz
     // a mesma conta cara do BCrypt e o tempo de resposta não denuncia se o login existe.
@@ -50,7 +51,9 @@ public class UsuarioService {
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PerfilRepository perfilRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          SessaoService sessaoService) {
+        this.sessaoService = sessaoService;
         this.usuarioRepository = usuarioRepository;
         this.perfilRepository = perfilRepository;
         this.passwordEncoder = passwordEncoder;
@@ -126,8 +129,12 @@ public class UsuarioService {
             usuarioRepository.save(usuario);
         }
 
+        List<String> perfis = nomesDosPerfis(usuario);
+        String perfilPrincipal = perfis.contains("GERENTE") ? "GERENTE" : perfis.get(0);
+        String token = sessaoService.criar(usuario);
+
         return new LoginResponseDTO(usuario.getId().longValue(), usuario.getNome(), usuario.getLogin(),
-                nomesDosPerfis(usuario));
+                perfis, perfilPrincipal, token);
     }
 
     private List<String> nomesDosPerfis(UsuarioEntity usuario) {
