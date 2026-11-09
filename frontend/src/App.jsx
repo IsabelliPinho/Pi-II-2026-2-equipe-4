@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 
 import { cadastrarPedido } from "./services/api";
+
 import {
     EVENTO_SESSAO_EXPIRADA,
     estaAutenticado,
-    limparSessao
+    limparSessao,
+    obterPerfil
 } from "./services/auth";
+
+import {
+    podeAcessarTela,
+    obterTelaInicial,
+    podeExibirBarra
+} from "./utils/Permissoes";
 
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
@@ -22,45 +30,71 @@ import Pendentes from "./pages/Pendentes";
 import DetalhePedido from "./pages/DetalhePedido";
 import Alertas from "./pages/Alertas";
 import AprovarPedido from "./pages/AprovarPedido";
+import ControleFinanceiro from "./pages/ControleFinanceiro";
+
 import BarraNavegacao from "./components/BarraNavegacao";
 
-// Telas do painel que mostram a barra fixa (Novo Pedido e Detalhe ficam só com o X)
-const TELAS_COM_BARRA = [
-    "dashboard",
-    "clientes",
-    "consultarPedido",
-    "pendentes",
-    "alertas",
-    "aprovarPedido"
-];
-
 function App() {
-    const [tela, setTela] = useState(
-        estaAutenticado() ? "dashboard" : "login"
-    );
+    // Sempre inicia na tela de login
+    const [tela, setTela] = useState("login");
+
     const [avisoLogin, setAvisoLogin] = useState("");
     const [carrinho, setCarrinho] = useState([]);
     const [cliente, setCliente] = useState(null);
     const [idPedidoAberto, setIdPedidoAberto] = useState(null);
 
-    // 401 em qualquer requisição: volta para o login
+    const perfil = obterPerfil();
+
+    // Impede acesso a telas não permitidas para o perfil
+    useEffect(() => {
+        if (!estaAutenticado()) {
+            if (tela !== "login" && tela !== "cadastro") {
+                setTela("login");
+            }
+
+            return;
+        }
+
+        if (!podeAcessarTela(obterPerfil(), tela)) {
+            setTela(obterTelaInicial(obterPerfil()));
+        }
+    }, [tela]);
+
+    // Trata a expiração da sessão
     useEffect(() => {
         function aoExpirar() {
             setAvisoLogin("Sua sessão expirou. Entre novamente.");
             setCarrinho([]);
+            setCliente(null);
             setTela("login");
         }
 
-        window.addEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirar);
-        return () =>
-            window.removeEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirar);
+        window.addEventListener(
+            EVENTO_SESSAO_EXPIRADA,
+            aoExpirar
+        );
+
+        return () => {
+            window.removeEventListener(
+                EVENTO_SESSAO_EXPIRADA,
+                aoExpirar
+            );
+        };
     }, []);
 
     function sair() {
         limparSessao();
         setAvisoLogin("");
         setCarrinho([]);
+        setCliente(null);
         setTela("login");
+    }
+
+    // Direciona o usuário conforme seu perfil
+    function entrar(sessao) {
+        setAvisoLogin("");
+        setCarrinho([]);
+        setTela(obterTelaInicial(sessao?.perfil));
     }
 
     function abrirAprovar(id) {
@@ -79,7 +113,8 @@ function App() {
         data.setDate(data.getDate() + 7);
         data.setHours(15, 0, 0, 0);
 
-        const ajustar = (numero) => String(numero).padStart(2, "0");
+        const ajustar = (numero) =>
+            String(numero).padStart(2, "0");
 
         return (
             `${data.getFullYear()}-` +
@@ -88,10 +123,13 @@ function App() {
         );
     }
 
+    // Finaliza o pedido
     async function finalizarPedido(clienteCadastrado) {
         try {
             if (!clienteCadastrado?.id) {
-                alert("Não foi possível identificar o cliente cadastrado.");
+                alert(
+                    "Não foi possível identificar o cliente cadastrado."
+                );
                 return;
             }
 
@@ -113,17 +151,20 @@ function App() {
                 itens
             };
 
-            console.log("Dados enviados para criar pedido:", dadosPedido);
+            console.log(
+                "Dados enviados para criar pedido:",
+                dadosPedido
+            );
 
             await cadastrarPedido(dadosPedido);
 
             setCliente(clienteCadastrado);
             setCarrinho([]);
             setTela("pedidoRealizado");
+
         } catch (erro) {
             console.error("Erro ao criar pedido:", erro);
 
-            // 401 já redireciona para o login; os demais mostram a mensagem da API
             if (erro.status !== 401) {
                 alert(
                     erro.message ||
@@ -133,205 +174,266 @@ function App() {
         }
     }
 
+    // Corrige o acesso à tela antes de renderizá-la
+    const telaAtual = estaAutenticado()
+        ? (
+            podeAcessarTela(perfil, tela)
+                ? tela
+                : obterTelaInicial(perfil)
+        )
+        : tela;
+
     function renderTela() {
-    // Sem login só abre a tela de login (Matriz de Autorização, T010)
-    if (tela === "login" || !estaAutenticado()) {
-        return (
-            <Login
-                aviso={avisoLogin}
-                entrar={() => {
-                    setAvisoLogin("");
-                    setTela("dashboard");
-                }}
-            />
-        );
+
+        // Cadastro
+        if (telaAtual === "cadastro") {
+            return (
+                <Cadastro
+                    voltarLogin={() => setTela("login")}
+                />
+            );
+        }
+
+        // Login
+        if (
+            telaAtual === "login" ||
+            !estaAutenticado()
+        ) {
+            return (
+                <Login
+                    aviso={avisoLogin}
+                    entrar={entrar}
+                    irCadastro={() => setTela("cadastro")}
+                />
+            );
+        }
+
+        // Novo Pedido
+        if (telaAtual === "pedido") {
+            return (
+                <Pedido
+                    voltarDashboard={
+                        perfil === "GERENTE"
+                            ? () => setTela("dashboard")
+                            : undefined
+                    }
+                    adicionarCarrinho={(produto) => {
+                        const produtoNormalizado = {
+                            ...produto,
+                            idProduto:
+                                produto.idProduto ?? produto.id
+                        };
+
+                        setCarrinho((carrinhoAtual) => [
+                            ...carrinhoAtual,
+                            produtoNormalizado
+                        ]);
+
+                        setTela("carrinho");
+                    }}
+                />
+            );
+        }
+
+        // Carrinho
+        if (telaAtual === "carrinho") {
+            return (
+                <Carrinho
+                    carrinho={carrinho}
+                    adicionarProduto={() => setTela("pedido")}
+                    realizarPedido={() => setTela("dados")}
+                    fecharCarrinho={() => setTela("pedido")}
+                    esvaziarCarrinho={() => {
+                        setCarrinho([]);
+                        setTela("carrinhoVazio");
+                    }}
+                />
+            );
+        }
+
+        // Carrinho vazio
+        if (telaAtual === "carrinhoVazio") {
+            return (
+                <CarrinhoVazio
+                    voltarCarrinho={() => setTela("carrinho")}
+                />
+            );
+        }
+
+        // Dados do cliente
+        if (telaAtual === "dados") {
+            return (
+                <DadosCliente
+                    voltarCarrinho={() => setTela("carrinho")}
+                    confirmarContato={finalizarPedido}
+                />
+            );
+        }
+
+        // Pedido realizado
+        if (telaAtual === "pedidoRealizado") {
+            return (
+                <PedidoRealizado
+                    voltarPedido={() => setTela("pedido")}
+                />
+            );
+        }
+
+        // Dashboard
+        if (telaAtual === "dashboard") {
+            return (
+                <Dashboard
+                    abrirDashboard={() => setTela("dashboard")}
+                    abrirNovoPedido={() => setTela("pedido")}
+                    abrirConsultarPedido={() =>
+                        setTela("consultarPedido")
+                    }
+                    abrirPendentes={() => setTela("pendentes")}
+                    abrirFinanceiro={() => setTela("financeiro")}
+                    abrirClientes={() => setTela("clientes")}
+                    abrirAlertas={() => setTela("alertas")}
+                    fecharDashboard={sair}
+                />
+            );
+        }
+
+        // Clientes
+        if (telaAtual === "clientes") {
+            return (
+                <Clientes
+                    abrirDashboard={() => setTela("dashboard")}
+                    abrirNovoPedido={() => setTela("pedido")}
+                    abrirConsultarPedido={() =>
+                        setTela("consultarPedido")
+                    }
+                    abrirPendentes={() => setTela("pendentes")}
+                    abrirFinanceiro={() => setTela("financeiro")}
+                    abrirClientes={() => setTela("clientes")}
+                    abrirAlertas={() => setTela("alertas")}
+                    fecharClientes={() => setTela("dashboard")}
+                />
+            );
+        }
+
+        // Consultar pedidos
+        if (telaAtual === "consultarPedido") {
+            return (
+                <ConsultarPedido
+                    abrirDashboard={() => setTela("dashboard")}
+                    abrirNovoPedido={() => setTela("pedido")}
+                    abrirConsultarPedido={() =>
+                        setTela("consultarPedido")
+                    }
+                    abrirPendentes={() => setTela("pendentes")}
+                    abrirFinanceiro={() => setTela("financeiro")}
+                    abrirClientes={() => setTela("clientes")}
+                    abrirAlertas={() => setTela("alertas")}
+                    abrirDetalhe={abrirDetalhe}
+                    fecharConsultarPedido={() =>
+                        setTela("dashboard")
+                    }
+                />
+            );
+        }
+
+        // Pedidos pendentes
+        if (telaAtual === "pendentes") {
+            return (
+                <Pendentes
+                    voltarDashboard={() => setTela("dashboard")}
+                    abrirDetalhe={abrirDetalhe}
+                    abrirAprovar={abrirAprovar}
+                />
+            );
+        }
+
+        // Alertas
+        if (telaAtual === "alertas") {
+            return (
+                <Alertas
+                    voltarDashboard={() => setTela("dashboard")}
+                    abrirNovoPedido={() => setTela("pedido")}
+                    abrirConsultarPedido={() =>
+                        setTela("consultarPedido")
+                    }
+                    abrirPendentes={() => setTela("pendentes")}
+                    abrirFinanceiro={() => setTela("financeiro")}
+                    abrirClientes={() => setTela("clientes")}
+                    abrirDetalhe={abrirDetalhe}
+                />
+            );
+        }
+
+        // Aprovar pedido
+        if (telaAtual === "aprovarPedido") {
+            return (
+                <AprovarPedido
+                    idPedido={idPedidoAberto}
+                    voltar={() => setTela("pendentes")}
+                />
+            );
+        }
+
+        // Detalhes do pedido
+        if (telaAtual === "detalhePedido") {
+            return (
+                <DetalhePedido
+                    idPedido={idPedidoAberto}
+                    voltarDashboard={() => setTela("dashboard")}
+                    abrirNovoPedido={() => setTela("pedido")}
+                    abrirConsultarPedido={() =>
+                        setTela("consultarPedido")
+                    }
+                    abrirPendentes={() => setTela("pendentes")}
+                    abrirFinanceiro={() => setTela("financeiro")}
+                    abrirClientes={() => setTela("clientes")}
+                    abrirAlertas={() => setTela("alertas")}
+                    editarPedido={() => {}}
+                />
+            );
+        }
+
+        // Controle financeiro
+        if (telaAtual === "financeiro") {
+            return <ControleFinanceiro />;
+        }
+
+        return null;
     }
 
-    if (tela === "cadastro") {
-        return <Cadastro voltarLogin={() => setTela("dashboard")} />;
+    // Somente o gerente visualiza a barra administrativa
+    const mostrarBarra =
+        estaAutenticado() &&
+        podeExibirBarra(perfil, telaAtual);
+
+    if (!mostrarBarra) {
+        return renderTela();
     }
-
-    if (tela === "pedido") {
-        return (
-            <Pedido
-                voltarDashboard={() => setTela("dashboard")}
-                adicionarCarrinho={(produto) => {
-                    const produtoNormalizado = {
-                        ...produto,
-                        idProduto: produto.idProduto ?? produto.id
-                    };
-
-                    setCarrinho((carrinhoAtual) => [
-                        ...carrinhoAtual,
-                        produtoNormalizado
-                    ]);
-
-                    setTela("carrinho");
-                }}
-            />
-        );
-    }
-
-    if (tela === "carrinho") {
-        return (
-            <Carrinho
-                carrinho={carrinho}
-                adicionarProduto={() => setTela("pedido")}
-                realizarPedido={() => setTela("dados")}
-                fecharCarrinho={() => setTela("pedido")}
-                esvaziarCarrinho={() => {
-                    setCarrinho([]);
-                    setTela("carrinhoVazio");
-                }}
-            />
-        );
-    }
-
-    if (tela === "carrinhoVazio") {
-        return <CarrinhoVazio voltarCarrinho={() => setTela("carrinho")} />;
-    }
-
-    if (tela === "dados") {
-        return (
-            <DadosCliente
-                voltarCarrinho={() => setTela("carrinho")}
-                confirmarContato={finalizarPedido}
-            />
-        );
-    }
-
-    if (tela === "pedidoRealizado") {
-        return (
-            <PedidoRealizado voltarPedido={() => setTela("pedido")} />
-        );
-    }
-
-    if (tela === "dashboard") {
-        return (
-            <Dashboard
-                abrirDashboard={() => setTela("dashboard")}
-                abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
-                abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
-                abrirClientes={() => setTela("clientes")}
-                abrirAlertas={() => setTela("alertas")}
-                fecharDashboard={sair}
-            />
-        );
-    }
-
-    if (tela === "clientes") {
-        return (
-            <Clientes
-                abrirDashboard={() => setTela("dashboard")}
-                abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
-                abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
-                abrirClientes={() => setTela("clientes")}
-                abrirAlertas={() => setTela("alertas")}
-                fecharClientes={() => setTela("dashboard")}
-            />
-        );
-    }
-
-    if (tela === "consultarPedido") {
-        return (
-            <ConsultarPedido
-                abrirDashboard={() => setTela("dashboard")}
-                abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
-                abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
-                abrirClientes={() => setTela("clientes")}
-                abrirAlertas={() => setTela("alertas")}
-                abrirDetalhe={abrirDetalhe}
-                fecharConsultarPedido={() => setTela("dashboard")}
-            />
-        );
-    }
-
-    if (tela === "pendentes") {
-        return (
-            <Pendentes
-                voltarDashboard={() => setTela("dashboard")}
-                abrirDetalhe={abrirDetalhe}
-                abrirAprovar={abrirAprovar}
-            />
-        );
-    }
-
-    if (tela === "alertas") {
-        return (
-            <Alertas
-                voltarDashboard={() => setTela("dashboard")}
-                abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
-                abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
-                abrirClientes={() => setTela("clientes")}
-                abrirDetalhe={abrirDetalhe}
-            />
-        );
-    }
-
-    if (tela === "aprovarPedido") {
-        return (
-            <AprovarPedido
-                idPedido={idPedidoAberto}
-                voltar={() => setTela("pendentes")}
-            />
-        );
-    }
-
-    if (tela === "detalhePedido") {
-        return (
-            <DetalhePedido
-                idPedido={idPedidoAberto}
-                voltarDashboard={() => setTela("dashboard")}
-                abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
-                abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
-                abrirClientes={() => setTela("clientes")}
-                abrirAlertas={() => setTela("alertas")}
-                editarPedido={() => {}}
-            />
-        );
-    }
-
-    return (
-        <Dashboard
-            abrirDashboard={() => setTela("dashboard")}
-            abrirNovoPedido={() => setTela("pedido")}
-            abrirConsultarPedido={() => setTela("consultarPedido")}
-            abrirPendentes={() => setTela("pendentes")}
-            abrirFinanceiro={() => abrirDetalhe(null)}
-            abrirClientes={() => setTela("clientes")}
-            abrirAlertas={() => setTela("alertas")}
-            fecharDashboard={sair}
-        />
-    );
-    }
-
-    const mostrarBarra = estaAutenticado() && TELAS_COM_BARRA.includes(tela);
-
-    if (!mostrarBarra) return renderTela();
 
     return (
         <>
             <BarraNavegacao
-                telaAtiva={tela === "aprovarPedido" ? "pendentes" : tela}
+                telaAtiva={
+                    telaAtual === "aprovarPedido"
+                        ? "pendentes"
+                        : telaAtual
+                }
                 abrirDashboard={() => setTela("dashboard")}
                 abrirNovoPedido={() => setTela("pedido")}
-                abrirConsultarPedido={() => setTela("consultarPedido")}
+                abrirConsultarPedido={() =>
+                    setTela("consultarPedido")
+                }
                 abrirPendentes={() => setTela("pendentes")}
-                abrirFinanceiro={() => abrirDetalhe(null)}
+                abrirFinanceiro={() => setTela("financeiro")}
                 abrirClientes={() => setTela("clientes")}
                 abrirAlertas={() => setTela("alertas")}
-                fechar={tela === "dashboard" ? sair : () => setTela("dashboard")}
+                fechar={
+                    telaAtual === "dashboard"
+                        ? sair
+                        : () => setTela("dashboard")
+                }
             />
+
             {renderTela()}
         </>
     );

@@ -1,0 +1,181 @@
+.financeiro-excluir-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    min-height: 100vh;
+    background-color: #faf7f6;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+/* BARRA SUPERIOR */
+
+.financeiro-excluir-header {
+    height: 55px;
+    width: 100%;
+    background-color: #5b292b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.financeiro-excluir-logo {
+    width: 55px;
+    height: 55px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.financeiro-excluir-logo-circulo {
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    background-color: #5b292b;
+    border: 1px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: Georgia, serif;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.financeiro-excluir-fechar {
+    margin-right: 9px;
+    width: 34px;
+    height: 34px;
+    color: white;
+    background: transparent;
+    border: none;
+    font-size: 27px;
+    font-weight: 200;
+    cursor: pointer;
+}
+
+/* PAINEL CENTRAL */
+
+.financeiro-excluir-painel {
+    position: absolute;
+    top: calc(50% + 22px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 488px;
+    height: 501px;
+    box-sizing: border-box;
+
+    border: 1px solid #b99c9c;
+    border-radius: 14px;
+
+    padding: 79px 36px 30px;
+    background-color: #faf7f6;
+}
+
+.financeiro-excluir-painel h2 {
+    margin: 0 0 20px;
+
+    color: #693a3a;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* BOTÃO X DO PAINEL */
+
+.financeiro-excluir-fechar-painel {
+    position: absolute;
+    top: 25px;
+    right: 15px;
+
+    width: 28px;
+    height: 28px;
+
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 200;
+    cursor: pointer;
+}
+
+/* CHECKBOXES */
+
+.financeiro-excluir-lista {
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr 1fr 0.75fr;
+    column-gap: 10px;
+    row-gap: 20px;
+    align-items: center;
+}
+
+.financeiro-excluir-opcao {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    white-space: nowrap;
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.financeiro-excluir-opcao input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: #003cff;
+}
+
+/* BOTÃO DELETAR */
+
+.financeiro-excluir-deletar {
+    display: block;
+
+    width: 113px;
+    height: 35px;
+
+    margin: 65px auto 0;
+
+    background-color: #fa4c53;
+    color: white;
+
+    border: none;
+    border-radius: 9px;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
+
+    transition: background-color 0.2s;
+}
+
+.financeiro-excluir-deletar:hover {
+    background-color: #e9434b;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 550px) {
+    .financeiro-excluir-painel {
+        width: calc(100% - 30px);
+        height: 430px;
+        padding: 75px 22px 25px;
+    }
+
+    .financeiro-excluir-lista {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 18px;
+    }
+
+    .financeiro-excluir-deletar {
+        margin-top: 55px;
+    }
+}

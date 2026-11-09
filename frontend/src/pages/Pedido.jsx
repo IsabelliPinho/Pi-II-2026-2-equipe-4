@@ -10,6 +10,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
     const [mensagemErro, setMensagemErro] = useState("");
     const [statusModal, setStatusModal] = useState("idle");
 
+    // Carrega os produtos do backend
     async function carregarProdutos() {
         try {
             setCarregando(true);
@@ -20,9 +21,9 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
 
             const produtosNormalizados = Array.isArray(dados)
                 ? dados.map((item) => ({
-                      ...item,
-                      id: item.id ?? item.idProduto ?? item.codigo
-                  }))
+                    ...item,
+                    id: item.id ?? item.idProduto ?? item.codigo
+                }))
                 : [];
 
             setProdutos(produtosNormalizados);
@@ -34,14 +35,28 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
             } else {
                 setProdutoSelecionado("");
             }
+
         } catch (erro) {
             console.error("Erro ao carregar produtos:", erro);
-            setErro(
-                erro.message ||
-                    "Não foi possível carregar os produtos. Verifique a conexão com o servidor."
-            );
+
+            // Mensagens específicas para cada situação
+            if (erro.status === 401 || erro.status === 403) {
+                setErro(
+                    "Não foi possível acessar o catálogo de produtos. Verifique a autorização da rota no backend."
+                );
+            } else if (erro.status === 0) {
+                setErro(
+                    "Servidor indisponível. Verifique se o backend está funcionando."
+                );
+            } else {
+                setErro(
+                    "Não foi possível carregar os produtos. Tente novamente."
+                );
+            }
+
             setProdutos([]);
             setProdutoSelecionado("");
+
         } finally {
             setCarregando(false);
         }
@@ -51,6 +66,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
         carregarProdutos();
     }, []);
 
+    // Adiciona o produto selecionado ao carrinho
     function adicionarProdutoAoCarrinho() {
         setMensagemErro("");
 
@@ -59,7 +75,9 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
         }
 
         if (produtos.length === 0) {
-            setMensagemErro("Nenhum produto disponível no catálogo.");
+            setMensagemErro(
+                "Nenhum produto disponível no catálogo."
+            );
             return;
         }
 
@@ -68,7 +86,16 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
         );
 
         if (!produto) {
-            setMensagemErro("Por favor, selecione um produto válido.");
+            setMensagemErro(
+                "Por favor, selecione um produto válido."
+            );
+            return;
+        }
+
+        if (!adicionarCarrinho) {
+            setMensagemErro(
+                "Não foi possível adicionar o produto ao carrinho."
+            );
             return;
         }
 
@@ -82,9 +109,15 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
             });
 
             setStatusModal("success");
+
         } catch (erro) {
-            console.error("Erro ao adicionar ao carrinho:", erro);
+            console.error(
+                "Erro ao adicionar ao carrinho:",
+                erro
+            );
+
             setStatusModal("idle");
+
             setMensagemErro(
                 "Não foi possível adicionar o produto ao carrinho."
             );
@@ -93,6 +126,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
 
     return (
         <div className="pedido-container">
+
             <header className="pedido-header">
                 <h1>Faça seu Pedido</h1>
 
@@ -109,8 +143,12 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
             </header>
 
             <main className="pedido-main">
+
                 <div className="pedido-card">
+
+                    {/* ESTRUTURA DO BOLO */}
                     <section className="estrutura-bolo">
+
                         <h2>Estrutura do Bolo</h2>
 
                         {carregando && (
@@ -120,7 +158,10 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                         )}
 
                         {!carregando && erro && (
-                            <div role="alert" className="alerta-erro-api">
+                            <div
+                                role="alert"
+                                className="alerta-erro-api"
+                            >
                                 <p>{erro}</p>
 
                                 <button
@@ -145,6 +186,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                             !erro &&
                             produtos.length > 0 && (
                                 <div className="campo-pedido">
+
                                     <label htmlFor="produto">
                                         Produto do catálogo <span>*</span>
                                     </label>
@@ -170,6 +212,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                             </option>
                                         ))}
                                     </select>
+
                                 </div>
                             )}
 
@@ -182,25 +225,33 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                             </p>
                         )}
 
+                        {/* TAMANHO */}
                         <div className="campo-pedido">
+
                             <label htmlFor="tamanho">
                                 Tamanho <span>*</span>
                             </label>
 
-                            <select id="tamanho" defaultValue="1kg">
+                            <select
+                                id="tamanho"
+                                defaultValue="1kg"
+                            >
                                 <option>1kg</option>
                                 <option>2kg</option>
                                 <option>3kg</option>
                                 <option>4kg</option>
                                 <option>5kg</option>
                             </select>
+
                         </div>
 
                         <p className="observacao">
                             1kg serve aprox. 20 pessoas
                         </p>
 
+                        {/* PRIMEIRO RECHEIO */}
                         <div className="campo-pedido">
+
                             <label htmlFor="recheio1">
                                 1º Recheio <span>*</span>
                             </label>
@@ -214,10 +265,15 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 <option>Ninho</option>
                                 <option>Doce de leite</option>
                             </select>
+
                         </div>
 
+                        {/* SEGUNDO RECHEIO */}
                         <div className="campo-pedido">
-                            <label htmlFor="recheio2">2º Recheio</label>
+
+                            <label htmlFor="recheio2">
+                                2º Recheio
+                            </label>
 
                             <select
                                 id="recheio2"
@@ -228,9 +284,12 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 <option>Ninho</option>
                                 <option>Doce de leite</option>
                             </select>
+
                         </div>
 
+                        {/* ANDAR */}
                         <div className="campo-pedido">
+
                             <label htmlFor="andar">
                                 Andar <span>*</span>
                             </label>
@@ -243,9 +302,12 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 <option>2 andares</option>
                                 <option>3 andares</option>
                             </select>
+
                         </div>
 
+                        {/* TEMA */}
                         <div className="campo-textarea">
+
                             <label htmlFor="tema">
                                 Tema <span>*</span>
                             </label>
@@ -254,13 +316,19 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 id="tema"
                                 placeholder="Descreva aqui as características do seu pedido"
                             />
+
                         </div>
+
                     </section>
 
+                    {/* ACABAMENTO DO BOLO */}
                     <section className="acabamento-bolo">
+
                         <h2>Acabamento do Bolo</h2>
 
+                        {/* COBERTURA */}
                         <div className="campo-pedido">
+
                             <label htmlFor="cobertura">
                                 Cobertura <span>*</span>
                             </label>
@@ -274,9 +342,12 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 <option>Ganache</option>
                                 <option>Buttercream</option>
                             </select>
+
                         </div>
 
+                        {/* DECORAÇÃO */}
                         <div className="campo-textarea">
+
                             <label htmlFor="decoracao">
                                 Topo &amp;
                                 <br />
@@ -287,21 +358,30 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 id="decoracao"
                                 placeholder="Descreva a decoração do bolo"
                             />
+
                         </div>
 
+                        {/* MASSA */}
                         <div className="campo-pedido">
+
                             <label htmlFor="massa">
                                 Massa <span>*</span>
                             </label>
 
-                            <select id="massa" defaultValue="Branca">
+                            <select
+                                id="massa"
+                                defaultValue="Branca"
+                            >
                                 <option>Branca</option>
                                 <option>Chocolate</option>
                                 <option>Red Velvet</option>
                             </select>
+
                         </div>
 
+                        {/* RESTRIÇÕES ALIMENTARES */}
                         <div className="campo-textarea">
+
                             <label htmlFor="restricoes">
                                 Restrições
                                 <br />
@@ -312,9 +392,12 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                                 id="restricoes"
                                 placeholder="Descreva se houver alguma restrição"
                             />
+
                         </div>
+
                     </section>
 
+                    {/* ADICIONAR AO CARRINHO */}
                     <button
                         type="button"
                         className="botao-carrinho"
@@ -327,12 +410,18 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                             statusModal === "processing"
                         }
                     >
-                        <span className="icone-carrinho">🛒</span>
+                        <span className="icone-carrinho">
+                            🛒
+                        </span>
+
                         Adicionar ao carrinho
                     </button>
+
                 </div>
+
             </main>
 
+            {/* MODAL DE PROCESSAMENTO */}
             {statusModal === "processing" && (
                 <div
                     className="modal-overlay"
@@ -341,14 +430,18 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                     aria-label="Adicionando produto ao carrinho"
                 >
                     <div className="card-modal card-loading">
+
                         <div className="spinner-modal"></div>
+
                         <p className="texto-processing">
                             Adicionando produto ao carrinho...
                         </p>
+
                     </div>
                 </div>
             )}
 
+            {/* MODAL DE SUCESSO */}
             {statusModal === "success" && (
                 <div
                     className="modal-overlay"
@@ -357,6 +450,7 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                     aria-label="Produto adicionado ao carrinho"
                 >
                     <div className="card-modal card-sucesso">
+
                         <button
                             type="button"
                             className="btn-fechar-modal"
@@ -366,16 +460,22 @@ function Pedido({ adicionarCarrinho, voltarDashboard }) {
                             ×
                         </button>
 
-                        <div className="icone-check">✓</div>
+                        <div className="icone-check">
+                            ✓
+                        </div>
+
                         <h3 className="titulo-aprovado">
                             Produto adicionado!
                         </h3>
+
                         <p className="subtitulo-confirmacao">
                             O produto foi adicionado ao carrinho.
                         </p>
+
                     </div>
                 </div>
             )}
+
         </div>
     );
 }
