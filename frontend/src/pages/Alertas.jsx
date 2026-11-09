@@ -83,34 +83,6 @@ function Alertas({
     return (
         <div className="alertas-container">
 
-            <header className="alertas-header">
-
-                <div className="alertas-logo">
-                    <div className="alertas-logo-circulo">
-                        <span>GM</span>
-                    </div>
-                </div>
-
-                <nav className="alertas-menu">
-                    <button onClick={voltarDashboard}>Dashboard</button>
-                    <button onClick={abrirNovoPedido}>Novo Pedido</button>
-                    <button onClick={abrirConsultarPedido}>Consultar Pedido</button>
-                    <button onClick={abrirPendentes}>Pendentes</button>
-                    <button onClick={abrirFinanceiro}>Controle Financeiro</button>
-                    <button onClick={abrirClientes}>Clientes</button>
-                </nav>
-
-                <button className="alertas-sino" aria-label="Alertas">🔔</button>
-
-                <button
-                    className="alertas-fechar"
-                    onClick={voltarDashboard}
-                    aria-label="Fechar"
-                >
-                    ✕
-                </button>
-
-            </header>
 
             <main className="alertas-main">
 

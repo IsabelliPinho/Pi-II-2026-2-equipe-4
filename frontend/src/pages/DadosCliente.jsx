@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../styles/DadosCliente.css";
+import { cadastrarCliente } from "../services/api";
 
 function DadosCliente({ voltarCarrinho, confirmarContato }) {
     const [nome, setNome] = useState("");
@@ -96,23 +97,7 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
         try {
             setCarregando(true);
 
-            const resposta = await fetch("http://localhost:8080/clientes/cadastro", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(dadosCliente),
-            });
-
-            const resultado = await resposta.json().catch(() => null);
-
-            if (!resposta.ok) {
-                throw new Error(
-                    resultado?.message ||
-                    resultado?.mensagem ||
-                    "Não foi possível cadastrar o cliente. Verifique os dados."
-                );
-            }
+            const resultado = await cadastrarCliente(dadosCliente);
 
             if (!resultado?.id) {
                 throw new Error(
