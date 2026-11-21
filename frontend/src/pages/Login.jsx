@@ -3,7 +3,7 @@ import { login, recuperarSenha } from "../services/api";
 import { salvarSessao } from "../services/auth";
 import "../styles/Login.css";
 
-function Login({ entrar, aviso }) {
+function Login({ entrar, aviso, irCadastro }) {
     const [usuario, setUsuario] = useState("");
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
@@ -37,6 +37,7 @@ function Login({ entrar, aviso }) {
 
         try {
             await recuperarSenha(usuario.trim());
+
             // Mesma mensagem exista ou não o usuário
             setMensagemRecuperacao(
                 "Se o usuário existir, enviaremos as instruções para redefinir a senha."
@@ -61,8 +62,10 @@ function Login({ entrar, aviso }) {
 
         try {
             const sessao = await login(usuario.trim(), senha);
+
             salvarSessao(sessao);
             entrar(sessao);
+
         } catch (err) {
             // Não revela qual dos dois está errado
             setErro(
@@ -75,11 +78,18 @@ function Login({ entrar, aviso }) {
         }
     }
 
+    // TELA DE RECUPERAÇÃO DE SENHA
     if (recuperando) {
         return (
             <div className="login-container">
-                <form className="login-card" onSubmit={enviarRecuperacao}>
-                    <h2 className="login-titulo">Recuperar senha</h2>
+
+                <form
+                    className="login-card"
+                    onSubmit={enviarRecuperacao}
+                >
+                    <h2 className="login-titulo">
+                        Recuperar senha
+                    </h2>
 
                     <div className="campo">
                         <input
@@ -92,9 +102,16 @@ function Login({ entrar, aviso }) {
                     </div>
 
                     {mensagemRecuperacao && (
-                        <p className="login-aviso">{mensagemRecuperacao}</p>
+                        <p className="login-aviso">
+                            {mensagemRecuperacao}
+                        </p>
                     )}
-                    {erro && <p className="login-erro" role="alert">{erro}</p>}
+
+                    {erro && (
+                        <p className="login-erro" role="alert">
+                            {erro}
+                        </p>
+                    )}
 
                     <button
                         type="submit"
@@ -113,16 +130,21 @@ function Login({ entrar, aviso }) {
                             Voltar ao login
                         </button>
                     </div>
+
                 </form>
+
             </div>
         );
     }
 
+    // TELA DE LOGIN
     return (
         <div className="login-container">
 
-            {/* CARD DE LOGIN */}
-            <form className="login-card" onSubmit={enviar}>
+            <form
+                className="login-card"
+                onSubmit={enviar}
+            >
 
                 {/* ÍCONE GRANDE DE USUÁRIO */}
                 <div className="usuario-icon">
@@ -208,19 +230,27 @@ function Login({ entrar, aviso }) {
                     <button
                         type="button"
                         className="mostrar-senha"
-                        onClick={() =>
-                            setSenhaVisivel(!senhaVisivel)
-                        }
+                        onClick={() => setSenhaVisivel(!senhaVisivel)}
                     >
                         {senhaVisivel ? "◉" : "○"}
                     </button>
                 </div>
 
-                {aviso && <p className="login-aviso">{aviso}</p>}
-                {erro && <p className="login-erro" role="alert">{erro}</p>}
+                {aviso && (
+                    <p className="login-aviso">
+                        {aviso}
+                    </p>
+                )}
+
+                {erro && (
+                    <p className="login-erro" role="alert">
+                        {erro}
+                    </p>
+                )}
 
                 {/* LINKS */}
                 <div className="links-login">
+
                     <button
                         type="button"
                         className="link-cadastro"
@@ -228,6 +258,15 @@ function Login({ entrar, aviso }) {
                     >
                         Esqueceu a senha?
                     </button>
+
+                    <button
+                        type="button"
+                        className="link-cadastro"
+                        onClick={irCadastro}
+                    >
+                        Criar conta
+                    </button>
+
                 </div>
 
                 {/* BOTÃO ENTRAR */}
