@@ -399,6 +399,7 @@ function App() {
         }
 
         return null;
+
     }
 
     // Somente o gerente visualiza a barra administrativa

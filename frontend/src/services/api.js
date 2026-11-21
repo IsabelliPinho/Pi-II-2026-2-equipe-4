@@ -58,66 +58,14 @@ async function request(path, { semToken = false, headers, ...options } = {}) {
     return resposta.status === 204 ? null : resposta.json();
 }
 
-/* =========================================================
-   AUTENTICAÇÃO
-========================================================= */
-
-const LOGIN_FAKE = import.meta.env.VITE_LOGIN_FAKE === "true";
-
-// POST /auth/login
+/* Autenticação - POST /auth/login { login, senha } -> { id, nome, login, perfis } (ainda sem token) */
 export const login = (usuario, senha) =>
-    LOGIN_FAKE
-        ? loginFake(usuario, senha)
-        : request("/auth/login", {
-            method: "POST",
-            semToken: true,
-            body: JSON.stringify({ usuario, senha })
-        });
+    request("/auth/login", {
+        method: "POST",
+        semToken: true,
+        body: JSON.stringify({login: usuario, senha})
+    });
 
-// Login falso para desenvolvimento
-async function loginFake(usuario, senha) {
-    const gerentes = [
-        "Gabriela Almeida",
-        "Rafael Monteiro",
-        "Camila Duarte",
-        "Lucas Ferreira",
-        "Beatriz Nogueira"
-    ];
-
-    const clientes = [
-        "Cliente Teste"
-    ];
-
-    if (senha !== "Senha@123") {
-        throw new ApiError(
-            401,
-            "CREDENCIAIS_INVALIDAS",
-            "Usuário ou senha inválidos."
-        );
-    }
-
-    if (gerentes.includes(usuario)) {
-        return {
-            token: "token-fake-dev",
-            perfil: "GERENTE",
-            nome: usuario
-        };
-    }
-
-    if (clientes.includes(usuario)) {
-        return {
-            token: "token-fake-cliente",
-            perfil: "CLIENTE",
-            nome: usuario
-        };
-    }
-
-    throw new ApiError(
-        401,
-        "CREDENCIAIS_INVALIDAS",
-        "Usuário ou senha inválidos."
-    );
-}
 
 /* =========================================================
    RECUPERAÇÃO DE SENHA

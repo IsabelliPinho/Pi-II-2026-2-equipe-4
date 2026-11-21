@@ -15,6 +15,10 @@ import com.gabicake.api.dto.PedidoConsultaResponseDTO;
 import com.gabicake.api.dto.VerificacaoEntregaDTO;
 import com.gabicake.api.model.Pedido;
 import com.gabicake.api.service.PedidoService;
+import com.gabicake.api.exception.ApiException;
+import com.gabicake.api.security.AuthInterceptor;
+import com.gabicake.api.security.UsuarioAutenticado;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +57,15 @@ public class PedidoController {
 
     // PATCH /pedidos/{id}
     @PatchMapping("/pedidos/{id}")
-    public PedidoAtualizacaoResponseDTO atualizar(@PathVariable Long id, @RequestBody Pedido alteracoes) {
+    public PedidoAtualizacaoResponseDTO atualizar(@PathVariable Long id, @RequestBody Pedido alteracoes,
+                                                  HttpServletRequest request) {
+        // Matriz R005: cancelar pedido é exclusivo do gerente (funcionário pode alterar e marcar atendido).
+        Object quem = request.getAttribute(AuthInterceptor.ATRIBUTO_USUARIO);
+        boolean cancelando = "CANCELADO".equalsIgnoreCase(alteracoes.getStatusPedido());
+        if (cancelando && quem instanceof UsuarioAutenticado u && !u.ehGerente()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN",
+                    "Somente o gerente pode cancelar um pedido.");
+        }
         Pedido atualizado = service.atualizar(id, alteracoes);
         return new PedidoAtualizacaoResponseDTO(
                 atualizado.getId(),

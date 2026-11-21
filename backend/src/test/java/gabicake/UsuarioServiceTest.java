@@ -26,6 +26,7 @@ import com.gabicake.api.entity.UsuarioEntity;
 import com.gabicake.api.exception.ApiException;
 import com.gabicake.api.repository.PerfilRepository;
 import com.gabicake.api.repository.UsuarioRepository;
+import com.gabicake.api.service.SessaoService;
 import com.gabicake.api.service.UsuarioService;
 
 /**
@@ -34,6 +35,16 @@ import com.gabicake.api.service.UsuarioService;
  * Rodar: mvn test
  */
 class UsuarioServiceTest {
+
+    // Sessão falsa: não toca no banco, só devolve um token fixo.
+    private static SessaoService sessaoFalsa() {
+        return new SessaoService(null) {
+            @Override
+            public String criar(UsuarioEntity usuario) {
+                return "token-de-teste";
+            }
+        };
+    }
 
     // Formato de um hash BCrypt (o mesmo que o banco exige em ck_usuario_senha_hash).
     private static final String FORMATO_BCRYPT = "^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$";
@@ -48,7 +59,7 @@ class UsuarioServiceTest {
     private final Map<String, UsuarioEntity> banco = new HashMap<>();
     private final AtomicInteger proximoId = new AtomicInteger(1);
     private final UsuarioService service =
-            new UsuarioService(usuarioRepositoryFalso(), perfilRepositoryFalso(), encoder);
+            new UsuarioService(usuarioRepositoryFalso(), perfilRepositoryFalso(), encoder, sessaoFalsa());
 
     // ---------------------------------------------------------------- criação
 
@@ -185,7 +196,7 @@ class UsuarioServiceTest {
         String hashAntigo = new BCryptPasswordEncoder(4).encode(SENHA);
         banco.put("maria.souza", usuarioComHash("maria.souza", hashAntigo));
         UsuarioService servicoMaisForte = new UsuarioService(usuarioRepositoryFalso(), perfilRepositoryFalso(),
-                new BCryptPasswordEncoder(6));
+                new BCryptPasswordEncoder(6), sessaoFalsa());
 
         servicoMaisForte.autenticar(new LoginRequestDTO("maria.souza", SENHA));
 
