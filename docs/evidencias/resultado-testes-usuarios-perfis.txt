@@ -1,0 +1,44 @@
+Evidência: execução de db/testes/testes-usuarios-perfis.sql
+Data: 31/10/2026 | PostgreSQL 16.15 | banco criado por 01-schema + 02-seed + 03-indices + 04-usuarios-perfis
+Comando: psql -U gabicake -d gabicake -v ON_ERROR_STOP=1 -f db/testes/testes-usuarios-perfis.sql
+
+=== Resultado: migration 04 (usuários e perfis) ===
+   id   |                             teste                             |            esperado             |             obtido              | resultado 
+--------+---------------------------------------------------------------+---------------------------------+---------------------------------+-----------
+ MIG-01 | perfis GERENTE e FUNCIONARIO existem                          | verdadeiro                      | verdadeiro                      | PASSOU
+ MIG-02 | todo gerente virou usuário (1 para 1)                         | verdadeiro                      | verdadeiro                      | PASSOU
+ MIG-03 | todo usuário vindo de gerente tem o perfil GERENTE            | verdadeiro                      | verdadeiro                      | PASSOU
+ MIG-04 | o hash de senha foi copiado sem alteração                     | verdadeiro                      | verdadeiro                      | PASSOU
+ MIG-05 | nenhum usuário está sem perfil                                | verdadeiro                      | verdadeiro                      | PASSOU
+ FK-01  | vincular perfil a usuário inexistente                         | 23503 fk_usuario_perfil_usuario | 23503 fk_usuario_perfil_usuario | PASSOU
+ FK-02  | vincular usuário a perfil inexistente                         | 23503 fk_usuario_perfil_perfil  | 23503 fk_usuario_perfil_perfil  | PASSOU
+ FK-03  | criar usuário ligado a gerente inexistente                    | 23503 fk_usuario_gerente        | 23503 fk_usuario_gerente        | PASSOU
+ FK-04  | UPDATE do vínculo apontando para perfil inexistente           | 23503 fk_usuario_perfil_perfil  | 23503 fk_usuario_perfil_perfil  | PASSOU
+ FK-05  | apagar perfil que está em uso                                 | 23503 fk_usuario_perfil_perfil  | 23503 fk_usuario_perfil_perfil  | PASSOU
+ FK-06  | apagar gerente que já tem usuário                             | 23503 fk_usuario_gerente        | 23503 fk_usuario_gerente        | PASSOU
+ UQ-01  | perfil com nome já existente                                  | 23505 uq_perfil_nome            | 23505 uq_perfil_nome            | PASSOU
+ UQ-02  | usuário com login já existente                                | 23505 uq_usuario_login          | 23505 uq_usuario_login          | PASSOU
+ UQ-03  | dois usuários para o mesmo gerente                            | 23505 uq_usuario_gerente        | 23505 uq_usuario_gerente        | PASSOU
+ UQ-04  | mesmo perfil vinculado duas vezes ao mesmo usuário            | 23505 usuario_perfil_pkey       | 23505 usuario_perfil_pkey       | PASSOU
+ UQ-05  | UPDATE do login para o de outro usuário                       | 23505 uq_usuario_login          | 23505 uq_usuario_login          | PASSOU
+ CK-01  | login com letras maiúsculas                                   | 23514 ck_usuario_login          | 23514 ck_usuario_login          | PASSOU
+ CK-02  | login com espaço                                              | 23514 ck_usuario_login          | 23514 ck_usuario_login          | PASSOU
+ CK-03  | login curto demais (2 caracteres)                             | 23514 ck_usuario_login          | 23514 ck_usuario_login          | PASSOU
+ CK-04  | senha gravada em texto puro (sem hash)                        | 23514 ck_usuario_senha_hash     | 23514 ck_usuario_senha_hash     | PASSOU
+ CK-05  | nome de perfil em minúsculas                                  | 23514 ck_perfil_nome            | 23514 ck_perfil_nome            | PASSOU
+ CK-06  | nome do usuário só com espaços                                | 23514 ck_usuario_nome           | 23514 ck_usuario_nome           | PASSOU
+ NN-01  | usuário sem senha (NOT NULL)                                  | 23502                           | 23502                           | PASSOU
+ OK-01  | criar funcionário válido (sem gerente) com perfil FUNCIONARIO | OK                              | aceito pelo banco               | PASSOU
+ OK-02  | apagar usuário apaga seus vínculos (ON DELETE CASCADE)        | OK                              | aceito pelo banco               | PASSOU
+ OK-03  | um usuário pode ter dois perfis (relação N:N)                 | OK                              | aceito pelo banco               | PASSOU
+(26 rows)
+
+=== Resumo ===
+ resultado | qtd 
+-----------+-----
+ PASSOU    |  26
+(1 row)
+
+DO
+ROLLBACK
+Código de saída: 0
