@@ -1,4 +1,6 @@
 import "../styles/BarraNavegacao.css";
+import { podeAcessarTela } from "../utils/Permissoes";
+import { obterPerfil } from "../services/auth";
 
 const ITENS = [
     { tela: "dashboard", rotulo: "Dashboard", acao: "abrirDashboard" },
@@ -20,7 +22,7 @@ function BarraNavegacao({ telaAtiva, fechar, ...acoes }) {
             </div>
 
             <nav className="barra-nav-menu">
-                {ITENS.map((item) => (
+                {ITENS.filter((item) => podeAcessarTela(obterPerfil(), item.tela)).map((item) => (
                     <button
                         key={item.tela}
                         type="button"

@@ -15,6 +15,21 @@ const PERMISSOES = {
         "financeiro"
     ],
 
+    FUNCIONARIO: [
+        "dashboard",
+        "pedido",
+        "carrinho",
+        "carrinhoVazio",
+        "dados",
+        "pedidoRealizado",
+        "clientes",
+        "consultarPedido",
+        "pendentes",
+        "detalhePedido",
+        "aprovarPedido",
+        "alertas"
+    ],
+
     CLIENTE: [
         "pedido",
         "carrinho",
@@ -56,7 +71,7 @@ export function podeAcessarTela(perfil, tela) {
 export function obterTelaInicial(perfil) {
     const perfilNormalizado = normalizarPerfil(perfil);
 
-    if (perfilNormalizado === "GERENTE") {
+    if (perfilNormalizado === "GERENTE" || perfilNormalizado === "FUNCIONARIO") {
         return "dashboard";
     }
 
@@ -69,7 +84,7 @@ export function obterTelaInicial(perfil) {
 
 export function podeExibirBarra(perfil, tela) {
     return (
-        normalizarPerfil(perfil) === "GERENTE" &&
+        ["GERENTE", "FUNCIONARIO"].includes(normalizarPerfil(perfil)) &&
         TELAS_COM_BARRA.includes(tela)
     );
 }
