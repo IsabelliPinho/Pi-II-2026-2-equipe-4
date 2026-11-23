@@ -3,8 +3,8 @@ const CHAVE = "gabicake.sessao";
 
 export const EVENTO_SESSAO_EXPIRADA = "gabicake:sessao-expirada";
 
-export function salvarSessao({ token = null, id, nome, login, perfis = []}) {
-    localStorage.setItem(CHAVE, JSON.stringify({ token, id, nome, login, perfis}));
+export function salvarSessao({ token = null, id, nome, login, perfis = [], perfil = null }) {
+    localStorage.setItem(CHAVE, JSON.stringify({ token, id, nome, login, perfis, perfil }));
 }
 
 export function obterSessao() {
