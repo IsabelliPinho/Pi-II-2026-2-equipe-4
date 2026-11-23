@@ -142,11 +142,8 @@ export const cadastrarPedido = (pedido) =>
 ========================================================= */
 
 // RF003 - Lista produtos
-// No login falso, não envia o token fictício ao backend.
 export const listarProdutos = () =>
-    request("/listar/produtos", {
-        semToken: LOGIN_FAKE
-    });
+    request("/listar/produtos");
 
 /* =========================================================
    CONTROLE FINANCEIRO
