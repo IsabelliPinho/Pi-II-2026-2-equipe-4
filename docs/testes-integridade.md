@@ -2,7 +2,7 @@
 
 Projeto Integrador II 2026/2 – Equipe 4
 Banco de dados: PostgreSQL 16
-Arquivos relacionados: `db/testes/testes-integridade.sql` e `docs/evidencias/resultado-testes-integridade.txt`
+A bateria está em `db/testes/testes-integridade.sql`. A migração está em `db/init/08-unicidade-cadastros.sql`.
 
 ## 1. O que queríamos descobrir
 
@@ -12,7 +12,7 @@ Chave estrangeira (FK) e restrição de unicidade (UNIQUE) são as regras que im
 
 Escrevemos um único script SQL que executa 21 casos, um depois do outro. Para cada caso ele registra qual erro era esperado, qual erro realmente veio e se os dois batem. O PostgreSQL identifica cada tipo de erro por um código chamado SQLSTATE: `23503` significa violação de chave estrangeira e `23505` significa violação de unicidade. Além do código, o script confere o **nome da constraint** que apareceu no erro (por exemplo `fk_item_produto`). Isso é importante: se conferíssemos só o código, um teste poderia "passar" por causa de outra constraint e esconder um problema real.
 
-O script é seguro de rodar: cada caso acontece dentro de uma subtransação que é desfeita ao final, e o script inteiro termina com `ROLLBACK`. Conferimos que, depois da execução, o banco continua com as mesmas contagens do seed (12 clientes, 15 pedidos, 10 gerentes, 12 produtos e 26 itens). Se algum teste falhar, o `psql` termina com código de saída diferente de zero, o que permite usar o mesmo script em uma automação no futuro.
+Cada caso acontece dentro de uma subtransação que é desfeita ao final, e o script inteiro termina com `ROLLBACK`. As sequências de identidade podem avançar durante os testes. Conferimos que, depois da execução, o banco continua com as mesmas contagens do seed (12 clientes, 15 pedidos, 10 gerentes, 12 produtos e 26 itens). Se algum teste falhar, o `psql` termina com código de saída diferente de zero, o que permite usar o mesmo script em uma automação no futuro.
 
 ## 3. Resultados
 
@@ -57,7 +57,7 @@ Incluímos três casos que devem **funcionar**: inserir um pedido válido, inser
 
 Um teste que sempre passa não vale nada, então fizemos uma verificação extra: copiamos o banco e, nessa cópia, removemos de propósito a FK `fk_item_produto` e a restrição `uq_gerente_nome`. Ao rodar o script, ele acusou falha exatamente nos cinco casos ligados a essas duas regras (FK-04, FK-06, FK-09, UQ-01 e UQ-03), apontou "aceito pelo banco" em cada um e terminou com código de saída 3. Ou seja, se alguém apagar uma dessas constraints no futuro, a bateria percebe.
 
-## 5. O que descobrimos além do esperado
+## 5. Achados anteriores à migração 08
 
 Todas as regras que existem estão funcionando. Mas a bateria também mostra situações que o banco **aceita** hoje, e que talvez a equipe queira decidir se deve aceitar. Marcamos esses três casos como ALERTA, e não como falha, porque o banco está fazendo exatamente o que o schema manda.
 
@@ -72,6 +72,12 @@ Testamos essa correção em uma cópia do banco: os dois casos passam a ser recu
 
 O terceiro é que o cadastro de cliente não tem nenhuma restrição de unicidade: o mesmo nome com o mesmo telefone pode ser cadastrado duas vezes. Aqui não recomendamos corrigir sem pensar, porque duas pessoas da mesma família podem dividir um telefone, e duas pessoas diferentes podem ter o mesmo nome. É uma decisão de regra de negócio, e vale conversar com a cliente.
 
+### Regressão após a migração 08
+
+A migração `08-unicidade-cadastros.sql` cobre os três achados e o caso CT-006 de QA. Para gerentes e produtos, a unicidade ignora diferenças de caixa e espaços nas extremidades do nome. Para clientes, o banco rejeita a repetição do par de nome normalizado e telefone. Pessoas homônimas com telefones diferentes e pessoas com nomes diferentes que compartilham um telefone continuam podendo ser cadastradas.
+
+A bateria atual tem 25 casos obrigatórios. Todos passaram em PostgreSQL 16, em um banco novo e em um banco com dados anteriores à migração. O dump de dados do banco existente foi idêntico antes e depois da aplicação e da reaplicação. Em cópias com colisões nas três tabelas, a migração abortou e os registros e vínculos foram preservados.
+
 ## 6. Limites desta bateria
 
 Os testes foram feitos direto no banco, sem passar pela API, então comprovam que a última linha de defesa funciona, mas não testam as validações do backend. Também não testamos `ON UPDATE CASCADE`, porque os ids são `GENERATED ALWAYS` e não podem ser alterados no uso normal. As regras `CHECK` (telefone, CEP, status, quantidade) já têm alguns testes manuais na seção 4 do `db/verificar.sql` e não foram o foco desta tarefa. Por fim, os casos usam como base os dados do `02-seed.sql`, e por isso o script espera que o seed esteja carregado.
@@ -83,4 +89,4 @@ docker compose exec -T db psql -U gabicake -d gabicake -v ON_ERROR_STOP=1 \
     < db/testes/testes-integridade.sql
 ```
 
-A saída completa da nossa execução está em `docs/evidencias/resultado-testes-integridade.txt`: 18 casos PASSOU e 3 ALERTA, com código de saída 0.
+Após a migração 08, o resumo esperado é `PASSOU | 25`, com código de saída 0.

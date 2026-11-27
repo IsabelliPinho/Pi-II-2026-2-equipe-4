@@ -1,0 +1,73 @@
+EVIDÊNCIA DA MIGRAÇÃO 08
+Gabi Cake | Projeto Integrador II | Equipe 4
+27/11/2026 | PostgreSQL 16.16 | Ambiente local de teste com dados sintéticos
+
+Task — Ajustes de modelo de dados pedidos pelo retorno dos testes
+Migração — db/init/08-unicidade-cadastros.sql
+
+1. Aplicação da migração
+
+Banco novo — scripts 01 a 08 executados em ordem até o COMMIT.
+Banco existente — scripts 01 a 07 e registros de teste vinculados já presentes.
+A migração 08 executou até o COMMIT na aplicação e na reaplicação.
+
+Consulta ao catálogo do banco existente
+Tabela | Índice | Único | Válido
+cliente | uq_cliente_nome_normalizado_telefone | t | t
+gerente | uq_gerente_nome_normalizado | t | t
+produto | uq_produto_nome_normalizado | t | t
+
+2. Preservação dos dados
+
+Os três dumps obtidos com pg_dump --data-only foram comparados com cmp.
+O conteúdo permaneceu idêntico, incluindo os registros e os campos de vínculo.
+
+SHA-256 dos três dumps
+Antes da migração   5178298ac8c72cf35a649b22882a54dc687fd04a3be54f2c31d85e876a565f2d
+Após a aplicação    5178298ac8c72cf35a649b22882a54dc687fd04a3be54f2c31d85e876a565f2d
+Após a reaplicação  5178298ac8c72cf35a649b22882a54dc687fd04a3be54f2c31d85e876a565f2d
+
+Em três cópias do banco, uma por tabela abaixo, foram inseridas colisões
+antes de aplicar a migração. A aplicação foi abortada em cada cópia.
+Os dumps de dados continuaram idênticos e nenhum dos três índices foi criado.
+
+Cadastros conflitantes em cliente (IDs {1,14}).
+Cadastros conflitantes em gerente (IDs {1,11}).
+Cadastros conflitantes em produto (IDs {1,13}).
+
+3. Bateria SQL
+
+Arquivo executado — db/testes/testes-integridade.sql
+
+Banco novo | 25 passaram | 0 falharam
+Banco existente | 25 passaram | 0 falharam
+
+Casos da migração 08 no banco existente
+Caso | Cenário | Resultado obtido | Status
+UQ-07 | gerente com mesmo nome e variação de caixa e espaços | 23505 uq_gerente_nome_normalizado | PASSOU
+UQ-08 | produto com mesmo nome e variação de caixa e espaços | 23505 uq_produto_nome_normalizado | PASSOU
+UQ-09 | CT-006: cliente duplicado (mesmo nome e telefone) | 23505 uq_cliente_nome_normalizado_telefone | PASSOU
+UQ-10 | cliente com variação de nome, mesmo telefone e novo endereço | 23505 uq_cliente_nome_normalizado_telefone | PASSOU
+UQ-11 | UPDATE para nome e telefone de outro cliente | 23505 uq_cliente_nome_normalizado_telefone | PASSOU
+OK-04 | clientes de nomes distintos podem compartilhar telefone | aceito pelo banco | PASSOU
+OK-05 | clientes homônimos podem ter telefones distintos | aceito pelo banco | PASSOU
+
+4. CT-006 no navegador e no banco
+
+O teste tentou cadastrar uma cliente da massa sintética com o mesmo nome e
+telefone. Depois do aviso, selecionou o botão “Usar cadastro existente”.
+
+POST /clientes/cadastro retornou HTTP 409 (DUPLICATE_CLIENT).
+Interface exibiu “Cliente já registrado no sistema.”
+POST /pedidos/cadastro retornou HTTP 201.
+Pedido 21 persistido com cliente_id = 1.
+Cadastros correspondentes antes e depois = 1 e 1.
+Pedidos do cliente antes e depois = 3 e 4.
+
+ct-006-duplicata.png — aviso e botão para usar o cadastro existente.
+ct-006-pedido-concluido.png — tela de confirmação do pedido.
+
+5. Escopo da validação
+
+Critério de aceite demonstrado no ambiente local de teste.
+Aplicação no Supabase pendente.

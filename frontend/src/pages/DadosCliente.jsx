@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../styles/DadosCliente.css";
-import { cadastrarCliente } from "../services/api";
+import { ApiError, buscarClientes, cadastrarCliente } from "../services/api";
 
 function DadosCliente({ voltarCarrinho, confirmarContato }) {
     const [nome, setNome] = useState("");
@@ -10,6 +10,7 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
     const [bairro, setBairro] = useState("");
     const [cep, setCep] = useState("");
     const [erro, setErro] = useState("");
+    const [clienteExistente, setClienteExistente] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
     function formatarTelefone(valor) {
@@ -46,6 +47,7 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
         if (carregando) return;
 
         setErro("");
+        setClienteExistente(null);
 
         const telefoneNumeros = telefone.replace(/\D/g, "");
         const cepFormatado = formatarCep(cep);
@@ -113,6 +115,33 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
                 error.message ||
                 "Não foi possível concluir a operação. Tente novamente."
             );
+
+            if (error instanceof ApiError && error.codigo === "DUPLICATE_CLIENT") {
+                try {
+                    const [telefoneCadastrado] = dadosCliente.telefones;
+                    const resultados = await buscarClientes(telefoneCadastrado);
+                    const correspondencias = resultados.filter((cliente) =>
+                        cliente.telefones.includes(telefoneCadastrado) &&
+                        cliente.nome.trim().toLowerCase() === dadosCliente.nome.toLowerCase()
+                    );
+                    if (correspondencias.length === 1) {
+                        setClienteExistente(correspondencias[0]);
+                    }
+                } catch (erroBusca) {
+                    setErro(`${error.message} ${erroBusca.message}`);
+                }
+            }
+        } finally {
+            setCarregando(false);
+        }
+    }
+
+    async function usarCadastroExistente() {
+        setCarregando(true);
+        try {
+            await confirmarContato(clienteExistente);
+        } catch (error) {
+            setErro(error.message || "Não foi possível concluir o pedido.");
         } finally {
             setCarregando(false);
         }
@@ -156,7 +185,10 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
                             id="nome"
                             type="text"
                             value={nome}
-                            onChange={(e) => setNome(e.target.value)}
+                            onChange={(e) => {
+                                setNome(e.target.value);
+                                setClienteExistente(null);
+                            }}
                             required
                             disabled={carregando}
                         />
@@ -168,9 +200,10 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
                             id="telefone"
                             type="tel"
                             value={telefone}
-                            onChange={(e) =>
-                                setTelefone(formatarTelefone(e.target.value))
-                            }
+                            onChange={(e) => {
+                                setTelefone(formatarTelefone(e.target.value));
+                                setClienteExistente(null);
+                            }}
                             maxLength={16}
                             required
                             disabled={carregando}
@@ -233,11 +266,14 @@ function DadosCliente({ voltarCarrinho, confirmarContato }) {
                     )}
 
                     <button
-                        type="submit"
+                        type={clienteExistente ? "button" : "submit"}
                         className="dados-cliente-confirmar"
+                        onClick={clienteExistente ? usarCadastroExistente : undefined}
                         disabled={carregando}
                     >
-                        {carregando ? "Processando..." : "Confirmar Contato"}
+                        {carregando ? "Processando..." : clienteExistente
+                            ? "Usar cadastro existente"
+                            : "Confirmar Contato"}
                     </button>
                 </form>
             </main>

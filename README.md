@@ -42,7 +42,9 @@ O sistema permite à gerente da loja cadastrar clientes, registrar e acompanhar 
 │   │   ├── 03-indices.sql            # índices de busca
 │   │   ├── 04-usuarios-perfis.sql    # tabelas de usuário e perfil; gerentes viram usuários
 │   │   ├── 05-senha-hash-gerente.sql # senha de gerente aceita só hash BCrypt
-│   │   └── 06-seed-usuarios.sql      # usuários de teste de todos os perfis
+│   │   ├── 06-seed-usuarios.sql      # usuários de teste de todos os perfis
+│   │   ├── 07-requisitos-essenciais.sql
+│   │   └── 08-unicidade-cadastros.sql
 │   ├── rollback/                     # desfazem as migrations
 │   ├── testes/                       # baterias de teste do banco (integridade, senhas, seed)
 │   └── verificar.sql                 # consultas de conferência do banco
@@ -145,7 +147,18 @@ O frontend é servido pelo nginx na porta 3000, e a API fica na porta 8080. O na
 | Listar as tabelas do banco | `docker compose exec db psql -U gabicake -d gabicake -c "\dt"` |
 | Rodar as consultas de conferência | `docker compose exec -T db psql -U gabicake -d gabicake < db/verificar.sql` |
 
-Se alterar os arquivos de `db/init` depois da primeira execução, use `docker compose down -v` para recriar o banco com o novo conteúdo.
+### Aplicar a migração 08 em um banco existente
+
+Execute após a migração 07, usando o volume atual do banco.
+
+```bash
+docker compose exec -T db sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' \
+    < db/init/08-unicidade-cadastros.sql
+```
+
+No Supabase, execute o conteúdo de `db/init/08-unicidade-cadastros.sql` no SQL Editor do projeto. Se houver registros conflitantes, a migração é revertida integralmente e informa a tabela e os IDs do primeiro conflito. Confira os dados e seus vínculos antes de reaplicar.
+
+Bancos novos executam a migração 08 na inicialização.
 
 ## Rotas da API
 

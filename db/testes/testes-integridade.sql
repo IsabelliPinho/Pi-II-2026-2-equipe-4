@@ -4,12 +4,13 @@
 -- Tenta inserir/alterar/apagar registros INVÁLIDOS e confere se o banco
 -- recusa cada um com o erro esperado (SQLSTATE e nome da constraint).
 --
--- Como rodar (banco com 01-schema.sql e 02-seed.sql aplicados):
+-- Como rodar (banco inicializado com os scripts de db/init):
 --   docker compose exec -T db psql -U gabicake -d gabicake -v ON_ERROR_STOP=1 \
 --       < db/testes/testes-integridade.sql
 --
 -- É seguro: cada teste roda em uma subtransação que é desfeita no fim, e o
--- script inteiro termina com ROLLBACK. Nada é gravado no banco.
+-- script inteiro termina com ROLLBACK. As linhas de teste são desfeitas.
+-- As sequências de identidade podem avançar.
 -- Se algum teste FALHAR, o psql termina com código de saída diferente de 0.
 --
 -- Códigos SQLSTATE usados:  23503 = violação de chave estrangeira (FK)
@@ -33,11 +34,9 @@ CREATE TEMP TABLE resultados (
 -- Executa um comando e compara o erro obtido com o esperado.
 --   p_esperado   : '23503', '23505' ou 'OK' (o comando deve ser aceito)
 --   p_constraint : nome da constraint que deve aparecer no erro (opcional)
---   p_info       : true = achado informativo; divergência vira ALERTA, não FALHOU
 -- Qualquer efeito do comando é desfeito (a subtransação sempre sofre rollback).
 CREATE FUNCTION pg_temp.testar(p_id TEXT, p_teste TEXT, p_sql TEXT,
-                               p_esperado TEXT, p_constraint TEXT DEFAULT NULL,
-                               p_info BOOLEAN DEFAULT FALSE)
+                               p_esperado TEXT, p_constraint TEXT DEFAULT NULL)
 RETURNS VOID LANGUAGE plpgsql AS $f$
 DECLARE
     v_state  TEXT;
@@ -56,13 +55,12 @@ BEGIN
 
     IF v_state = 'T0001' THEN
         v_obtido := 'aceito pelo banco';
-        v_res := CASE WHEN p_esperado = 'OK' THEN 'PASSOU'
-                      WHEN p_info THEN 'ALERTA' ELSE 'FALHOU' END;
+        v_res := CASE WHEN p_esperado = 'OK' THEN 'PASSOU' ELSE 'FALHOU' END;
     ELSE
         v_obtido := v_state || COALESCE(' ' || v_constr, '');
         v_res := CASE WHEN p_esperado = v_state
                            AND (p_constraint IS NULL OR p_constraint = v_constr) THEN 'PASSOU'
-                      WHEN p_info THEN 'ALERTA' ELSE 'FALHOU' END;
+                      ELSE 'FALHOU' END;
     END IF;
 
     INSERT INTO resultados (id, teste, esperado, obtido, resultado)
@@ -186,23 +184,47 @@ SELECT pg_temp.testar('OK-03', 'DELETE pedido apaga seus itens (ON DELETE CASCAD
  'OK');
 
 -- =====================================================================
--- GRUPO 5 - Achados informativos: situações que o banco ACEITA hoje.
--- Se aceitar, o resultado é ALERTA (não é falha da bateria, mas merece decisão).
+-- GRUPO 5 - Unicidade após a migração 08.
 -- =====================================================================
-SELECT pg_temp.testar('INFO-01', 'gerente com mesmo nome mudando só maiúsculas/minúsculas',
+SELECT pg_temp.testar('UQ-07', 'gerente com mesmo nome e variação de caixa e espaços',
  $q$ INSERT INTO gerente (nome, senha)
-     SELECT upper(nome), senha FROM gerente ORDER BY id LIMIT 1 $q$,
- '23505', NULL, TRUE);
+     SELECT ' ' || upper(nome) || ' ', senha FROM gerente ORDER BY id LIMIT 1 $q$,
+ '23505', 'uq_gerente_nome_normalizado');
 
-SELECT pg_temp.testar('INFO-02', 'produto com mesmo nome + espaço no final',
+SELECT pg_temp.testar('UQ-08', 'produto com mesmo nome e variação de caixa e espaços',
  $q$ INSERT INTO produto (nome, preco)
-     SELECT nome || ' ', 10 FROM produto ORDER BY id LIMIT 1 $q$,
- '23505', NULL, TRUE);
+     SELECT ' ' || upper(nome) || ' ', 10 FROM produto ORDER BY id LIMIT 1 $q$,
+ '23505', 'uq_produto_nome_normalizado');
 
-SELECT pg_temp.testar('INFO-03', 'cliente duplicado (mesmo nome e telefone)',
+SELECT pg_temp.testar('UQ-09', 'CT-006: cliente duplicado (mesmo nome e telefone)',
  $q$ INSERT INTO cliente (nome, telefone, rua, num_casa, bairro, cep)
      SELECT nome, telefone, rua, num_casa, bairro, cep FROM cliente ORDER BY id LIMIT 1 $q$,
- '23505', NULL, TRUE);
+ '23505', 'uq_cliente_nome_normalizado_telefone');
+
+SELECT pg_temp.testar('UQ-10', 'cliente com variação de nome, mesmo telefone e novo endereço',
+ $q$ INSERT INTO cliente (nome, telefone, rua, num_casa, bairro, cep)
+     SELECT ' ' || upper(nome) || ' ', telefone, 'Rua de Teste', '41', bairro, cep
+       FROM cliente ORDER BY id LIMIT 1 $q$,
+ '23505', 'uq_cliente_nome_normalizado_telefone');
+
+SELECT pg_temp.testar('UQ-11', 'UPDATE para nome e telefone de outro cliente',
+ $q$ UPDATE cliente destino
+        SET nome = origem.nome, telefone = origem.telefone
+       FROM (SELECT nome, telefone FROM cliente ORDER BY id LIMIT 1) origem
+      WHERE destino.id = (SELECT id FROM cliente ORDER BY id OFFSET 1 LIMIT 1) $q$,
+ '23505', 'uq_cliente_nome_normalizado_telefone');
+
+SELECT pg_temp.testar('OK-04', 'clientes de nomes distintos podem compartilhar telefone',
+ $q$ INSERT INTO cliente (nome, telefone, rua, num_casa, bairro, cep)
+     SELECT 'Contato de Teste', telefone, rua, num_casa, bairro, cep
+       FROM cliente ORDER BY id LIMIT 1 $q$,
+ 'OK');
+
+SELECT pg_temp.testar('OK-05', 'clientes homônimos podem ter telefones distintos',
+ $q$ INSERT INTO cliente (nome, telefone, rua, num_casa, bairro, cep)
+     SELECT nome, '(85) 90000-0000', rua, num_casa, bairro, cep
+       FROM cliente ORDER BY id LIMIT 1 $q$,
+ 'OK');
 
 -- =====================================================================
 -- Relatório

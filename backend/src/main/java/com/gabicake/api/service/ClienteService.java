@@ -2,6 +2,8 @@ package com.gabicake.api.service;
 
 import java.util.List;
 
+import org.hibernate.JDBCException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -113,11 +115,15 @@ public class ClienteService {
             return clienteRetorno;
 
         } catch (DataIntegrityViolationException e) {
-            throw ApiException.duplicado(
-                "Não foi possível cadastrar o cliente. "
-                + "Verifique se o telefone já está cadastrado "
-                + "e se os dados informados são válidos."
-            );
+            if (e.getCause() instanceof ConstraintViolationException violacao
+                    && "uq_cliente_nome_normalizado_telefone".equals(violacao.getConstraintName())) {
+                throw ApiException.duplicado("Cliente já registrado no sistema.");
+            }
+            if (e.getCause() instanceof JDBCException falhaBanco
+                    && ("23514".equals(falhaBanco.getSQLState()) || "22001".equals(falhaBanco.getSQLState()))) {
+                throw ApiException.validacao("Verifique os dados informados no cadastro do cliente.");
+            }
+            throw e;
         }
     }
 }
