@@ -1,0 +1,78 @@
+EVIDÊNCIA DE RECONSTRUÇÃO, BACKUP E RESTAURAÇÃO
+
+O teste usou o projeto Docker Compose isolado gabicake-ciclo-qa e o volume
+gabicake-ciclo-qa_db_data. Uma sobreposição local publicou as portas em
+localhost e montou o backend e o frontend já compilados. O PostgreSQL usou
+os scripts de inicialização do projeto e os scripts originais de operação.
+
+1. Backup
+
+O script 09-demonstracao-final.sql foi aplicado sob demanda antes do backup.
+Foi incluído um cliente sintético com um pedido e um item vinculados.
+Marcador — Marcador Ciclo QA | Cliente 43 | Pedido 100 | Item 195 | Quantidade 2
+
+Comando executado — bash scripts/backup.sh
+Backup criado: backups/gabicake-20261127-105415.sql (56K)
+SHA-256 do arquivo de backup
+6f9c6b0aeabbe421f429f9ef79fddee12ee058528842cfb56cae28b9ff832165
+
+2. Reconstrução limpa
+
+Comandos executados no projeto isolado
+docker compose down --volumes --remove-orphans
+docker compose up -d --wait --wait-timeout 100
+
+Volume anterior — 2026-11-27T10:53:55-03:00
+Após o down, a consulta ao volume confirmou a remoção.
+Volume recriado — 2026-11-27T10:54:24-03:00
+
+Scripts executados automaticamente pelo entrypoint do PostgreSQL
+01-schema.sql
+02-seed.sql
+03-indices.sql
+04-usuarios-perfis.sql
+05-senha-hash-gerente.sql
+06-seed-usuarios.sql
+07-requisitos-essenciais.sql
+08-unicidade-cadastros.sql
+
+A base voltou com os dados iniciais e o marcador estava ausente.
+Após a reconstrução, os cinco testes SQL saíram com código 0.
+testes-integridade.sql
+testes-requisitos-essenciais.sql
+testes-seed-usuarios.sql
+testes-senha-hash.sql
+testes-usuarios-perfis.sql
+
+3. Restauração e verificação
+
+Comando executado — bash scripts/restore.sh backups/gabicake-20261127-105415.sql
+Confirmação — SIM
+Saída — Restauração concluída.
+
+Etapa | Tabelas | Clientes | Produtos | Pedidos | Itens | Usuários
+Antes do backup | 10 | 43 | 20 | 100 | 195 | 15
+Base reconstruída | 10 | 12 | 12 | 15 | 26 | 13
+Após a restauração | 10 | 43 | 20 | 100 | 195 | 15
+
+O marcador recuperou os mesmos IDs e vínculos. Os dumps de dados e
+sequências ficaram idênticos antes e depois da restauração.
+SHA-256 dos dois dumps de dados
+0054c2f3d8925066c0a55ad044c8bf31944d8d5286856e62c1bafdbf6d606d9c
+
+O PostgreSQL representou de forma diferente casts equivalentes em quatro
+restrições de pedido e no índice parcial idx_pedido_agenda_ativa. Após
+normalizar apenas esses cinco casts, os dumps do esquema coincidiram.
+
+Após reconstruir e após restaurar, o frontend retornou HTTP 200 e a API
+ficou UP tanto no acesso direto quanto via nginx. Os dois usuários do
+Marco Final fizeram login com HTTP 200 e consultaram o pedido recuperado.
+
+O teste adicional com SQL inválido confirmou o rollback. O marcador foi
+preservado e os dumps de dados e esquema ficaram idênticos aos da base
+restaurada. Os serviços voltaram a responder depois de reiniciar o backend.
+
+Captura — ciclo-banco-marcador-restaurado.png
+Busca no navegador pelo cliente Marcador Ciclo QA devolveu o cadastro 43.
+
+Resultado — reconstrução limpa e recuperação verificadas no ambiente de teste.
